@@ -21,6 +21,22 @@ export default function ComplaintDetails() {
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
 
+  const downloadEvidence = async (file) => {
+    try {
+      const response = await complaintsAPI.getEvidence(complaintId, file.filename);
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.originalName || file.filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (_) {
+      toast.error('Evidence download was not authorized or is unavailable.');
+    }
+  };
+
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
@@ -253,11 +269,10 @@ export default function ComplaintDetails() {
                 <h4 style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontWeight: 800, letterSpacing: '1.5px', marginBottom: '16px' }}>SECURED EVIDENCE ({complaint.evidence.length})</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {complaint.evidence.map((file, idx) => (
-                    <a 
+                    <button
                       key={idx} 
-                      href={file.url.startsWith('http') ? file.url : `http://localhost:5002${file.url}`}
-                      target="_blank" 
-                      rel="noreferrer"
+                      type="button"
+                      onClick={() => downloadEvidence(file)}
                       style={{ 
                         background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
                         borderRadius: '16px', padding: '14px 20px', color: '#fff', textDecoration: 'none',
@@ -268,7 +283,7 @@ export default function ComplaintDetails() {
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00B4FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
                       {file.originalName || `Evidence File ${idx + 1}`}
-                    </a>
+                    </button>
                   ))}
                 </div>
               </div>

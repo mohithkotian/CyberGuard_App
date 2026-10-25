@@ -11,6 +11,7 @@ const emailAgentService = require('../services/emailAgentService');
 const smsService = require('../services/smsService');
 const threatIntelligence = require('../utils/threatIntelligence');
 const { buildComplaintForViewer } = require('../utils/complaintVisibility');
+const { maskTextForModel } = require('../utils/modelPrivacy');
 
 // Multer config for file uploads
 const storage = multer.diskStorage({
@@ -39,6 +40,44 @@ exports.upload = multer({
   fileFilter,
   limits: { fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024 },
 }).array('evidence', 5);
+
+// @desc    Download complaint evidence for an authorized viewer
+// @route   GET /api/complaints/:complaintId/evidence/:filename
+exports.getEvidence = async (req, res, next) => {
+  try {
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(req.params.complaintId);
+    const query = isObjectId
+      ? { $or: [{ _id: req.params.complaintId }, { complaintId: req.params.complaintId }] }
+      : { complaintId: req.params.complaintId };
+    const complaint = await Complaint.findOne(query).select('userId assignedTo evidence');
+
+    if (!complaint) return next(new AppError('Complaint not found.', 404));
+
+    const viewerId = req.user._id.toString();
+    const ownerId = complaint.userId.toString();
+    const assignedId = complaint.assignedTo?.toString();
+    const authorized = req.user.role === 'admin'
+      || viewerId === ownerId
+      || (req.user.role === 'officer' && assignedId === viewerId);
+
+    if (!authorized) return next(new AppError('Not authorized to access this evidence.', 403));
+
+    const evidence = complaint.evidence.find(item => item.filename === req.params.filename);
+    if (!evidence) return next(new AppError('Evidence file not found.', 404));
+
+    const evidenceRoot = path.resolve(process.cwd(), 'uploads', 'evidence');
+    const filePath = path.resolve(evidenceRoot, evidence.filename);
+    if (!filePath.startsWith(`${evidenceRoot}${path.sep}`)) {
+      return next(new AppError('Invalid evidence path.', 400));
+    }
+
+    return res.sendFile(filePath, (error) => {
+      if (error && !res.headersSent) next(error);
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @desc    Submit new complaint
 // @route   POST /api/complaints
@@ -72,16 +111,14 @@ exports.createComplaint = async (req, res, next) => {
     const titleResult = title ? maskPII(title) : { masked: title, detected: [] };
     const descriptionResult = description ? maskPII(description) : { masked: description, detected: [] };
 
-    console.log("\n========== PII DEBUG ==========");
-    console.log("ORIGINAL DESCRIPTION:");
-    console.log(description);
-
-    console.log("\nMASKED DESCRIPTION:");
-    console.log(descriptionResult.masked);
-
-    console.log("\nDETECTED:");
-    console.log(descriptionResult.detected);
-    console.log("================================\n");
+    logger.info('Complaint text processed by Privacy Shield', {
+      titleMasked: Boolean(title),
+      descriptionMasked: Boolean(description),
+      detectedTypes: [...new Set([
+        ...titleResult.detected.map(item => item.type),
+        ...descriptionResult.detected.map(item => item.type),
+      ])],
+    });
 
     const maskedTitle = titleResult.masked;
     const maskedDescription = descriptionResult.masked;
@@ -625,7 +662,7 @@ exports.analyzeDescription = async (req, res, next) => {
       return res.json({ status: 'success', data: { category: 'other', confidence: 0 } });
     }
 
-    const prediction = await mlService.predict(text);
+    const prediction = await mlService.predict(maskTextForModel(text));
     res.json({ status: 'success', data: prediction });
   } catch (error) {
     logger.warn(`AI analysis failed: ${error.message}`);

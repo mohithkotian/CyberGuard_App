@@ -141,7 +141,8 @@ export const authAPI = {
   register:      (d)    => api.post('/auth/register', d),
   login:         (d)    => api.post('/auth/login', d),
   logout:        ()     => api.post('/auth/logout'),
-  getMe:         ()     => api.get('/auth/me'),
+  getMe:         ()      => api.get('/auth/me'),
+  registerPushToken: (token) => api.post('/users/push-token', { token }),
   updateProfile: (d)    => api.patch('/auth/profile', d),
 };
 

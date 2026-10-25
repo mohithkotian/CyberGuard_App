@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// 1. Configure the base connection to your Railway Backend
+// 1. Configure the public backend URL through REACT_APP_API_URL.
 const API = axios.create({
-  baseURL: 'https://invigorating-fulfillment-production-667e.up.railway.app/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5002/api',
   headers: {
     'Content-Type': 'application/json',
   },

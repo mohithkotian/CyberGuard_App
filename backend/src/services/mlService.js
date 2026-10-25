@@ -1,6 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const logger = require('../utils/logger');
+const { maskTextForModel } = require('../utils/modelPrivacy');
 
 const ML_BASE_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:5003';
 const TIMEOUT = parseInt(process.env.ML_SERVICE_TIMEOUT) || 4000;
@@ -183,8 +184,10 @@ function localRuleClassification(text) {
 
 // Predict crime category with Flask ML service + Rule-based failover
 const predict = async (text) => {
+  const safeText = maskTextForModel(text);
+
   try {
-    const response = await mlClient.post('/predict', { text });
+    const response = await mlClient.post('/predict', { text: safeText });
     const data = response.data;
     const mappedCategory = CATEGORY_DISPLAY_MAP[data.category] || data.category || 'Other';
     const subcategory = data.subcategory || SUBCATEGORY_DEFAULT_MAP[mappedCategory] || 'General Cybercrime';
@@ -203,7 +206,7 @@ const predict = async (text) => {
     };
   } catch (error) {
     logger.warn(`ML Service request bypassed, using robust local NLP engine: ${error.message}`);
-    const localRes = localRuleClassification(text);
+    const localRes = localRuleClassification(safeText);
     return {
       status: 'success',
       ...localRes,

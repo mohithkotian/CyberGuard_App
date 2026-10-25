@@ -85,6 +85,7 @@ export const complaintsAPI = {
   }),
   getAll: (p) => api.get('/complaints', { params: p }),
   getOne: (id) => api.get(`/complaints/${id}`),
+  getEvidence: (complaintId, filename) => api.get(`/complaints/${complaintId}/evidence/${encodeURIComponent(filename)}`, { responseType: 'blob' }),
   track: (id) => api.get(`/complaints/track/${id}`),
   publicSearch: (q) => api.get('/complaints/public/search', { params: { q } }),
   analyze: (text) => api.post('/complaints/analyze', { text }),

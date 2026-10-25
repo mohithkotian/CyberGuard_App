@@ -6,7 +6,11 @@ let socket = null;
 
 export const connectSocket = (userId, isAdmin = false) => {
   if (socket?.connected) return socket;
-  socket = io(SOCKET_URL, { transports: ['websocket', 'polling'], reconnectionAttempts: 5 });
+  socket = io(SOCKET_URL, {
+    auth: { token: localStorage.getItem('accessToken') },
+    transports: ['websocket', 'polling'],
+    reconnectionAttempts: 5
+  });
 
   socket.on('connect', () => {
     console.log('🔌 Socket connected');

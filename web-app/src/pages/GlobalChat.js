@@ -69,6 +69,7 @@ export default function GlobalChat() {
 
     // 2. Initialize Socket
     socketRef.current = io(SOCKET_URL, {
+      auth: { token: localStorage.getItem('accessToken') },
       withCredentials: true,
       transports: ['websocket']
     });

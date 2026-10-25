@@ -18,6 +18,7 @@ router.post('/analyze', ctrl.analyzeDescription);
 
 // Protected routes
 router.use(protect);
+router.get('/:complaintId/evidence/:filename', ctrl.getEvidence);
 router.post(
   '/',
   ctrl.upload,

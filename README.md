@@ -76,8 +76,8 @@ sequenceDiagram
 
     User->>API: POST /api/complaints (Filing Incident)
     API->>Mask: Process Text and Detect PII (Aadhaar, PAN, UPI, Phone)
-    Mask-->>API: Return Masked Version and Detected Hashes
-    API->>DB: Store Original Raw Data and Masked Version
+    Mask-->>API: Return Masked Version for model processing
+    API->>DB: Store Original Raw Complaint Data
 
     Note over API,DB: Role-Based Retrieval Matrix
 
@@ -97,7 +97,7 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> Submitted : Victim files report
-    Submitted --> ML_Classification : Text sent to Python ML Model
+    Submitted --> ML_Classification : PII-masked text sent to Python ML Model
     ML_Classification --> OCR_Analysis : Evidence image uploaded
     OCR_Analysis --> Pending_Review : Category and Severity assigned
 
@@ -135,7 +135,7 @@ graph LR
     Client[React Web / Mobile Client] -->|JWT Auth| Gateway[Express API Gateway]
     Gateway -->|Rate Limited, Helmet Secured| Auth[Auth Middleware]
     Auth --> Controller[Complaint / Chat / Analytics Controllers]
-    Controller -->|Text| ML[Flask ML Service :5001]
+    Controller -->|Text| ML[Flask ML Service :5003]
     Controller -->|Image| OCR[OCR Service]
     Controller -->|CRUD| DB[(MongoDB)]
     Controller -->|Events| Socket[Socket.IO Engine]
@@ -170,13 +170,13 @@ CyberGuard_App/
 │   │   ├── routes/            Express API route definitions
 │   │   ├── services/          OCR, SMS, Email and ML service connectors
 │   │   └── utils/             Privacy shield and PII masking utilities
-│   └── server.js              Entry point and Socket.IO server initialization
+│   └── src/server.js          Entry point and Socket.IO server initialization
 │
 ├── ml-service/                Python Flask AI classification engine
 │   ├── src/                   Flask API application
 │   ├── models/                Pre-trained TF-IDF vectorizers and ML models
-│   ├── train_model.py         Model training pipeline script
-│   └── requirements.txt       Python dependencies
+│   └── train_model.py         Model training pipeline script
+├── requirements.txt           Python dependencies for the ML service
 │
 ├── web-app/                   React web application
 │   ├── public/                Static assets and voices
@@ -214,55 +214,105 @@ CyberGuard_App/
 - MongoDB v7.0+ (local instance or MongoDB Atlas cluster)
 
 ### Step 1 — Start MongoDB
-```bash
-# macOS (Homebrew)
-brew services start mongodb-community@7.0
 
-# Linux (systemd)
-sudo systemctl start mongod
+On Windows, check the MongoDB service:
+
+```powershell
+Get-Service MongoDB
 ```
 
-### Step 2 — Launch the ML Service
-```bash
-cd ml-service
+If it is stopped, open PowerShell as Administrator and run:
 
-python3 -m venv venv
-source venv/bin/activate       # Windows: .\venv\Scripts\Activate.ps1
-
-pip install -r requirements.txt
-python3 -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet')"
-
-python3 train_model.py
-python3 src/app.py
+```powershell
+net start MongoDB
 ```
-Runs on `http://localhost:5001`
 
-### Step 3 — Launch the Backend Server
-```bash
-cd backend
+On macOS, use `brew services start mongodb-community@7.0`. On Linux, use `sudo systemctl start mongod`.
+
+### Step 2 — First-time ML Service Setup
+
+```powershell
+cd C:\Users\Mohith\CyberGuard_App\ml-service
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r ..\requirements.txt
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet')"
+```
+
+The Python dependency file is at `C:\Users\Mohith\CyberGuard_App\requirements.txt`. Do not run `train_model.py` unless the service reports that the model is missing.
+
+### Step 3 — First-time Backend Setup
+
+```powershell
+cd C:\Users\Mohith\CyberGuard_App\backend
 npm install
+```
 
-# Create a .env file with PORT, MONGO_URI, JWT_SECRET, etc.
+The backend environment file is `backend\.env`. Confirm that `ML_SERVICE_URL` is set to:
 
+```env
+ML_SERVICE_URL=http://127.0.0.1:5003
+```
+
+### Step 4 — First-time React Web Setup
+
+```powershell
+cd C:\Users\Mohith\CyberGuard_App\web-app
+npm install
+```
+
+### Step 5 — Start the ML Service
+
+```powershell
+cd C:\Users\Mohith\CyberGuard_App\ml-service
+.\.venv\Scripts\Activate.ps1
+python src\app.py
+```
+
+Runs on `http://localhost:5003`. Optional health check:
+
+```powershell
+Invoke-RestMethod http://localhost:5003/health
+```
+
+### Step 6 — Start the Backend Server
+
+```powershell
+cd C:\Users\Mohith\CyberGuard_App\backend
 npm run dev
 ```
-Runs on `http://localhost:5002`
 
-### Step 4 — Launch the React Web App
-```bash
-cd web-app
-npm install
+Runs on `http://localhost:5002`.
+
+### Step 7 — Start the React Web App
+
+```powershell
+cd C:\Users\Mohith\CyberGuard_App\web-app
 npm start
 ```
-Runs on `http://localhost:3000`
 
-### Step 5 — Launch the Mobile App (optional)
-```bash
-cd mobile-app
+Runs on `http://localhost:3000`. Open that address in your browser.
+
+### Optional — Start the Mobile App
+
+```powershell
+cd C:\Users\Mohith\CyberGuard_App\mobile-app
 npm install
 npx expo start
 ```
-Scan the QR code with the Expo Go app on iOS/Android.
+
+Scan the QR code with the Expo Go app on iOS or Android.
+
+### Every-time Startup Order
+
+```text
+1. MongoDB
+2. ML service — port 5003
+3. Backend API — port 5002
+4. React web app — port 3000
+```
+
+Do not use `npm run dev` for the React app; this project uses `npm start`.
 
 ---
 

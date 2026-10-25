@@ -1,1 +1,1 @@
-web: python3 backend/src/app.py
+web: cd backend && npm start

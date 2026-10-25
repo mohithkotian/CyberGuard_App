@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
@@ -147,14 +148,14 @@ const getMe = async (req, res, next) => {
 // 3. REGISTER LOGIC
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, phone, role = 'user' } = req.body;
+    const { name, email, password, phone } = req.body;
     
     const newUser = await User.create({
       name,
       email: email.toLowerCase(),
       password,
       phone,
-      role
+      role: 'user'
     });
 
     const { accessToken, refreshToken } = generateTokens(newUser._id);
@@ -218,9 +219,43 @@ const logout = async (req, res, next) => {
   }
 };
 
-// 5. REFRESH TOKEN & UPDATE PASSWORD PLACEHOLDERS
+// 5. REFRESH TOKEN & UPDATE PASSWORD
 const refreshToken = async (req, res, next) => {
-    res.status(200).json({ status: 'success', message: 'Token refresh endpoint' });
+  try {
+    const { refreshToken: submittedToken } = req.body || {};
+    if (!submittedToken) {
+      return next(new AppError('Refresh token is required.', 401));
+    }
+
+    const decoded = jwt.verify(
+      submittedToken,
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
+    );
+    const user = await User.findById(decoded.id)
+      .select('+refreshToken +isActive');
+
+    if (!user || !user.isActive || !user.refreshToken || user.refreshToken !== submittedToken) {
+      return next(new AppError('Invalid refresh token. Please log in again.', 401));
+    }
+
+    const tokens = generateTokens(user._id);
+    user.refreshToken = tokens.refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user: { id: user._id, name: user.name, email: user.email, role: user.role },
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      },
+    });
+  } catch (error) {
+    if (['JsonWebTokenError', 'TokenExpiredError', 'NotBeforeError'].includes(error.name)) {
+      return next(new AppError('Invalid or expired refresh token. Please log in again.', 401));
+    }
+    next(error);
+  }
 };
 const updatePassword = async (req, res, next) => {
   try {
