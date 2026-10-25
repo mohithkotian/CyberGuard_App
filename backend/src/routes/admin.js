@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { maskTextForModel } = require('../utils/modelPrivacy');
 const User = require('../models/User');
 const Complaint = require('../models/Complaint');
 const mlService = require('../services/mlService');
@@ -324,7 +325,7 @@ router.post('/predict', async (req, res, next) => {
     const { text } = req.body;
     if (!text) return next(new AppError('Please provide text to analyze', 400));
     
-    const prediction = await mlService.predict(text);
+    const prediction = await mlService.predict(maskTextForModel(text));
     res.json({ status: 'success', data: prediction });
   } catch (error) { next(error); }
 });

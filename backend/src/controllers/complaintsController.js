@@ -11,6 +11,7 @@ const emailAgentService = require('../services/emailAgentService');
 const smsService = require('../services/smsService');
 const threatIntelligence = require('../utils/threatIntelligence');
 const { buildComplaintForViewer } = require('../utils/complaintVisibility');
+const { maskTextForModel } = require('../utils/modelPrivacy');
 
 // Multer config for file uploads
 const storage = multer.diskStorage({
@@ -110,16 +111,14 @@ exports.createComplaint = async (req, res, next) => {
     const titleResult = title ? maskPII(title) : { masked: title, detected: [] };
     const descriptionResult = description ? maskPII(description) : { masked: description, detected: [] };
 
-    console.log("\n========== PII DEBUG ==========");
-    console.log("ORIGINAL DESCRIPTION:");
-    console.log(description);
-
-    console.log("\nMASKED DESCRIPTION:");
-    console.log(descriptionResult.masked);
-
-    console.log("\nDETECTED:");
-    console.log(descriptionResult.detected);
-    console.log("================================\n");
+    logger.info('Complaint text processed by Privacy Shield', {
+      titleMasked: Boolean(title),
+      descriptionMasked: Boolean(description),
+      detectedTypes: [...new Set([
+        ...titleResult.detected.map(item => item.type),
+        ...descriptionResult.detected.map(item => item.type),
+      ])],
+    });
 
     const maskedTitle = titleResult.masked;
     const maskedDescription = descriptionResult.masked;
@@ -663,7 +662,7 @@ exports.analyzeDescription = async (req, res, next) => {
       return res.json({ status: 'success', data: { category: 'other', confidence: 0 } });
     }
 
-    const prediction = await mlService.predict(text);
+    const prediction = await mlService.predict(maskTextForModel(text));
     res.json({ status: 'success', data: prediction });
   } catch (error) {
     logger.warn(`AI analysis failed: ${error.message}`);

@@ -60,10 +60,13 @@ function nameMaskingMiddleware(req, res, next) {
       const masked = await maskFieldsDeep(data, shouldMask);
       return originalJson(masked);
     } catch (err) {
-      // Fail safe: never leak an unmasked response just because masking
-      // itself errored. Fail loud in logs, but don't crash the request.
+      // Fail closed: never leak an unmasked response if masking errors.
       console.error('Name masking failed:', err);
-      return originalJson(data);
+      res.statusCode = 500;
+      return originalJson({
+        status: 'fail',
+        message: 'Unable to safely prepare this response',
+      });
     }
   };
 
