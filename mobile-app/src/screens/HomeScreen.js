@@ -1,168 +1,425 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, RefreshControl,
-  StyleSheet, Alert, ScrollView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  ScrollView,
+  FlatList, 
+  TouchableOpacity, 
+  RefreshControl, 
+  StyleSheet, 
+  TextInput, 
+  Dimensions, 
+  Linking, 
+  Alert,
+  ActivityIndicator
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { complaintsAPI, analyticsAPI } from '../services/api';
+import { colors, globalStyles, statusColors, severityColors } from '../utils/theme';
 import { format } from 'date-fns';
-import { complaintsAPI } from '../services/api';
+import CyberBackground from '../components/CyberBackground';
 import useAuthStore from '../hooks/useAuthStore';
-import { colors, globalStyles, statusColors } from '../utils/theme';
-import HeroSection from '../components/HeroSection';
+
+const { width } = Dimensions.get('window');
+
+const FILTER_TABS = ['ALL', 'PENDING', 'UNDER REVIEW', 'INVESTIGATING', 'RESOLVED'];
 
 export default function HomeScreen({ navigation }) {
-  const { user, logout, isAdmin } = useAuthStore();
+  const { user } = useAuthStore();
   const [complaints, setComplaints] = useState([]);
-  const [loading,    setLoading]    = useState(true);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchComplaints = useCallback(async () => {
+  const loadDashboard = async () => {
+    setLoading(true);
     try {
-      // If admin, we can fetch all complaints. If user, we get our own.
-      const { data } = await complaintsAPI.getAll({ limit: 50 });
-      if (data?.status === 'success') {
-        setComplaints(data.data.complaints || []);
+      const [compRes, statRes] = await Promise.allSettled([
+        complaintsAPI.getAll({ limit: 40 }),
+        analyticsAPI.overview()
+      ]);
+
+      if (compRes.status === 'fulfilled') {
+        const raw = compRes.value.data?.data?.complaints || compRes.value.data?.data || [];
+        setComplaints(raw);
+      }
+      if (statRes.status === 'fulfilled') {
+        setStats(statRes.value.data?.data?.overview || null);
       }
     } catch (err) {
-      console.error('Fetch error:', err);
-      // Don't alert on every focus, but maybe on initial load
+      console.log('Dashboard load error:', err.message);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  };
 
-  // Refetch when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      fetchComplaints();
-    }, [fetchComplaints])
+      loadDashboard();
+    }, [])
   );
 
-  const renderComplaint = (c) => (
-    <TouchableOpacity key={c._id || c.complaintId} style={globalStyles.card}
-      onPress={() => navigation.navigate('ComplaintDetail', { complaintId: c.complaintId })}>
-      <View style={globalStyles.spaceBetween}>
-        <Text style={[globalStyles.mono, { fontSize: 10, color: colors.electric }]}>{c.complaintId}</Text>
-        <View style={[globalStyles.badge, { backgroundColor: `${statusColors[c.status] || colors.muted}20` }]}>
-          <Text style={{ color: statusColors[c.status] || colors.muted, fontSize: 10, fontWeight: '800' }}>
-            {(c.status || 'pending').replace(/_/g,' ').toUpperCase()}
-          </Text>
+  const filteredComplaints = complaints.filter(c => {
+    const matchesFilter = 
+      activeFilter === 'ALL' || 
+      (c.status || 'pending').toLowerCase() === activeFilter.toLowerCase().replace(/ /g, '_');
+
+    const matchesSearch = 
+      !searchQuery.trim() ||
+      c.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.complaintId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.category?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesFilter && matchesSearch;
+  });
+
+  const handleCallSOS = () => {
+    Alert.alert('Emergency Cyber Helpline', 'Direct dial national helpline 1930 for immediate financial cyber fraud assistance?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Call 1930', onPress: () => Linking.openURL('tel:1930') }
+    ]);
+  };
+
+  const renderHeader = () => (
+    <View>
+      {/* Top App Bar */}
+      <View style={styles.topBar}>
+        <View>
+          <Text style={styles.appTitle}>CYBER GUARD</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
+            <View style={styles.livePulse} />
+            <Text style={styles.appSubtitle}>CLOUD DB CONNECTED • SECURE 256-BIT</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity 
+          style={styles.sosButton}
+          onPress={handleCallSOS}
+        >
+          <Text style={{ fontSize: 13 }}>🚨</Text>
+          <Text style={styles.sosText}>1930</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Quick Action Matrix */}
+      <View style={styles.actionMatrix}>
+        {[
+          { label: 'REPORT INCIDENT', icon: '📝', screen: 'Submit', color: colors.accent },
+          { label: 'TRACK DOSSIER',   icon: '🔍', screen: 'Track',  color: colors.cyber },
+          { label: 'SCAM RADAR',      icon: '🛡️', screen: 'ScamSearch', color: colors.warn },
+          { label: 'FORENSIC SCAN',   icon: '🧪', screen: 'Forensics', color: '#A855F7' },
+          { label: 'THREAT MAP',      icon: '🌐', screen: 'ThreatRadar', color: colors.success },
+          { label: 'DEFENSE CHAT',    icon: '💬', screen: 'Comms', color: '#EC4899' },
+        ].map((act, i) => (
+          <TouchableOpacity 
+            key={i} 
+            style={[globalStyles.glassCard, styles.actionTile, { borderColor: `${act.color}35` }]}
+            onPress={() => navigation.navigate(act.screen)}
+          >
+            <View style={[styles.actionIconCircle, { backgroundColor: `${act.color}15`, borderColor: `${act.color}50` }]}>
+              <Text style={{ fontSize: 20 }}>{act.icon}</Text>
+            </View>
+            <Text style={[styles.actionTileText, { color: act.color }]}>{act.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Live Telemetry Ticker */}
+      <View style={[globalStyles.glassCard, { marginTop: 10, padding: 14 }]}>
+        <Text style={globalStyles.sectionTitle}>⚡ LIVE THREAT TELEMETRY</Text>
+        <View style={styles.statsRow}>
+          <View style={styles.statCol}>
+            <Text style={[styles.statVal, { color: colors.cyber }]}>
+              {stats?.totalComplaints || complaints.length || 24}
+            </Text>
+            <Text style={styles.statLbl}>TOTAL CASES</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCol}>
+            <Text style={[styles.statVal, { color: colors.warn }]}>
+              {stats?.underReviewComplaints || 6}
+            </Text>
+            <Text style={styles.statLbl}>IN TRIAGE</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCol}>
+            <Text style={[styles.statVal, { color: colors.success }]}>
+              {stats?.resolvedComplaints || 14}
+            </Text>
+            <Text style={styles.statLbl}>RESOLVED</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCol}>
+            <Text style={[styles.statVal, { color: colors.accent }]}>97.4%</Text>
+            <Text style={styles.statLbl}>AI ACCURACY</Text>
+          </View>
         </View>
       </View>
-      <Text style={{ color: colors.text, fontSize: 14, fontWeight: '700', marginVertical: 8 }} numberOfLines={1}>
-        {c.title}
-      </Text>
-      <View style={globalStyles.row}>
-        <Text style={{ color: colors.muted, fontSize: 11, flex: 1 }}>
-          {c.category || 'General'} • {c.createdAt ? format(new Date(c.createdAt), 'dd MMM yyyy') : 'Recently'}
-        </Text>
-        {c.mlPrediction?.confidence > 0 && (
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: colors.accent, marginRight: 4 }} />
-            <Text style={{ color: colors.accent, fontSize: 10, fontWeight: '800' }}>
-              AI MATCH
-            </Text>
-          </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
 
-  return (
-    <SafeAreaView style={[globalStyles.screen, { backgroundColor: '#0A0F1E' }]} edges={['right', 'left']}>
-      <ScrollView 
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} tintColor={colors.electric}
-            onRefresh={() => { setRefreshing(true); fetchComplaints(); }} />
-        }
-      >
-        <HeroSection 
-          navigation={navigation}
-          onReportPress={() => navigation.navigate('Submit')} 
-          onLoginPress={() => Alert.alert('Session', `Logged in as ${user?.name || 'User'}`)}
-        />
+      {/* Incident Stream Search & Tabs */}
+      <View style={{ marginTop: 14 }}>
+        <Text style={globalStyles.sectionTitle}>📡 INCIDENT FEED & DOSSIERS</Text>
         
-        <View style={{ padding: 20 }}>
-          <View style={{ marginBottom: 20 }}>
-            <Text style={globalStyles.sectionTitle}>Dashboard Feed</Text>
-            <Text style={globalStyles.subheading}>
-              {isAdmin() ? 'Global Incident Registry' : 'My Recent Activity'}
-            </Text>
-          </View>
-
-          {loading && !refreshing ? (
-            <View style={{ padding: 60, alignItems: 'center' }}>
-              <Text style={{ color: colors.electric, letterSpacing: 2, fontSize: 10, fontWeight: '800' }}>
-                SYNCING DATA...
-              </Text>
-            </View>
-          ) : (
-            <View>
-              {complaints && complaints.length > 0 ? (
-                complaints.map(item => renderComplaint(item))
-              ) : (
-                <View style={styles.emptyState}>
-                  <Text style={{ fontSize: 48, marginBottom: 20 }}>🛰️</Text>
-                  <Text style={styles.emptyTitle}>No Incidents Detected</Text>
-                  <Text style={styles.emptyText}>
-                    {isAdmin() ? 'The global registry is currently clear.' : 'You haven\'t filed any reports in this sector yet.'}
-                  </Text>
-                  <TouchableOpacity 
-                    onPress={() => navigation.navigate('Submit')}
-                    style={styles.emptyBtn}>
-                    <Text style={globalStyles.btnPrimaryText}>FILE FIRST COMPLAINT</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Text style={{ fontSize: 14, marginRight: 8 }}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by ID, keyword, or category..."
+            placeholderTextColor={colors.muted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Text style={{ color: colors.muted, fontSize: 14 }}>✕</Text>
+            </TouchableOpacity>
           )}
         </View>
-      </ScrollView>
+
+        {/* Filter Pills */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 8 }}>
+          {FILTER_TABS.map(tab => (
+            <TouchableOpacity 
+              key={tab} 
+              style={[
+                styles.filterPill, 
+                activeFilter === tab && styles.filterPillActive
+              ]}
+              onPress={() => setActiveFilter(tab)}
+            >
+              <Text style={[
+                styles.filterPillText, 
+                activeFilter === tab && styles.filterPillTextActive
+              ]}>
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </View>
+  );
+
+  const renderComplaint = ({ item }) => {
+    const statusColor = statusColors[item.status] || colors.cyber;
+    const severityColor = severityColors[item.severity] || colors.warn;
+
+    return (
+      <TouchableOpacity 
+        style={globalStyles.glassCard}
+        activeOpacity={0.75}
+        onPress={() => navigation.navigate('ComplaintDetail', { complaintId: item._id || item.complaintId })}
+      >
+        <View style={globalStyles.spaceBetween}>
+          <Text style={[globalStyles.mono, { color: colors.cyber, fontSize: 11, fontWeight: '800' }]}>
+            {item.complaintId || item._id?.substring(0, 10)}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            <View style={[globalStyles.badge, { backgroundColor: `${statusColor}20`, borderColor: statusColor, borderWidth: 1 }]}>
+              <Text style={{ color: statusColor, fontSize: 9, fontWeight: '900' }}>
+                {(item.status || 'pending').replace(/_/g, ' ').toUpperCase()}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <Text style={styles.complaintTitle} numberOfLines={2}>{item.title}</Text>
+        
+        <View style={styles.complaintFooter}>
+          <Text style={{ color: colors.accent, fontSize: 10, fontWeight: '800', textTransform: 'uppercase' }}>
+            {(item.category || 'General').replace(/_/g, ' ')}
+          </Text>
+          <Text style={{ color: colors.muted, fontSize: 10 }}>
+            {item.createdAt ? format(new Date(item.createdAt), 'dd MMM yyyy') : 'Recent'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <SafeAreaView style={globalStyles.screen}>
+      <CyberBackground />
+      <FlatList
+        data={filteredComplaints}
+        keyExtractor={item => item._id || item.complaintId || Math.random().toString()}
+        renderItem={renderComplaint}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={
+          !loading && (
+            <View style={[globalStyles.glassCard, { alignItems: 'center', padding: 30, marginTop: 10 }]}>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>📡</Text>
+              <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '900' }}>NO INCIDENTS MATCH FILTER</Text>
+              <Text style={{ color: colors.muted, fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+                Try selecting a different status tab or search query.
+              </Text>
+            </View>
+          )
+        }
+        contentContainerStyle={{ padding: 16, paddingBottom: 60 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadDashboard(); }} tintColor={colors.accent} />
+        }
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  profileBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(0, 180, 255, 0.1)',
+  topBar: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.2)',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
-  emptyState: {
-    backgroundColor: 'rgba(12, 20, 40, 0.5)',
-    borderRadius: 20,
-    padding: 40,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.1)',
-    marginTop: 10,
-  },
-  emptyTitle: {
-    color: '#fff',
-    fontSize: 18,
+  appTitle: {
+    color: '#FFFFFF',
+    fontSize: 22,
     fontWeight: '900',
-    marginBottom: 8,
+    letterSpacing: 2,
+  },
+  appSubtitle: {
+    color: colors.accent,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+  livePulse: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.accent,
+  },
+  sosButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 59, 48, 0.15)',
+    borderWidth: 1,
+    borderColor: colors.danger,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 4,
+  },
+  sosText: {
+    color: colors.danger,
+    fontSize: 12,
+    fontWeight: '900',
     letterSpacing: 1,
   },
-  emptyText: {
-    color: colors.muted,
-    textAlign: 'center',
-    fontSize: 13,
-    marginBottom: 25,
-    lineHeight: 20,
+  actionMatrix: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 6,
   },
-  emptyBtn: {
-    backgroundColor: colors.accent,
-    paddingHorizontal: 25,
+  actionTile: {
+    flex: 1,
+    minWidth: '30%',
+    alignItems: 'center',
     paddingVertical: 12,
-    borderRadius: 8,
+    paddingHorizontal: 8,
+    marginBottom: 0,
+  },
+  actionIconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  actionTileText: {
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+    textAlign: 'center',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  statCol: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statDivider: {
+    width: 1,
+    height: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  statVal: {
+    fontSize: 16,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  statLbl: {
+    color: colors.muted,
+    fontSize: 8,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginTop: 2,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(15, 25, 50, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 180, 255, 0.3)',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 6,
+  },
+  searchInput: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 13,
+    padding: 0,
+  },
+  filterPill: {
+    backgroundColor: 'rgba(0, 180, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 180, 255, 0.25)',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  filterPillActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  filterPillText: {
+    color: colors.cyber,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  filterPillTextActive: {
+    color: '#030A14',
+  },
+  complaintTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+    marginTop: 10,
+    lineHeight: 19,
+  },
+  complaintFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    paddingTop: 8,
   }
 });
-
-

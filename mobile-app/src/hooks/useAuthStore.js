@@ -72,7 +72,8 @@ const useAuthStore = create((set, get) => ({
       return user;
     } catch (err) {
       set({ loading: false });
-      throw new Error(err.response?.data?.message || 'Login failed');
+      const msg = err.response?.data?.message || (err.message === 'Network Error' ? 'Cannot reach backend server. Please verify the server is running on port 5002.' : err.message) || 'Login failed';
+      throw new Error(msg);
     }
   },
 
@@ -89,7 +90,8 @@ const useAuthStore = create((set, get) => ({
       return user;
     } catch (err) {
       set({ loading: false });
-      throw new Error(err.response?.data?.message || 'Registration failed');
+      const msg = err.response?.data?.message || (err.message === 'Network Error' ? 'Cannot reach backend server. Please verify the server is running on port 5002.' : err.message) || 'Registration failed';
+      throw new Error(msg);
     }
   },
 

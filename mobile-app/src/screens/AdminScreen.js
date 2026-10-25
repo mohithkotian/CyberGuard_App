@@ -1,488 +1,311 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Alert, StyleSheet, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, Alert, Modal, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { analyticsAPI, complaintsAPI } from '../services/api';
-import { colors, globalStyles, statusColors } from '../utils/theme';
+import { complaintsAPI } from '../services/api';
+import useAuthStore from '../hooks/useAuthStore';
+import { colors, globalStyles, statusColors, severityColors } from '../utils/theme';
 import { format } from 'date-fns';
 import CyberBackground from '../components/CyberBackground';
-import { useFocusEffect } from '@react-navigation/native';
-import useAuthStore from '../hooks/useAuthStore';
 
-const { height } = Dimensions.get('window');
+const STATUSES = ['pending', 'under_review', 'investigating', 'resolved', 'rejected'];
+const SEVERITIES = ['low', 'medium', 'high', 'critical'];
 
 export default function AdminScreen({ navigation }) {
   const { user } = useAuthStore();
-  const isAdminUser = user?.role === 'admin';
-  const [overview,   setOverview]   = useState(null);
   const [complaints, setComplaints] = useState([]);
-  const [health,     setHealth]     = useState({ cpu: 0, memory: 0, storage: 0, uptime: 0 });
-  const [mlStatus,   setMlStatus]   = useState(null);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [tab,        setTab]        = useState('overview');
-  const [error,      setError]      = useState(false);
+  const [selectedComp, setSelectedComp] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [status, setStatus] = useState('');
+  const [severity, setSeverity] = useState('');
+  const [notes, setNotes] = useState('');
+  const [updating, setUpdating] = useState(false);
 
-  const fetchData = async () => {
-    setRefreshing(true);
-    setError(false);
+  const fetchAdminComplaints = async () => {
     try {
-      // Step 1: Priority Core Data
-      const [ovRes, clRes] = await Promise.allSettled([
-        analyticsAPI.overview(),
-        complaintsAPI.getAll({ limit: 50 })
-      ]);
-
-      if (ovRes.status === 'fulfilled') setOverview(ovRes.value.data?.data?.overview || null);
-      if (clRes.status === 'fulfilled') setComplaints(clRes.value.data?.data?.complaints || []);
-      
-      if (ovRes.status === 'rejected' && clRes.status === 'rejected') {
-        setError(true);
-      }
-
-      // Step 2: Admin-only system metrics. Officers may use the shared
-      // analytics and complaint-status capabilities above, but not /admin/*.
-      if (isAdminUser) {
-        try {
-          const [hlRes, mlRes] = await Promise.all([
-            adminAPI.systemStats(),
-            adminAPI.mlStatus()
-          ]);
-          setHealth(hlRes.data?.data?.health || health);
-          setMlStatus(mlRes.data?.data || null);
-        } catch (e) {
-          console.log('Admin system metrics unavailable');
-        }
-      }
-      
-    } catch (e) {
-      console.error('Unexpected Admin Fetch Error:', e);
-      setError(true);
+      const { data } = await complaintsAPI.getAll({ limit: 50 });
+      const list = data.data?.complaints || data.data || [];
+      setComplaints(list);
+    } catch (err) {
+      console.log('Admin list fetch:', err.message);
     } finally {
+      setLoading(false);
       setRefreshing(false);
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchData();
-    }, [isAdminUser])
-  );
+  useEffect(() => {
+    fetchAdminComplaints();
+  }, []);
 
-  const handleAction = (name) => {
-    Alert.alert('Protocol Execution', `Initiating ${name} sequence...`, [
-      { text: 'CONFIRM', onPress: () => Alert.alert('Success', `${name} completed. Logs updated.`) },
-      { text: 'ABORT', style: 'cancel' }
-    ]);
+  const openTriageModal = (item) => {
+    setSelectedComp(item);
+    setStatus(item.status || 'pending');
+    setSeverity(item.severity || 'medium');
+    setNotes('');
+    setModalVisible(true);
   };
 
-  const handleStatusUpdate = (complaint) => {
-    Alert.alert('System Protocol', 'Change incident status?', [
-      ...['pending','under_review','investigating','resolved','closed','rejected'].map(s => ({
-        text: s.replace(/_/g,' ').toUpperCase(),
-        onPress: async () => {
-          try {
-            await complaintsAPI.updateStatus(complaint._id, { status: s });
-            fetchData();
-          } catch { Alert.alert('Error', 'Protocol update failed'); }
-        }
-      })),
-      { text: 'ABORT', style: 'cancel' },
-    ]);
+  const handleUpdate = async () => {
+    if (!selectedComp) return;
+    setUpdating(true);
+    try {
+      await complaintsAPI.updateStatus(selectedComp._id, {
+        status,
+        message: notes.trim() || `Status updated to ${status} by triage officer`,
+      });
+
+      if (severity !== selectedComp.severity) {
+        await complaintsAPI.updatePriority(selectedComp._id, { priority: severity });
+      }
+
+      Alert.alert('Triage Saved', `Case ${selectedComp.complaintId || selectedComp._id} updated successfully.`);
+      setModalVisible(false);
+      fetchAdminComplaints();
+    } catch (err) {
+      Alert.alert('Update Failed', err.response?.data?.message || 'Could not update case triage.');
+    } finally {
+      setUpdating(false);
+    }
   };
 
-  const statItems = [
-    { label: 'LIVE CASES',    value: overview?.totalComplaints || '...',   color: colors.electric, icon: '📂' },
-    { label: 'CRITICAL',      value: overview?.criticalComplaints || '...', color: colors.danger,   icon: '🚨' },
-    { label: 'UPTIME',        value: '99.9%',                   color: colors.success,  icon: '🌐' },
-    { label: 'ACCURACY',      value: '97.4%',                   color: '#9C27B0',       icon: '🧠' },
-  ];
+  const renderComplaintItem = ({ item }) => {
+    const statusColor = statusColors[item.status] || colors.cyber;
+    const severityColor = severityColors[item.severity] || colors.warn;
+
+    return (
+      <View style={globalStyles.glassCard}>
+        <View style={globalStyles.spaceBetween}>
+          <Text style={[globalStyles.mono, { color: colors.cyber, fontSize: 11, fontWeight: '800' }]}>
+            {item.complaintId || item._id?.substring(0, 10)}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            <View style={[globalStyles.badge, { backgroundColor: `${statusColor}20`, borderColor: statusColor, borderWidth: 1 }]}>
+              <Text style={{ color: statusColor, fontSize: 9, fontWeight: '900' }}>
+                {(item.status || 'pending').replace(/_/g, ' ').toUpperCase()}
+              </Text>
+            </View>
+            <View style={[globalStyles.badge, { backgroundColor: `${severityColor}20`, borderColor: severityColor, borderWidth: 1 }]}>
+              <Text style={{ color: severityColor, fontSize: 9, fontWeight: '900' }}>
+                {(item.severity || 'medium').toUpperCase()}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <Text style={styles.titleText}>{item.title}</Text>
+        <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 4 }} numberOfLines={2}>
+          {item.description}
+        </Text>
+
+        <View style={styles.cardActions}>
+          <TouchableOpacity 
+            style={[globalStyles.btnOutline, { flex: 1, paddingVertical: 8 }]}
+            onPress={() => navigation.navigate('ComplaintDetail', { complaintId: item._id || item.complaintId })}
+          >
+            <Text style={[globalStyles.btnOutlineText, { fontSize: 11 }]}>View Dossier</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.triageBtn, { flex: 1 }]}
+            onPress={() => openTriageModal(item)}
+          >
+            <Text style={styles.triageBtnText}>⚡ Triage & Update</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
 
   return (
-    <SafeAreaView style={[globalStyles.screen, { backgroundColor: '#0A0F1E' }]}>
+    <SafeAreaView style={globalStyles.screen}>
       <CyberBackground />
       
-      {/* Back Navigation */}
-      <View style={{ paddingHorizontal: 20, paddingTop: 10, zIndex: 100 }}>
-        <TouchableOpacity 
-          onPress={() => navigation.navigate('Home')}
-          style={{ 
-            width: 40, height: 40, borderRadius: 20, 
-            backgroundColor: 'rgba(0, 255, 209, 0.1)', 
-            alignItems: 'center', justifyContent: 'center',
-            borderWidth: 1, borderColor: 'rgba(0, 255, 209, 0.3)'
-          }}
-        >
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backBtn}>
           <Text style={{ color: colors.accent, fontSize: 18, fontWeight: '900' }}>←</Text>
         </TouchableOpacity>
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <Text style={styles.headerTitle}>OFFICER COMMAND & TRIAGE</Text>
+          <Text style={styles.headerSub}>CASE MANAGEMENT & INCIDENT RESOLUTION</Text>
+        </View>
       </View>
 
-      <ScrollView 
-        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
-        refreshControl={<RefreshControl refreshing={refreshing} tintColor={colors.electric} onRefresh={fetchData} />}
-      >
-        <View style={styles.header}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            <View style={{ paddingHorizontal: 8, paddingVertical: 2, backgroundColor: 'rgba(0,180,255,0.15)', borderRadius: 4 }}>
-              <Text style={{ color: colors.electric, fontSize: 8, fontWeight: '900', letterSpacing: 1 }}>SYSTEM LEVEL 4</Text>
+      <FlatList
+        data={complaints}
+        keyExtractor={item => item._id}
+        renderItem={renderComplaintItem}
+        contentContainerStyle={{ padding: 18, paddingBottom: 60 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchAdminComplaints(); }} tintColor={colors.accent} />
+        }
+        ListEmptyComponent={
+          !loading && (
+            <View style={[globalStyles.glassCard, { alignItems: 'center', padding: 30 }]}>
+              <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '900' }}>NO ACTIVE INCIDENTS TO TRIAGE</Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: error ? colors.danger : colors.success }} />
-              <Text style={{ color: colors.muted, fontSize: 10 }}>{error ? 'OFFLINE' : 'SYNC: ACTIVE'}</Text>
-            </View>
-          </View>
-          <Text style={styles.title}>COMMAND CENTER</Text>
-          <Text style={styles.subtitle}>SECURE SECTOR 01 • REAL-TIME MONITORING</Text>
-        </View>
+          )
+        }
+      />
 
-        {error && (
-          <View style={[styles.metricsCard, { borderColor: colors.danger, backgroundColor: 'rgba(255,82,82,0.05)' }]}>
-            <Text style={{ color: '#fff', fontWeight: '800', textAlign: 'center', fontSize: 12 }}>SYNC ERROR 503: NEURAL LINK TIMEOUT</Text>
-            <TouchableOpacity onPress={fetchData} style={[globalStyles.btnPrimary, { marginTop: 15, backgroundColor: colors.danger }]}>
-              <Text style={globalStyles.btnPrimaryText}>RETRY PROTOCOL</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Tab Selection */}
-        <View style={styles.tabContainer}>
-          {['OVERVIEW','COMPLAINTS'].map(t => (
-            <TouchableOpacity key={t} onPress={() => setTab(t.toLowerCase())} style={[
-              styles.tab,
-              tab === t.toLowerCase() && styles.activeTab
-            ]}>
-              <Text style={[
-                styles.tabText,
-                tab === t.toLowerCase() && styles.activeTabText
-              ]}>{t}</Text>
-              {tab === t.toLowerCase() && <View style={styles.tabIndicator} />}
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {tab === 'overview' && (
-          <View style={{ marginTop: 10 }}>
-            {/* Stat Cards */}
-            <View style={styles.statsGrid}>
-              {statItems.map((s, i) => (
-                <View key={i} style={styles.statCard}>
-                  <Text style={{ fontSize: 20, marginBottom: 8 }}>{s.icon}</Text>
-                  <Text style={[styles.statValue, { color: s.color }]}>{s.value}</Text>
-                  <Text style={styles.statLabel}>{s.label}</Text>
-                </View>
-              ))}
+      {/* Triage Modal */}
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[globalStyles.glassCard, styles.modalContent]}>
+            <View style={globalStyles.spaceBetween}>
+              <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '900' }}>CASE TRIAGE CONTROL</Text>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text style={{ color: colors.muted, fontSize: 18 }}>✕</Text>
+              </TouchableOpacity>
             </View>
 
-            {/* System Protocols are admin-only placeholders until backed by APIs. */}
-            {isAdminUser && (
-              <View style={styles.metricsCard}>
-                <Text style={[globalStyles.sectionTitle, { color: colors.electric, fontSize: 11, marginBottom: 15 }]}>SYSTEM PROTOCOLS</Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                  {[
-                    { label: 'AUDIT',    color: colors.electric, icon: '🔍' },
-                    { label: 'ALERT',    color: colors.accent,   icon: '📢' },
-                    { label: 'OPTIMIZE', color: '#FFD600',       icon: '⚡' },
-                    { label: 'PURGE',    color: colors.danger,   icon: '🗑️' }
-                  ].map(p => (
-                    <TouchableOpacity
-                      key={p.label}
-                      onPress={() => handleAction(p.label)}
-                      style={[styles.protocolBtn, { borderColor: `${p.color}40` }]}
-                    >
-                      <Text style={{ fontSize: 14, marginBottom: 4 }}>{p.icon}</Text>
-                      <Text style={[styles.protocolText, { color: p.color }]}>{p.label}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
+            <Text style={{ color: colors.cyber, fontSize: 11, fontWeight: '800', marginTop: 4, fontFamily: 'monospace' }}>
+              {selectedComp?.complaintId}
+            </Text>
 
-            {/* Neural Engine & Health are backed by admin-only endpoints. */}
-            {isAdminUser && <View style={{ flexDirection: 'row', gap: 15, marginVertical: 20 }}>
-              <View style={[styles.statCard, { flex: 1, borderColor: 'rgba(156, 39, 176, 0.3)' }]}>
-                <Text style={[globalStyles.sectionTitle, { color: '#9C27B0', fontSize: 10, marginBottom: 10 }]}>NEURAL ENGINE</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.success, shadowColor: colors.success, shadowRadius: 5, shadowOpacity: 1 }} />
-                  <Text style={{ color: '#fff', fontSize: 11, fontWeight: '800' }}>ONLINE</Text>
-                </View>
-                <Text style={{ color: colors.muted, fontSize: 9 }}>Accuracy: 97.4%</Text>
-                <Text style={{ color: colors.muted, fontSize: 9, marginTop: 4 }}>Models: 4 Active</Text>
-              </View>
-
-              <View style={[styles.statCard, { flex: 1 }]}>
-                <Text style={[globalStyles.sectionTitle, { color: '#fff', fontSize: 10, marginBottom: 10 }]}>SYSTEM HEALTH</Text>
-                {[
-                  { label: 'CPU', val: health.cpu, color: colors.accent },
-                  { label: 'MEM', val: health.memory, color: '#FFD600' },
-                  { label: 'DSK', val: health.storage, color: colors.electric }
-                ].map(h => (
-                  <View key={h.label} style={{ marginBottom: 6 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
-                      <Text style={{ color: colors.muted, fontSize: 8, fontWeight: '700' }}>{h.label}</Text>
-                      <Text style={{ color: '#fff', fontSize: 8 }}>{Math.round(h.val)}%</Text>
-                    </View>
-                    <View style={{ height: 3, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
-                      <View style={{ width: `${h.val}%`, height: '100%', backgroundColor: h.color, borderRadius: 2 }} />
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>}
-
-            {/* Recent Incident Stream */}
-            <View style={styles.metricsCard}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
-                <Text style={[globalStyles.sectionTitle, { color: colors.accent, fontSize: 11, margin: 0 }]}>INCIDENT STREAM</Text>
-                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent }} />
-              </View>
-              {complaints.slice(0, 5).map((c, i) => (
-                <View key={c._id} style={{ 
-                  padding: 10, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 8, 
-                  borderWidth: 1, borderColor: 'rgba(255,255,255,0.03)', marginBottom: 8 
-                }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                    <Text style={{ color: colors.electric, fontSize: 9, fontWeight: '800' }}>{c.complaintId}</Text>
-                    <Text style={{ color: c.severity === 'high' ? colors.danger : colors.muted, fontSize: 8, textTransform: 'uppercase' }}>{c.severity}</Text>
-                  </View>
-                  <Text style={{ color: '#fff', fontSize: 11, fontWeight: '600' }} numberOfLines={1}>{c.title}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {tab === 'complaints' && (
-          <View style={{ marginTop: 10 }}>
-            {complaints.length === 0 && !refreshing ? (
-              <View style={styles.emptyState}>
-                <Text style={{ fontSize: 40, marginBottom: 15 }}>📡</Text>
-                <Text style={styles.emptyTitle}>NO ACTIVE SIGNALS</Text>
-                <Text style={styles.emptySub}>The registry is currently synchronized and clear.</Text>
-              </View>
-            ) : (
-              complaints.map(c => (
-                <TouchableOpacity 
-                  key={c._id} 
-                  activeOpacity={0.7}
-                  onPress={() => navigation.navigate('ComplaintDetail', { complaintId: c._id })}
-                  style={styles.complaintCard}
+            {/* Status Selector */}
+            <Text style={[globalStyles.label, { marginTop: 14 }]}>UPDATE INVESTIGATION STATUS</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+              {STATUSES.map(s => (
+                <TouchableOpacity
+                  key={s}
+                  style={[styles.statusChip, status === s && { backgroundColor: colors.accent, borderColor: colors.accent }]}
+                  onPress={() => setStatus(s)}
                 >
-                  <View style={globalStyles.spaceBetween}>
-                    <Text style={[globalStyles.mono, { color: colors.electric, fontSize: 10 }]}>{c.complaintId}</Text>
-                    <View style={[styles.statusBadge, { backgroundColor: `${statusColors[c.status] || colors.muted}20`, borderColor: statusColors[c.status] || colors.muted, borderWidth: 1 }]}>
-                      <Text style={[styles.statusText, { color: statusColors[c.status] || colors.muted }]}>
-                        {(c.status || 'pending').replace(/_/g,' ').toUpperCase()}
-                      </Text>
-                    </View>
-                  </View>
-                  
-                  <Text style={styles.complaintTitle} numberOfLines={2}>{c.title}</Text>
-                  
-                  <View style={styles.complaintFooter}>
-                    <Text style={styles.footerInfo}>
-                      {c.userId?.name || 'EXTERNAL SOURCE'} • {format(new Date(c.createdAt), 'dd MMM yyyy')}
-                    </Text>
-                    <TouchableOpacity onPress={() => handleStatusUpdate(c)} style={styles.actionBtn}>
-                      <Text style={styles.actionBtnText}>UPDATE STATUS</Text>
-                    </TouchableOpacity>
-                  </View>
+                  <Text style={[styles.statusChipText, status === s && { color: '#030A14' }]}>
+                    {s.replace(/_/g, ' ').toUpperCase()}
+                  </Text>
                 </TouchableOpacity>
-              ))
-            )}
+              ))}
+            </View>
+
+            {/* Severity Selector */}
+            <Text style={[globalStyles.label, { marginTop: 14 }]}>THREAT SEVERITY</Text>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              {SEVERITIES.map(sev => (
+                <TouchableOpacity
+                  key={sev}
+                  style={[styles.statusChip, severity === sev && { backgroundColor: colors.warn, borderColor: colors.warn }]}
+                  onPress={() => setSeverity(sev)}
+                >
+                  <Text style={[styles.statusChipText, severity === sev && { color: '#030A14' }]}>
+                    {sev.toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Officer Note */}
+            <Text style={[globalStyles.label, { marginTop: 14 }]}>OFFICER REMARK / TIMELINE NOTE</Text>
+            <TextInput
+              style={[globalStyles.input, { height: 70, textAlignVertical: 'top' }]}
+              placeholder="e.g. Account freeze request sent to nodal bank..."
+              placeholderTextColor={colors.muted}
+              multiline
+              value={notes}
+              onChangeText={setNotes}
+            />
+
+            <TouchableOpacity 
+              style={[globalStyles.btnPrimary, { marginTop: 14 }]}
+              onPress={handleUpdate}
+              disabled={updating}
+            >
+              {updating ? (
+                <ActivityIndicator color="#030A14" />
+              ) : (
+                <Text style={globalStyles.btnPrimaryText}>SAVE CASE UPDATES</Text>
+              )}
+            </TouchableOpacity>
           </View>
-        )}
-      </ScrollView>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   header: {
-    marginBottom: 30,
-    marginTop: 10,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#fff',
-    letterSpacing: 2,
-    textShadowColor: 'rgba(0, 180, 255, 0.4)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-  },
-  subtitle: {
-    fontSize: 10,
-    color: colors.accent,
-    fontWeight: '800',
-    letterSpacing: 2,
-    marginTop: 4,
-  },
-  tabContainer: {
     flexDirection: 'row',
-    marginBottom: 25,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
     alignItems: 'center',
-    position: 'relative',
-  },
-  activeTab: {
-  },
-  tabText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: colors.muted,
-    letterSpacing: 1,
-  },
-  activeTabText: {
-    color: colors.electric,
-  },
-  tabIndicator: {
-    position: 'absolute',
-    bottom: -1,
-    width: '40%',
-    height: 2,
-    backgroundColor: colors.electric,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
-  },
-  statCard: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: 'rgba(12, 20, 40, 0.7)',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.1)',
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
-  statLabel: {
-    fontSize: 8,
-    color: colors.muted,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginTop: 4,
-  },
-  metricsCard: {
-    backgroundColor: 'rgba(12, 20, 40, 0.7)',
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.1)',
-  },
-  metricRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    paddingHorizontal: 18,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
-  metricLabel: {
-    fontSize: 11,
-    color: colors.muted,
-    fontWeight: '700',
-  },
-  metricValue: {
-    fontSize: 12,
-    color: colors.electric,
-    fontWeight: '800',
-  },
-  protocolBtn: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: 'rgba(255,255,255,0.02)',
-    padding: 12,
-    borderRadius: 12,
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(0, 255, 209, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
+    borderColor: 'rgba(0, 255, 209, 0.3)',
+  },
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '900',
+    letterSpacing: 1.5,
+  },
+  headerSub: {
+    color: colors.accent,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  titleText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+    marginTop: 8,
+  },
+  cardActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.06)',
+    paddingTop: 10,
+  },
+  triageBtn: {
+    backgroundColor: 'rgba(0, 255, 209, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 255, 209, 0.4)',
+    borderRadius: 8,
+    paddingVertical: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  protocolText: {
-    fontSize: 9,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
-  complaintCard: {
-    backgroundColor: 'rgba(12, 20, 40, 0.8)',
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.15)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-  },
-  complaintTitle: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-    marginVertical: 12,
-    lineHeight: 20,
-  },
-  complaintFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 5,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
-    paddingTop: 12,
-  },
-  footerInfo: {
-    fontSize: 10,
-    color: colors.muted,
-    fontWeight: '600',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  statusText: {
-    fontSize: 9,
-    fontWeight: '900',
-  },
-  actionBtn: {
-    backgroundColor: 'rgba(0, 180, 255, 0.1)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.3)',
-  },
-  actionBtnText: {
-    color: colors.electric,
-    fontSize: 9,
+  triageBtnText: {
+    color: colors.accent,
+    fontSize: 11,
     fontWeight: '800',
   },
-  emptyState: {
-    padding: 60,
-    alignItems: 'center',
-    backgroundColor: 'rgba(12, 20, 40, 0.4)',
-    borderRadius: 20,
-    marginTop: 20,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    padding: 20,
   },
-  emptyTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 2,
+  modalContent: {
+    padding: 20,
+    borderRadius: 16,
   },
-  emptySub: {
-    color: colors.muted,
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 8,
+  statusChip: {
+    backgroundColor: 'rgba(0, 180, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 180, 255, 0.25)',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  statusChipText: {
+    color: colors.cyber,
+    fontSize: 10,
+    fontWeight: '800',
   }
 });

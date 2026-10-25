@@ -119,6 +119,8 @@ const CyberReport = () => {
   const [pincode, setPincode] = useState("");
   const [location, setLocation] = useState(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [areaSearchQuery, setAreaSearchQuery] = useState("");
+  const [showAreaSearch, setShowAreaSearch] = useState(false);
   const [email, setEmail] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [mobile, setMobile] = useState("");
@@ -181,25 +183,194 @@ const CyberReport = () => {
     }
   };
 
-  const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      return toast.error("Geolocation is not supported by your browser");
+  // 📍 High-Precision Reverse Geocoding with OpenStreetMap Nominatim
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
+        headers: { 'Accept-Language': 'en' }
+      });
+      const data = await res.json();
+      if (data && data.address) {
+        const city = data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.county || data.address.state_district || 'Local Area';
+        const state = data.address.state || '';
+        const postcode = data.address.postcode || '';
+        return { city, state, postcode, displayName: data.display_name };
+      }
+    } catch (err) {
+      console.warn("Reverse geocode failed:", err);
     }
+    return null;
+  };
 
+  // 📍 Geocode 6-Digit Indian PIN Code with Postal Service & Nominatim
+  const geocodePincode = async (pin) => {
+    if (!pin || pin.length !== 6) return;
     setGettingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
+    try {
+      // 1. Try Nominatim postal search
+      const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${pin}&country=India&format=json`);
+      const nomData = await nomRes.json();
+      if (nomData && nomData.length > 0) {
+        const match = nomData[0];
+        const lat = parseFloat(match.lat);
+        const lng = parseFloat(match.lon);
+        const parts = match.display_name.split(',').map(s => s.trim());
+        const area = parts[1] || parts[0];
+        const state = parts[parts.length - 2] || 'India';
+        
         setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
+          lat,
+          lng,
+          city: area,
+          region: state
         });
         setGettingLocation(false);
-        toast.success("Live location captured!");
+        toast.success(`📍 PIN ${pin} Located: ${area}, ${state}`);
+        return;
+      }
+
+      // 2. Postal PIN Code fallback
+      const pinRes = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+      const pinData = await pinRes.json();
+      if (pinData && pinData[0]?.Status === 'Success' && pinData[0]?.PostOffice?.length > 0) {
+        const po = pinData[0].PostOffice[0];
+        const district = po.District;
+        const state = po.State;
+        
+        // Search city coordinates
+        const citySearchRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(district + ', ' + state + ', India')}&format=json`);
+        const citySearchData = await citySearchRes.json();
+        const lat = citySearchData?.[0]?.lat ? parseFloat(citySearchData[0].lat) : 12.97;
+        const lng = citySearchData?.[0]?.lon ? parseFloat(citySearchData[0].lon) : 77.59;
+        
+        setLocation({
+          lat,
+          lng,
+          city: `${po.Name}, ${district}`,
+          region: state
+        });
+        setGettingLocation(false);
+        toast.success(`📍 PIN ${pin} Located: ${po.Name}, ${district}`);
+        return;
+      }
+    } catch (err) {
+      console.warn("PIN geocode failed", err);
+    }
+    setGettingLocation(false);
+  };
+
+  // 📍 Search by Area / City Name (e.g. Udupi, Indiranagar, Mangalore, Bandra)
+  const handleSearchArea = async () => {
+    if (!areaSearchQuery || areaSearchQuery.trim().length < 2) {
+      toast.error("Please enter a city or area name to search");
+      return;
+    }
+    setGettingLocation(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(areaSearchQuery.trim() + ', India')}&format=json&addressdetails=1`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const match = data[0];
+        const lat = parseFloat(match.lat);
+        const lng = parseFloat(match.lon);
+        const city = match.address?.city || match.address?.town || match.address?.village || match.address?.suburb || match.address?.county || areaSearchQuery.trim();
+        const state = match.address?.state || '';
+        const postcode = match.address?.postcode || '';
+
+        setLocation({
+          lat,
+          lng,
+          city,
+          region: state
+        });
+        if (postcode && /^\d{6}$/.test(postcode)) {
+          setPincode(postcode);
+        }
+        setShowAreaSearch(false);
+        setGettingLocation(false);
+        toast.success(`📍 Location Locked: ${city}, ${state}`);
+        return;
+      } else {
+        toast.error(`No results found for "${areaSearchQuery}". Please try another landmark or city.`);
+      }
+    } catch (err) {
+      toast.error("Area search service error. Please try again.");
+    }
+    setGettingLocation(false);
+  };
+
+  const fallbackIpLocation = async () => {
+    try {
+      const res = await fetch('https://ipwho.is/');
+      const data = await res.json();
+      if (data && data.success !== false && data.latitude && data.longitude) {
+        setLocation({
+          lat: data.latitude,
+          lng: data.longitude,
+          city: data.city,
+          region: data.region
+        });
+        setGettingLocation(false);
+        toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''} 🌐`);
+        return true;
+      }
+    } catch (e) {
+      console.warn("ipwho.is lookup failed", e);
+    }
+    setGettingLocation(false);
+    toast.info("Please enter your 6-digit PIN code or search for your city directly.");
+    return false;
+  };
+
+  const handleGetLocation = () => {
+    setGettingLocation(true);
+
+    if (!navigator.geolocation) {
+      if (pincode && pincode.length === 6) {
+        geocodePincode(pincode);
+      } else {
+        fallbackIpLocation();
+      }
+      return;
+    }
+
+    // High Accuracy GPS Mode
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        const geo = await reverseGeocode(lat, lng);
+        if (geo) {
+          setLocation({
+            lat,
+            lng,
+            city: geo.city,
+            region: geo.state
+          });
+          if (geo.postcode && /^\d{6}$/.test(geo.postcode)) {
+            setPincode(geo.postcode);
+          }
+          setGettingLocation(false);
+          toast.success(`📍 Exact Location Locked: ${geo.city}, ${geo.state}`);
+        } else {
+          setLocation({ lat, lng });
+          setGettingLocation(false);
+          toast.success(`📍 High-Precision GPS Locked: (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+        }
       },
       (error) => {
-        console.error(error);
-        setGettingLocation(false);
-        toast.error("Failed to get location. Please enable location permissions.");
+        console.warn("High-accuracy GPS request failed/denied:", error.message);
+        if (pincode && pincode.length === 6) {
+          geocodePincode(pincode);
+        } else {
+          fallbackIpLocation();
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 0
       }
     );
   };
@@ -633,9 +804,14 @@ const CyberReport = () => {
           </div>
           
           {/* LOCATION GRID */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '30px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '24px', alignItems: 'start' }}>
             <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Pin Code</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', paddingLeft: '4px' }}>
+                <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Pin Code</label>
+                <span style={{ fontSize: '11px', color: '#00B4FF', cursor: 'pointer' }} onClick={() => pincode && geocodePincode(pincode)}>
+                  {pincode?.length === 6 ? '⚡ Auto-Geocoded' : 'Enter 6-digit PIN'}
+                </span>
+              </div>
               <input
                 type="text"
                 style={{ 
@@ -650,42 +826,117 @@ const CyberReport = () => {
                   transition: '0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                   boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
                 }}
-                placeholder="6-digit ZIP / PIN"
+                placeholder="6-digit PIN (e.g. 560001)"
                 value={pincode}
                 maxLength={6}
-                onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  setPincode(val);
+                  if (val.length === 6) {
+                    geocodePincode(val);
+                  }
+                }}
+                onBlur={() => {
+                  if (pincode?.length === 6) {
+                    geocodePincode(pincode);
+                  }
+                }}
               />
             </div>
             <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Geospatial Threat Map Tag</label>
-              <div 
-                onClick={handleGetLocation}
-                style={{ 
-                  background: location ? 'rgba(0, 180, 255, 0.1)' : 'rgba(255,255,255,0.03)', 
-                  border: location ? '1px solid rgba(0, 180, 255, 0.3)' : '1px solid rgba(255,255,255,0.1)',
-                  color: location ? '#00B4FF' : 'rgba(255,255,255,0.7)',
-                  padding: '16px',
-                  borderRadius: '16px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '12px',
-                  fontSize: '15px',
-                  fontWeight: 600,
-                  transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                  height: '54px',
-                  boxShadow: location ? '0 0 20px rgba(0, 180, 255, 0.2)' : 'none'
-                }}
-                onMouseOver={e => e.currentTarget.style.background = location ? 'rgba(0, 180, 255, 0.15)' : 'rgba(255,255,255,0.08)'}
-                onMouseOut={e => e.currentTarget.style.background = location ? 'rgba(0, 180, 255, 0.1)' : 'rgba(255,255,255,0.03)'}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                {gettingLocation ? "ACQUIRING SIGNAL..." : location ? "LIVE GPS COORDINATES LOCKED" : "CAPTURE LIVE LOCATION FOR MAP"}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', paddingLeft: '4px' }}>
+                <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Geospatial Threat Map Tag</label>
+                <button
+                  type="button"
+                  onClick={() => setShowAreaSearch(!showAreaSearch)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#00B4FF',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  {showAreaSearch ? '✕ Close Search' : '🔍 Search City / Area'}
+                </button>
               </div>
+
+              {showAreaSearch ? (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    placeholder="Enter city or locality (e.g. Udupi, Indiranagar, Mangalore)..."
+                    value={areaSearchQuery}
+                    onChange={(e) => setAreaSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSearchArea();
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid #00B4FF',
+                      borderRadius: '16px',
+                      padding: '14px 18px',
+                      color: '#fff',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSearchArea}
+                    style={{
+                      background: 'linear-gradient(135deg, #00B4FF, #0070F3)',
+                      border: 'none',
+                      borderRadius: '16px',
+                      padding: '0 20px',
+                      color: '#fff',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Locate
+                  </button>
+                </div>
+              ) : (
+                <div 
+                  onClick={handleGetLocation}
+                  style={{ 
+                    background: location ? 'rgba(0, 180, 255, 0.1)' : 'rgba(255,255,255,0.03)', 
+                    border: location ? '1px solid rgba(0, 180, 255, 0.3)' : '1px solid rgba(255,255,255,0.1)',
+                    color: location ? '#00B4FF' : 'rgba(255,255,255,0.7)',
+                    padding: '16px',
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                    height: '54px',
+                    boxShadow: location ? '0 0 20px rgba(0, 180, 255, 0.2)' : 'none'
+                  }}
+                  onMouseOver={e => e.currentTarget.style.background = location ? 'rgba(0, 180, 255, 0.15)' : 'rgba(255,255,255,0.08)'}
+                  onMouseOut={e => e.currentTarget.style.background = location ? 'rgba(0, 180, 255, 0.1)' : 'rgba(255,255,255,0.03)'}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  {gettingLocation 
+                    ? "ACQUIRING SATELLITE GPS..." 
+                    : location 
+                      ? (location.city ? `📍 ${location.city.toUpperCase()}, ${location.region || ''} (${location.lat.toFixed(2)}, ${location.lng.toFixed(2)})` : `📍 GPS LOCKED (${location.lat.toFixed(2)}, ${location.lng.toFixed(2)})`) 
+                      : "CAPTURE LIVE GPS / PIN MAP"}
+                </div>
+              )}
             </div>
           </div>
 

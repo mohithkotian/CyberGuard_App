@@ -95,29 +95,71 @@ export default function AdminSafety() {
     return () => clearInterval(interval);
   }, [fetchIncidents]);
 
+  const fallbackSafetyIpLocation = async (toastId) => {
+    try {
+      const res = await fetch('https://ipwho.is/');
+      const data = await res.json();
+      if (data && data.success !== false && data.latitude && data.longitude) {
+        setFormData(prev => ({
+          ...prev,
+          lat: data.latitude,
+          lng: data.longitude,
+          location: prev.location || `${data.city || 'Detected Location'}, ${data.region || ''}`,
+          pincode: prev.pincode || (data.postal ? String(data.postal).slice(0, 6) : '')
+        }));
+        toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''} 🌐`, { id: toastId });
+        return true;
+      }
+    } catch (e) {
+      console.warn('ipwho.is lookup failed in safety dispatch', e);
+    }
+    toast.error('Unable to acquire GPS/IP. Please enter address manually.', { id: toastId });
+  };
+
   const handleGetLocation = () => {
+    const toastId = toast.loading('Acquiring high-precision GPS signal...');
+
     if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by your browser');
+      fallbackSafetyIpLocation(toastId);
       return;
     }
     
-    const toastId = toast.loading('Acquiring satellite GPS lock...');
-    
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        let placeName = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+        let pin = '';
+        
+        try {
+          const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
+            headers: { 'Accept-Language': 'en' }
+          });
+          const revData = await revRes.json();
+          if (revData && revData.address) {
+            const city = revData.address.city || revData.address.town || revData.address.village || revData.address.suburb || revData.address.county || '';
+            const state = revData.address.state || '';
+            placeName = `${city}${city && state ? ', ' : ''}${state}`;
+            pin = revData.address.postcode || '';
+          }
+        } catch (err) {
+          console.warn('Nominatim reverse geocode failed in safety', err);
+        }
+
         setFormData(prev => ({
           ...prev,
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          location: prev.location || `Lat: ${position.coords.latitude.toFixed(4)}, Lng: ${position.coords.longitude.toFixed(4)}`
+          lat,
+          lng,
+          location: placeName || prev.location,
+          pincode: pin || prev.pincode
         }));
-        toast.success('GPS coordinates locked!', { id: toastId });
+        toast.success(`📍 GPS locked: ${placeName}`, { id: toastId });
       },
       (error) => {
-        console.error('GPS acquisition error:', error);
-        toast.error('Unable to acquire GPS lock. Please enter address manually.', { id: toastId });
+        console.warn('GPS unavailable, falling back to IP geolocation:', error.message);
+        fallbackSafetyIpLocation(toastId);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
     );
   };
 

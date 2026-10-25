@@ -14,36 +14,47 @@ Notifications.setNotificationHandler({
 export const registerForPushNotifications = async () => {
   if (!Device.isDevice) return null;
 
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  let finalStatus = existing;
+  try {
+    const { status: existing } = await Notifications.getPermissionsAsync();
+    let finalStatus = existing;
 
-  if (existing !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
+    if (existing !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== 'granted') return null;
+
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'CyberGuard Alerts',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#00B4FF',
+      });
+    }
+
+    const tokenRes = await Notifications.getExpoPushTokenAsync().catch(() => null);
+    const token = tokenRes?.data;
+
+    if (token) {
+      try { await authAPI.registerPushToken?.(token); } catch {}
+    }
+
+    return token;
+  } catch (err) {
+    console.log('Push notification registration bypassed:', err.message);
+    return null;
   }
-
-  if (finalStatus !== 'granted') return null;
-
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'CyberGuard Alerts',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#00B4FF',
-    });
-  }
-
-  const { data: token } = await Notifications.getExpoPushTokenAsync();
-
-  // Register token with backend
-  try { await authAPI.registerPushToken?.(token); } catch {}
-
-  return token;
 };
 
 export const scheduleLocalNotification = async (title, body) => {
-  await Notifications.scheduleNotificationAsync({
-    content: { title, body, sound: 'default' },
-    trigger: null,
-  });
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: { title, body, sound: 'default' },
+      trigger: null,
+    });
+  } catch (err) {
+    console.log('Local notification error:', err.message);
+  }
 };
