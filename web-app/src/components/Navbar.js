@@ -5,14 +5,13 @@ import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motio
 import toast from 'react-hot-toast';
 import useAuthStore from '../hooks/useAuthStore';
 import useTranslationStore from '../hooks/useTranslationStore';
-import { getAvatarUrl } from '../utils/avatar';
 import NotificationCenter from './NotificationCenter';
 import DeveloperAccessScanner from './DeveloperAccessScanner';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, isAdmin, isOfficer } = useAuthStore();
+  const { logout, isAdmin, isOfficer } = useAuthStore();
   const { t } = useTranslationStore();
   const containerRef = useRef(null);
   const helpBtnRef = useRef(null);
@@ -99,44 +98,8 @@ export default function Navbar() {
     }}>
       {/* Brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
-        <motion.div 
-          onClick={() => {
-            if (user?.email === 'pruthvishetty04@gmail.com') {
-              setShowScanner(true);
-            } else {
-              navigate('/');
-            }
-          }}
-          whileHover={{ scale: 1.1 }}
-          style={{ 
-            width: 42, height: 42, 
-            borderRadius: '10px', 
-            overflow: 'hidden',
-            border: '2px solid #00B4FF',
-            boxShadow: '0 0 15px rgba(0,180,255,0.4)',
-            background: 'rgba(0,180,255,0.1)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer'
-          }}
-        >
-          {getAvatarUrl(user?.avatar, user?.updatedAt) ? (
-            <img 
-              src={getAvatarUrl(user?.avatar, user?.updatedAt)} 
-              alt={user?.name || 'User'} 
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-            />
-          ) : (
-            <div style={{ color: '#00B4FF', fontWeight: 900, fontSize: 22, fontFamily: 'Orbitron, monospace' }}>
-              {user?.name?.[0] || 'C'}
-            </div>
-          )}
-        </motion.div>
-        
         <Link to="/" style={{ textDecoration: 'none' }}>
-          <span style={{ fontFamily: 'Orbitron,monospace', fontSize: 16, color: '#fff', fontWeight: 800, letterSpacing: '3px' }}>
-            CYBERGUARD
-          </span>
+          <img src="/icons/cyberguard/cyberguard-white.png" alt="CyberGuard" style={{ display: 'block', width: 148, height: 38, objectFit: 'contain' }} />
         </Link>
       </div>
 
@@ -180,7 +143,7 @@ export default function Navbar() {
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             scrollBehavior: 'smooth',
-            padding: '0 36px',
+            padding: '0 64px 0 36px',
             gap: 12
           }}
         >

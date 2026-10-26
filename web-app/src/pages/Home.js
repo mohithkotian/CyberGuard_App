@@ -333,10 +333,12 @@ export default function Home() {
         <div style={{ flex: 1 }}>
           <div
             onClick={() => navigate('/')}
-            style={{ cursor: 'pointer', fontWeight: 900, fontSize: '20px', letterSpacing: '4px', color: '#fff', fontFamily: 'Orbitron, monospace', textShadow: '0 0 20px rgba(255,255,255,0.4)' }}
-          >CYBERGUARD</div>
+            style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+          >
+            <img src="/icons/cyberguard/cyberguard-white.png" alt="CyberGuard" style={{ width: 176, height: 44, objectFit: 'contain' }} />
+          </div>
         </div>
-        <nav style={{ flex: 2, display: 'flex', justifyContent: 'center', gap: 40, position: 'relative' }}>
+        <nav style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 40, position: 'relative' }}>
           {navLinks.map(l => (
             <span key={l.name}
               onClick={() => navigate(l.path)}
@@ -440,14 +442,6 @@ export default function Home() {
             transition={{ duration: 1, ease: 'easeOut' }}
             style={{ width: '100%' }}
           >
-            {/* Accent line */}
-            <div style={{
-              width: 60, height: 4,
-              background: 'linear-gradient(90deg, #007AFF, #00FFD1)',
-              marginBottom: 32, borderRadius: 2,
-              boxShadow: '0 0 20px rgba(0,122,255,0.5)',
-            }} />
-
             {/* REPORT. TRACK. PROTECT. — smaller font so T is never clipped */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}

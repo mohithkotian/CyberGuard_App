@@ -12,6 +12,7 @@ export default function Register() {
   // Get role from URL query: /register?role=admin
   const queryParams = new URLSearchParams(location.search);
   const role = queryParams.get('role') || 'user';
+  const roleIcon = role === 'admin' ? 'admin-command.png' : role === 'officer' ? 'police-badge.png' : role === 'education' ? 'cyber-educator.png' : 'citizen-shield.png';
 
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' });
   const [errors, setErrors] = useState({});
@@ -46,10 +47,10 @@ export default function Register() {
   };
 
   const roleColors = {
-    admin: { main: '#007AFF', accent: '#00B4FF', glow: 'rgba(0, 122, 255, 0.15)', bg: 'rgba(0, 122, 255, 0.05)' },
-    officer: { main: '#FF8F00', accent: '#FFD600', glow: 'rgba(255, 143, 0, 0.15)', bg: 'rgba(255, 143, 0, 0.05)' },
-    education: { main: '#7C3AED', accent: '#A855F7', glow: 'rgba(124, 58, 237, 0.15)', bg: 'rgba(124, 58, 237, 0.05)' },
-    user: { main: '#00C853', accent: '#00ffaa', glow: 'rgba(0, 200, 83, 0.15)', bg: 'rgba(0, 200, 83, 0.05)' }
+    admin: { main: 'var(--auth-btn-bg)', accent: 'var(--auth-heading)', glow: 'transparent', bg: 'var(--auth-input-bg)' },
+    officer: { main: 'var(--auth-btn-bg)', accent: 'var(--auth-heading)', glow: 'transparent', bg: 'var(--auth-input-bg)' },
+    education: { main: 'var(--auth-btn-bg)', accent: 'var(--auth-heading)', glow: 'transparent', bg: 'var(--auth-input-bg)' },
+    user: { main: 'var(--auth-btn-bg)', accent: 'var(--auth-heading)', glow: 'transparent', bg: 'var(--auth-input-bg)' }
   };
 
   const theme = roleColors[role] || roleColors.user;
@@ -60,7 +61,7 @@ export default function Register() {
         display: 'block', 
         fontSize: '13px', 
         fontWeight: 700, 
-        color: 'rgba(255,255,255,0.4)', 
+        color: 'var(--auth-label)', 
         marginBottom: '10px', 
         marginLeft: '12px',
         textTransform: 'uppercase',
@@ -78,18 +79,18 @@ export default function Register() {
           style={{ 
             width: '100%',
             padding: '16px 24px',
-            background: 'rgba(255,255,255,0.03)',
-            border: `1px solid rgba(255,255,255,0.1)`,
+            background: 'var(--auth-input-bg)',
+            border: '1px solid var(--auth-input-border)',
             borderRadius: '18px',
-            color: '#fff',
+            color: 'var(--auth-input-text)',
             fontSize: '15px',
             outline: 'none',
             transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+            boxShadow: 'none'
           }}
         />
         {errors[key] && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#FF3B30', fontSize: '12px', marginTop: '6px', marginLeft: '12px', fontWeight: 600 }}>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#b85c5c', fontSize: '12px', marginTop: '6px', marginLeft: '12px', fontWeight: 600 }}>
             {errors[key]}
           </motion.p>
         )}
@@ -98,9 +99,9 @@ export default function Register() {
   );
 
   return (
-    <div style={{ 
+    <div className="auth-page" style={{ 
       minHeight: '100vh', 
-      background: '#02060A', 
+      background: 'var(--auth-bg)', 
       display: 'flex',
       alignItems: 'center', 
       justifyContent: 'center', 
@@ -110,9 +111,9 @@ export default function Register() {
       fontFamily: 'Inter, sans-serif'
     }}>
       {/* Dynamic Role-Based Background Accents */}
-      <div style={{ position: 'fixed', top: '-15%', right: '-10%', width: '60%', height: '60%', background: `radial-gradient(circle, ${theme.glow} 0%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-15%', left: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', top: '-15%', right: '-10%', width: '60%', height: '60%', background: 'none', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', bottom: '-15%', left: '-10%', width: '60%', height: '60%', background: 'none', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(var(--auth-dot) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
 
       <motion.div 
         initial={{ opacity: 0, y: 30, scale: 0.98 }} 
@@ -124,27 +125,27 @@ export default function Register() {
             initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 12 }}
             style={{ 
               width: 72, height: 72, borderRadius: '22px',
-              background: `linear-gradient(135deg, ${theme.main}, ${theme.accent})`,
+              background: 'var(--auth-card)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 32, margin: '0 auto 24px',
-              boxShadow: `0 15px 35px ${theme.glow}`,
+              border: '1px solid var(--auth-card-border)', boxShadow: 'none',
               position: 'relative',
               overflow: 'hidden'
             }}
           >
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(rgba(255,255,255,0.2), transparent)', opacity: 0.5 }} />
-            {role === 'admin' ? '⚡' : role === 'officer' ? '👮' : role === 'education' ? '🎓' : '🛡️'}
+            <div style={{ position: 'absolute', inset: 0, background: 'transparent', opacity: 0.5 }} />
+            <img src="/icons/cyberguard/cyberguard-app-icon.png" alt="CyberGuard" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px', position: 'relative', zIndex: 1 }} />
           </motion.div>
           <h1 style={{ 
             fontSize: '2.4rem', 
             fontWeight: 800,
-            color: '#fff', 
+            color: 'var(--auth-input-text)', 
             marginBottom: '8px',
             letterSpacing: '-1px'
           }}>
             Create <span style={{ color: theme.accent }}>{role.charAt(0).toUpperCase() + role.slice(1)}</span> Account
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '15px' }}>
+          <p style={{ color: 'var(--auth-subtext)', fontSize: '15px' }}>
             {role === 'admin' ? 'Establish Command Center clearance' : 
              role === 'officer' ? 'Access investigative tools and logs' :
              role === 'education' ? 'Join the cyber learning community' :
@@ -153,13 +154,13 @@ export default function Register() {
         </div>
 
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.03)',
+          background: 'var(--auth-card)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          border: `1px solid rgba(255, 255, 255, 0.08)`,
+          border: '1px solid var(--auth-card-border)',
           borderRadius: '32px',
           padding: '48px',
-          boxShadow: '0 30px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+          boxShadow: 'none'
         }}>
           <form onSubmit={handleSubmit}>
             {field('name',    'Full Name',    'text',     'John Doe')}
@@ -177,13 +178,13 @@ export default function Register() {
                 fontSize: '16px', 
                 fontWeight: 800,
                 marginTop: '12px',
-                background: `linear-gradient(135deg, ${theme.main} 0%, ${theme.accent} 100%)`,
-                color: (role === 'admin' || role === 'education') ? '#fff' : '#000',
-                border: 'none',
+                background: 'var(--auth-btn-bg)',
+                color: 'var(--auth-btn-text)',
+                border: '2px solid var(--auth-btn-border)',
                 borderRadius: '18px',
                 cursor: 'pointer',
                 transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                boxShadow: `0 10px 25px ${theme.glow}`,
+                boxShadow: 'none',
                 position: 'relative',
                 overflow: 'hidden'
               }}
@@ -202,9 +203,9 @@ export default function Register() {
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', marginTop: '32px', fontSize: '14px', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+          <p style={{ textAlign: 'center', marginTop: '32px', fontSize: '14px', color: 'var(--auth-subtext)', fontWeight: 500 }}>
             Already registered?{' '}
-            <Link to="/login" style={{ color: theme.accent, textDecoration: 'none', fontWeight: 800 }}>
+            <Link to="/login" style={{ color: 'var(--auth-link)', textDecoration: 'none', fontWeight: 800 }}>
               Sign in
             </Link>
           </p>
@@ -214,9 +215,9 @@ export default function Register() {
       <style>
         {`
           .liquid-input:focus {
-            background: rgba(255,255,255,0.06) !important;
-            border-color: ${theme.accent} !important;
-            box-shadow: 0 0 0 4px ${theme.glow}, inset 0 2px 4px rgba(0,0,0,0.1) !important;
+            background: var(--auth-btn-hover-bg) !important;
+            border-color: var(--auth-input-border-focus) !important;
+            box-shadow: none !important;
           }
           button:active { transform: scale(0.96) !important; }
         `}

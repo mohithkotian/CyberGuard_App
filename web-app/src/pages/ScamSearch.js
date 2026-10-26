@@ -42,9 +42,9 @@ export default function ScamSearch() {
       setSearched(true);
 
       if (finalResults.length > 0) {
-        toast.error(`⚠️ Alert: ${finalResults.length} Scam / Threat match(es) detected!`, { icon: '🚨' });
+        toast.error(`Alert: ${finalResults.length} Scam / Threat match(es) detected!`);
       } else {
-        toast.success('✓ Verified Safe: No records found in criminal index', { icon: '🛡️' });
+        toast.success('Verified Safe: No records found in criminal index');
       }
     } catch (err) {
       console.error(err);
@@ -221,7 +221,7 @@ export default function ScamSearch() {
                     alignItems: 'center',
                     gap: '6px'
                   }}>
-                    🚨 <strong>SCAM DETECTED:</strong> HIGH-RISK THREAT IDENTIFIER
+                    <img src="/icons/cyberguard/critical-threat.png" alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} /> <strong>SCAM DETECTED:</strong> HIGH-RISK THREAT IDENTIFIER
                   </span>
                 ) : (
                   <span style={{ 
@@ -237,7 +237,7 @@ export default function ScamSearch() {
                     alignItems: 'center',
                     gap: '6px'
                   }}>
-                    🛡️ <strong>SAFE:</strong> CLEAN VERIFICATION RECORD
+                    <img src="/icons/cyberguard/verified-safe.png" alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} /> <strong>SAFE:</strong> CLEAN VERIFICATION RECORD
                   </span>
                 )}
               </div>
@@ -252,7 +252,7 @@ export default function ScamSearch() {
                   textAlign: 'center',
                   boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
                 }}>
-                  <div style={{ fontSize: '50px', marginBottom: '16px' }}>🛡️</div>
+                  <img src="/icons/cyberguard/scam-search.png" alt="Scam search clear" style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: '16px' }} />
                   <h4 style={{ color: '#00FFAA', fontSize: '22px', fontWeight: 800, margin: '0 0 10px 0' }}>
                     Safe / Clean Verification
                   </h4>

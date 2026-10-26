@@ -7,13 +7,13 @@ import { complaintsAPI } from '../services/api';
 import { lookupThreatClient } from '../data/threatIntel';
 
 const searchCategories = [
-  { id: 'mobile', label: 'Mobile', icon: '📱', warning: 'Enter 10-digit Mobile number (e.g., 9800000001 or 555-0100)', sampleScam: '9800000001', sampleSafe: '9876543210' },
-  { id: 'email', label: 'E-mail', icon: '📧', warning: 'Enter the complete email address', sampleScam: 'phishing-support@icicibank.com', sampleSafe: 'john.doe@gmail.com' },
-  { id: 'bank', label: 'Bank Account', icon: '🏦', warning: 'Enter digits only without spaces or dashes', sampleScam: '9120000001234', sampleSafe: '5010034928192' },
-  { id: 'social', label: 'Social Media', icon: '💬', warning: 'Enter the profile URL or handle', sampleScam: '@crypto_giveaway_bot', sampleSafe: '@official_support' },
-  { id: 'upi', label: 'UPI ID', icon: '🏧', warning: 'Enter valid VPA (e.g., name@bank)', sampleScam: 'paytm-refund@okaxis', sampleSafe: 'rahul@oksbi' },
-  { id: 'app', label: 'Mobile App', icon: '📲', warning: 'Enter the exact App name or package', sampleScam: 'Fast Instant Loan 24x7', sampleSafe: 'Google Pay' },
-  { id: 'website', label: 'Website URL', icon: '🌐', warning: 'Enter domain or URL (e.g. graphicriver.net or icicibank.com)', sampleScam: 'graphicriver.net', sampleSafe: 'github.com/official' }
+  { id: 'mobile', label: 'Mobile', icon: 'mobile-phone.png', warning: 'Enter 10-digit Mobile number (e.g., 9800000001 or 555-0100)', sampleScam: '9800000001', sampleSafe: '9876543210' },
+  { id: 'email', label: 'E-mail', icon: 'email-address.png', warning: 'Enter the complete email address', sampleScam: 'phishing-support@icicibank.com', sampleSafe: 'john.doe@gmail.com' },
+  { id: 'bank', label: 'Bank Account', icon: 'bank-account.png', warning: 'Enter digits only without spaces or dashes', sampleScam: '9120000001234', sampleSafe: '5010034928192' },
+  { id: 'social', label: 'Social Media', icon: 'social-handle.png', warning: 'Enter the profile URL or handle', sampleScam: '@crypto_giveaway_bot', sampleSafe: '@official_support' },
+  { id: 'upi', label: 'UPI ID', icon: 'payment-card.png', warning: 'Enter valid VPA (e.g., name@bank)', sampleScam: 'paytm-refund@okaxis', sampleSafe: 'rahul@oksbi' },
+  { id: 'app', label: 'Mobile App', icon: 'mobile-app.png', warning: 'Enter the exact App name or package', sampleScam: 'Fast Instant Loan 24x7', sampleSafe: 'Google Pay' },
+  { id: 'website', label: 'Website URL', icon: 'phishing-url.png', warning: 'Enter domain or URL (e.g. graphicriver.net or icicibank.com)', sampleScam: 'graphicriver.net', sampleSafe: 'github.com/official' }
 ];
 
 const generateCaptchaCode = () => {
@@ -108,9 +108,9 @@ export default function SuspectSearch() {
       setSearched(true);
 
       if (finalResults.length > 0) {
-        toast.error(`⚠️ Alert: Match found! Flagged as SCAM / Suspect in ${finalResults.length} record(s).`, { icon: '🚨' });
+        toast.error(`Alert: Match found! Flagged as SCAM / Suspect in ${finalResults.length} record(s).`);
       } else {
-        toast.success('🛡️ Verified Safe: No suspect records found.', { icon: '✓' });
+        toast.success('Verified Safe: No suspect records found.');
       }
     } catch (err) {
       console.error(err);
@@ -184,7 +184,7 @@ export default function SuspectSearch() {
           </p>
 
           {/* Category Selector */}
-          <div style={{ display: 'flex', gap: '14px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '24px', scrollbarWidth: 'none' }}>
+          <div style={{ display: 'flex', gap: '14px', overflowX: 'auto', padding: '12px 0 10px', marginBottom: '24px', scrollbarWidth: 'none' }}>
             {searchCategories.map(cat => {
               const isActive = activeCategory.id === cat.id;
               return (
@@ -200,7 +200,10 @@ export default function SuspectSearch() {
                     position: 'relative',
                     flex: '0 0 auto',
                     width: '120px',
-                    height: '105px',
+                    height: '120px',
+                    boxSizing: 'border-box',
+                    padding: '16px 8px 10px',
+                    overflow: 'visible',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -217,7 +220,7 @@ export default function SuspectSearch() {
                 >
                   {isActive && (
                     <div style={{ 
-                      position: 'absolute', top: '-8px', left: '50%', transform: 'translateX(-50%)',
+                      position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',
                       background: '#00B4FF', color: '#fff', borderRadius: '50%',
                       width: '18px', height: '18px', display: 'flex', 
                       alignItems: 'center', justifyContent: 'center', fontSize: '10px',
@@ -226,7 +229,7 @@ export default function SuspectSearch() {
                       ✓
                     </div>
                   )}
-                  <div style={{ fontSize: '30px', marginBottom: '8px' }}>{cat.icon}</div>
+          <img src={`/icons/cyberguard/${cat.icon}`} alt="" style={{ width: 42, height: 42, objectFit: 'contain', marginBottom: '8px' }} />
                   <div style={{ fontSize: '12px', color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', textAlign: 'center', fontWeight: isActive ? 'bold' : 'normal', padding: '0 5px' }}>
                     {cat.label}
                   </div>
@@ -445,7 +448,7 @@ export default function SuspectSearch() {
                       alignItems: 'center',
                       gap: '6px'
                     }}>
-                      🚨 <strong>SCAM DETECTED:</strong> SUSPECT RECORD CONFIRMED IN DATABASE
+                      <img src="/icons/cyberguard/critical-threat.png" alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} /> <strong>SCAM DETECTED:</strong> SUSPECT RECORD CONFIRMED IN DATABASE
                     </span>
                   ) : (
                     <span style={{ 
@@ -461,7 +464,7 @@ export default function SuspectSearch() {
                       alignItems: 'center',
                       gap: '6px'
                     }}>
-                      🛡️ <strong>SAFE:</strong> NO SUSPECT RECORD FOUND (CLEAN)
+                      <img src="/icons/cyberguard/verified-safe.png" alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} /> <strong>SAFE:</strong> NO SUSPECT RECORD FOUND (CLEAN)
                     </span>
                   )}
                 </div>
@@ -475,7 +478,7 @@ export default function SuspectSearch() {
                     padding: '36px 24px',
                     textAlign: 'center'
                   }}>
-                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>🛡️</div>
+                    <img src="/icons/cyberguard/verified-safe.png" alt="Clean verification" style={{ width: 52, height: 52, objectFit: 'contain', marginBottom: '12px' }} />
                     <h4 style={{ color: '#00FFAA', fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0' }}>Clean Verification Record</h4>
                     <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: '0 auto 12px', maxWidth: 600, lineHeight: 1.6 }}>
                       No reported cybercrime complaints, fraudulent vishing records, or scam flags currently match &quot;<strong style={{ color: '#fff' }}>{inputValue}</strong>&quot;.

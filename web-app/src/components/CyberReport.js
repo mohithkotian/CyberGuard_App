@@ -125,7 +125,7 @@ const CyberReport = () => {
   const [countryCode, setCountryCode] = useState("+91");
   const [mobile, setMobile] = useState("");
 
-  // 🔍 Real-time Advanced AI Neural Analysis on title + description
+  // Real-time advanced AI neural analysis on title + description
   useEffect(() => {
     const fullText = `${title} ${description}`.trim();
     if (fullText.length < 10) {
@@ -179,11 +179,11 @@ const CyberReport = () => {
       setCategory(aiDetection.category);
       setSubCategory(aiDetection.subcategory);
       setUserOverrodeCategory(false);
-      toast.success(`Applied AI Category: ${aiDetection.category} 🤖`);
+      toast.success(`Applied AI Category: ${aiDetection.category}`);
     }
   };
 
-  // 📍 High-Precision Reverse Geocoding with OpenStreetMap Nominatim
+  // High-precision reverse geocoding with OpenStreetMap Nominatim
   const reverseGeocode = async (lat, lng) => {
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
@@ -202,7 +202,7 @@ const CyberReport = () => {
     return null;
   };
 
-  // 📍 Geocode 6-Digit Indian PIN Code with Postal Service & Nominatim
+  // Geocode 6-digit Indian PIN code with postal service and Nominatim
   const geocodePincode = async (pin) => {
     if (!pin || pin.length !== 6) return;
     setGettingLocation(true);
@@ -225,7 +225,7 @@ const CyberReport = () => {
           region: state
         });
         setGettingLocation(false);
-        toast.success(`📍 PIN ${pin} Located: ${area}, ${state}`);
+        toast.success(`PIN ${pin} Located: ${area}, ${state}`);
         return;
       }
 
@@ -250,7 +250,7 @@ const CyberReport = () => {
           region: state
         });
         setGettingLocation(false);
-        toast.success(`📍 PIN ${pin} Located: ${po.Name}, ${district}`);
+        toast.success(`PIN ${pin} Located: ${po.Name}, ${district}`);
         return;
       }
     } catch (err) {
@@ -259,7 +259,7 @@ const CyberReport = () => {
     setGettingLocation(false);
   };
 
-  // 📍 Search by Area / City Name (e.g. Udupi, Indiranagar, Mangalore, Bandra)
+  // Search by area or city name (e.g. Udupi, Indiranagar, Mangalore, Bandra)
   const handleSearchArea = async () => {
     if (!areaSearchQuery || areaSearchQuery.trim().length < 2) {
       toast.error("Please enter a city or area name to search");
@@ -288,7 +288,7 @@ const CyberReport = () => {
         }
         setShowAreaSearch(false);
         setGettingLocation(false);
-        toast.success(`📍 Location Locked: ${city}, ${state}`);
+        toast.success(`Location Locked: ${city}, ${state}`);
         return;
       } else {
         toast.error(`No results found for "${areaSearchQuery}". Please try another landmark or city.`);
@@ -311,7 +311,7 @@ const CyberReport = () => {
           region: data.region
         });
         setGettingLocation(false);
-        toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''} 🌐`);
+      toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''}`);
         return true;
       }
     } catch (e) {
@@ -352,11 +352,11 @@ const CyberReport = () => {
             setPincode(geo.postcode);
           }
           setGettingLocation(false);
-          toast.success(`📍 Exact Location Locked: ${geo.city}, ${geo.state}`);
+          toast.success(`Exact Location Locked: ${geo.city}, ${geo.state}`);
         } else {
           setLocation({ lat, lng });
           setGettingLocation(false);
-          toast.success(`📍 High-Precision GPS Locked: (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+          toast.success(`High-Precision GPS Locked: (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
         }
       },
       (error) => {
@@ -375,10 +375,10 @@ const CyberReport = () => {
     );
   };
 
-  // 📁 File Upload handling
+  // File upload handling
   const onDrop = useCallback((acceptedFiles) => {
     setFiles(prev => [...prev, ...acceptedFiles].slice(0, 5));
-    toast.success(`${acceptedFiles.length} file(s) attached. AI OCR analyzer primed! 🖼️`);
+    toast.success(`${acceptedFiles.length} file(s) attached. AI OCR analyzer primed!`);
   }, []);
 
   const removeFile = (index) => {
@@ -451,7 +451,7 @@ const CyberReport = () => {
 
       await complaintsAPI.create(formData);
 
-      toast.success(`Incident logged under [${finalCategory}] & projected on Live Map 🚀`, { duration: 5000 });
+      toast.success(`Incident logged under [${finalCategory}] & projected on Live Map`, { duration: 5000 });
 
       // Reset form
       setTitle("");
@@ -609,7 +609,7 @@ const CyberReport = () => {
                   boxShadow: `0 4px 14px ${aiDetection.style.color}44`
                 }}
               >
-                Sync with AI Suggestion ⚡
+                Sync with AI Suggestion
               </button>
             )}
           </div>
@@ -809,7 +809,7 @@ const CyberReport = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', paddingLeft: '4px' }}>
                 <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Pin Code</label>
                 <span style={{ fontSize: '11px', color: '#00B4FF', cursor: 'pointer' }} onClick={() => pincode && geocodePincode(pincode)}>
-                  {pincode?.length === 6 ? '⚡ Auto-Geocoded' : 'Enter 6-digit PIN'}
+                  {pincode?.length === 6 ? 'Auto-Geocoded' : 'Enter 6-digit PIN'}
                 </span>
               </div>
               <input
@@ -859,7 +859,7 @@ const CyberReport = () => {
                     textDecoration: 'underline'
                   }}
                 >
-                  {showAreaSearch ? '✕ Close Search' : '🔍 Search City / Area'}
+                  {showAreaSearch ? 'Close Search' : 'Search City / Area'}
                 </button>
               </div>
 
@@ -933,7 +933,7 @@ const CyberReport = () => {
                   {gettingLocation 
                     ? "ACQUIRING SATELLITE GPS..." 
                     : location 
-                      ? (location.city ? `📍 ${location.city.toUpperCase()}, ${location.region || ''} (${location.lat.toFixed(2)}, ${location.lng.toFixed(2)})` : `📍 GPS LOCKED (${location.lat.toFixed(2)}, ${location.lng.toFixed(2)})`) 
+                      ? (location.city ? `${location.city.toUpperCase()}, ${location.region || ''} (${location.lat.toFixed(2)}, ${location.lng.toFixed(2)})` : `GPS LOCKED (${location.lat.toFixed(2)}, ${location.lng.toFixed(2)})`) 
                       : "CAPTURE LIVE GPS / PIN MAP"}
                 </div>
               )}
@@ -1031,7 +1031,7 @@ const CyberReport = () => {
               }}
             >
               <input {...getInputProps()} />
-              <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.7 }}>🖼️</div>
+              <img src="/icons/cyberguard/evidence-folder.png" alt="" aria-hidden="true" style={{ width: 42, height: 42, objectFit: 'contain', marginBottom: '16px', opacity: 0.85 }} />
               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: '20px' }}>
                 Drag & Drop screenshots of phishing emails, transaction receipts, WhatsApp threats, or ransomware screens
               </p>
@@ -1079,7 +1079,7 @@ const CyberReport = () => {
                     color: '#fff',
                     backdropFilter: 'blur(10px)'
                   }}>
-                    <span>📎</span>
+                    <img src="/icons/cyberguard/evidence-attachment.png" alt="" aria-hidden="true" style={{ width: 18, height: 18, objectFit: 'contain' }} />
                     <span style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.9 }}>
                       {file.name}
                     </span>
@@ -1087,7 +1087,7 @@ const CyberReport = () => {
                       onClick={() => removeFile(idx)}
                       style={{ background: 'rgba(255,59,48,0.2)', border: 'none', color: '#FF3B30', cursor: 'pointer', padding: '2px', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}
                     >
-                      ✕
+                      Remove
                     </button>
                   </div>
                 ))}
