@@ -1,0 +1,10 @@
+<svg width="1242" height="2688" viewBox="0 0 1242 2688" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1242" height="2688" fill="#081327"/>
+  <g transform="translate(301 920) scale(10)">
+    <path fill="#FFFFFF" fill-rule="evenodd" d="M32 3.5 58 13v18.1c0 14.6-9.4 24.8-26 30.1C15.4 55.9 6 45.7 6 31.1V13L32 3.5Zm0 10.2-16.2 5.9v11.5c0 9.1 5.4 15.8 16.2 20 10.8-4.2 16.2-10.9 16.2-20v-1.8H34.8a8.2 8.2 0 1 0 0 5.4h6.5c-1.6 3.6-5.2 6.1-9.3 6.1a10.2 10.2 0 1 1 0-20.4h16.2v-.8L32 13.7Z" clip-rule="evenodd"/>
+    <path fill="#2D8CFF" d="M47 20.4h11v8.9H47l-4.45-4.45L47 20.4Z"/>
+    <rect width="5.2" height="5.2" x="29.4" y="27.4" fill="#2D8CFF" rx="1.2"/>
+  </g>
+  <text x="621" y="1690" text-anchor="middle" fill="#FFFFFF" font-family="Arial,sans-serif" font-size="92" font-weight="700" letter-spacing="7">CYBERGUARD</text>
+  <text x="621" y="1770" text-anchor="middle" fill="#8192AC" font-family="Arial,sans-serif" font-size="28" letter-spacing="5">SECURE · VERIFY · DEFEND</text>
+</svg>
