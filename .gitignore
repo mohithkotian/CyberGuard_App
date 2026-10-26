@@ -13,6 +13,7 @@ mobile-app/.env
 scratch/
 **/scratch/
 scratch/*
+.work/
 
 # macOS
 .DS_Store
