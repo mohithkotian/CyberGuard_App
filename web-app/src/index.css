@@ -12,6 +12,26 @@
   --border: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(0, 0, 0, 0.8);
   --shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+
+  /* Login and Register monochrome theme */
+  --auth-bg: #000000;
+  --auth-card: #111111;
+  --auth-card-border: rgba(255, 255, 255, 0.08);
+  --auth-input-bg: #161616;
+  --auth-input-border: rgba(255, 255, 255, 0.10);
+  --auth-input-border-focus: #ffffff;
+  --auth-input-text: #ffffff;
+  --auth-placeholder: #777777;
+  --auth-label: #a1a1a1;
+  --auth-heading: #ffffff;
+  --auth-subtext: #b0b0b0;
+  --auth-btn-bg: #272727;
+  --auth-btn-border: #ffffff;
+  --auth-btn-text: #ffffff;
+  --auth-btn-hover-bg: #333333;
+  --auth-link: #ffffff;
+  --auth-muted-link: #777777;
+  --auth-dot: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme='light'] {
@@ -38,6 +58,22 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
+}
+
+.auth-page input::placeholder {
+  color: var(--auth-placeholder);
+  opacity: 1;
+}
+
+.auth-page input:focus {
+  border-color: var(--auth-input-border-focus) !important;
+  box-shadow: none !important;
+}
+
+.auth-page button:hover:not(:disabled) {
+  background: var(--auth-btn-hover-bg) !important;
+  border-color: var(--auth-btn-border) !important;
+  box-shadow: none !important;
 }
 
 h1, h2, h3, h4, h5, h6 {

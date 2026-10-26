@@ -57,7 +57,9 @@ const TwoFactorModal = ({ isOpen, onClose, onEnabled }) => {
         <div style={s.content}>
           {step === 1 && (
             <div style={s.stepContent}>
-              <div style={s.icon}>🛡️</div>
+              <div style={s.icon}>
+                <img src="/icons/cyberguard/cyberguard-security-badge.png" alt="CyberGuard security badge" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
               <p style={s.text}>Two-factor authentication adds an extra layer of security. Every time you log in, you'll need to provide a code from your authenticator app.</p>
               <button style={s.btnPrimary} onClick={handleStartSetup} disabled={loading}>
                 {loading ? 'Initializing...' : 'Get Started'}

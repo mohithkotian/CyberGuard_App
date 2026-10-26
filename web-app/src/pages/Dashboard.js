@@ -14,6 +14,30 @@ const STATUS_COLORS = {
   resolved:'#00C896', closed:'#5A6480', rejected:'#FF5252'
 };
 
+function DashboardIcon({ name, size = 28 }) {
+  const paths = {
+    gamepad: <><rect x="3" y="7" width="18" height="11" rx="5" /><path d="M8 11v4M6 13h4M16 12h.01M18 14h.01" /></>,
+    arrow: <><path d="M5 12h13M13 7l5 5-5 5" /></>,
+    inbox: <><path d="M4 5h16v14H4z" /><path d="M4 13h4l2 3h4l2-3h4" /></>
+  };
+
+  return (
+    <svg
+      aria-hidden="true"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {paths[name]}
+    </svg>
+  );
+}
+
 export default function Dashboard() {
   const navigate  = useNavigate();
   const { user }  = useAuthStore();
@@ -143,7 +167,7 @@ export default function Dashboard() {
               fontSize: 28,
               boxShadow: '0 0 20px rgba(0, 180, 255, 0.4)'
             }}>
-              🎮
+              <DashboardIcon name="gamepad" size={28} />
             </div>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -184,7 +208,7 @@ export default function Dashboard() {
             }}
           >
             <span>{t('LEARN.START_CHALLENGE', 'START 1-MIN DEFENDER QUIZ')}</span>
-            <span>➔</span>
+            <DashboardIcon name="arrow" size={18} />
           </button>
         </motion.div>
 
@@ -306,7 +330,9 @@ export default function Dashboard() {
             textAlign: 'center', 
             padding: 80 
           }}>
-            <div style={{ fontSize: '64px', marginBottom: 24 }}>📭</div>
+            <div style={{ fontSize: '64px', marginBottom: 24, color: 'rgba(255,255,255,0.4)' }}>
+              <DashboardIcon name="inbox" size={64} />
+            </div>
             <p style={{ color: 'rgba(255,255,255,0.4)', marginBottom: 16, fontSize: '18px', fontWeight: 500 }}>
               {user?.role === 'user' ? "You haven't filed any complaints yet." : "No complaints found."}
             </p>

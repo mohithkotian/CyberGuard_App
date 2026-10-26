@@ -17,10 +17,10 @@ export default function Login() {
       const res = await login(form.email, form.password);
       if (res.emailOtpRequired) {
         setOtpData({ type: 'email', userId: res.userId });
-        toast.success('6-digit security code sent to your email!', { icon: '📧' });
+        toast.success('6-digit security code sent to your email!');
       } else if (res.mfaRequired) {
         setOtpData({ type: 'totp', userId: res.userId });
-        toast('Authenticator App 2FA Required', { icon: '🛡️' });
+        toast('Authenticator App 2FA Required');
       } else {
         toast.success(`Welcome back, ${res.name}!`);
         navigate(res.role === 'admin' || res.role === 'officer' ? '/admin' : '/dashboard');
@@ -48,9 +48,9 @@ export default function Login() {
   };
 
   return (
-    <div style={{ 
+    <div className="auth-page" style={{ 
       minHeight: '100vh', 
-      background: '#02060A', 
+      background: 'var(--auth-bg)', 
       display: 'flex',
       alignItems: 'center', 
       justifyContent: 'center', 
@@ -60,9 +60,9 @@ export default function Login() {
       fontFamily: 'Inter, sans-serif'
     }}>
       {/* Liquid Atmospheric Accents */}
-      <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 122, 255, 0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(160, 32, 240, 0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '60%', height: '60%', background: 'none', pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '60%', height: '60%', background: 'none', pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(var(--auth-dot) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
 
       <motion.div 
         initial={{ opacity: 0, y: 40 }} 
@@ -73,26 +73,28 @@ export default function Login() {
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <div style={{ 
             width: 72, height: 72, borderRadius: '22px',
-            background: 'linear-gradient(135deg, #007AFF, #00C896)',
+            background: 'var(--auth-card)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 32, margin: '0 auto 20px', boxShadow: '0 20px 40px rgba(0, 122, 255, 0.4)'
-          }}>🛡️</div>
-          <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#fff', letterSpacing: '-1px', marginBottom: 8 }}>
-            Cyber<span style={{ color: '#007AFF' }}>Guard</span>
+            fontSize: 32, margin: '0 auto 20px', border: '1px solid var(--auth-card-border)', boxShadow: 'none'
+          }}>
+            <img src="/icons/cyberguard/cyberguard-app-icon.png" alt="CyberGuard" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '20px' }} />
+          </div>
+          <h1 style={{ fontSize: '24px', fontWeight: 900, color: 'var(--auth-heading)', letterSpacing: '-1px', marginBottom: 8 }}>
+            Cyber<span style={{ color: 'var(--auth-heading)' }}>Guard</span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '15px', fontWeight: 500 }}>
+          <p style={{ color: 'var(--auth-subtext)', fontSize: '15px', fontWeight: 500 }}>
             {otpData ? (otpData.type === 'email' ? 'Security OTP Verification' : '2FA Protocol Required') : 'Secure Access Gateway'}
           </p>
         </div>
 
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.03)',
+          background: 'var(--auth-card)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          border: '1px solid var(--auth-card-border)',
           borderRadius: '32px',
           padding: '40px',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.6)'
+          boxShadow: 'none'
         }}>
           <AnimatePresence mode="wait">
             {!otpData ? (
@@ -104,7 +106,7 @@ export default function Login() {
                 onSubmit={handleSubmit}
               >
                 <div style={{ marginBottom: 24 }}>
-                  <label style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12, display: 'block' }}>Email Address</label>
+                  <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--auth-label)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12, display: 'block' }}>Email Address</label>
                   <input 
                     className="liquid-input" 
                     type="email" 
@@ -113,13 +115,13 @@ export default function Login() {
                     onChange={e => setForm({...form, email: e.target.value})}
                     required 
                     style={{ 
-                      width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '16px', padding: '16px 20px', color: '#fff', fontSize: '16px', outline: 'none'
+                      width: '100%', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)',
+                      borderRadius: '16px', padding: '16px 20px', color: 'var(--auth-input-text)', fontSize: '16px', outline: 'none'
                     }} 
                   />
                 </div>
                 <div style={{ marginBottom: 40 }}>
-                  <label style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12, display: 'block' }}>Secure Password</label>
+                  <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--auth-label)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12, display: 'block' }}>Secure Password</label>
                   <input 
                     className="liquid-input" 
                     type="password" 
@@ -128,8 +130,8 @@ export default function Login() {
                     onChange={e => setForm({...form, password: e.target.value})}
                     required 
                     style={{ 
-                      width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '16px', padding: '16px 20px', color: '#fff', fontSize: '16px', outline: 'none'
+                      width: '100%', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)',
+                      borderRadius: '16px', padding: '16px 20px', color: 'var(--auth-input-text)', fontSize: '16px', outline: 'none'
                     }} 
                   />
                 </div>
@@ -137,9 +139,9 @@ export default function Login() {
                   type="submit" 
                   disabled={loading}
                   style={{ 
-                    width: '100%', padding: '18px', background: '#007AFF', borderRadius: '16px',
-                    border: 'none', color: '#fff', fontSize: '16px', fontWeight: 800, cursor: 'pointer',
-                    boxShadow: '0 10px 20px rgba(0, 122, 255, 0.3)'
+                    width: '100%', padding: '18px', background: 'var(--auth-btn-bg)', borderRadius: '16px',
+                    border: '2px solid var(--auth-btn-border)', color: 'var(--auth-btn-text)', fontSize: '16px', fontWeight: 800, cursor: 'pointer',
+                    boxShadow: 'none'
                   }}
                 >
                   {loading ? 'AUTHENTICATING...' : 'SIGN IN →'}
@@ -154,15 +156,15 @@ export default function Login() {
                 onSubmit={handleOtpSubmit}
               >
                 <div style={{ textAlign: 'center', marginBottom: 28 }}>
-                  <div style={{ fontSize: '28px', marginBottom: '8px' }}>
-                    {otpData.type === 'email' ? '📨' : '🛡️'}
+                  <div style={{ marginBottom: '8px' }}>
+                    <img src="/icons/cyberguard/cyberguard-app-icon.png" alt="" style={{ width: 38, height: 38, objectFit: 'cover', borderRadius: '10px' }} />
                   </div>
-                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.6, fontWeight: 600 }}>
+                  <p style={{ fontSize: '14px', color: 'var(--auth-subtext)', lineHeight: 1.6, fontWeight: 600 }}>
                     {otpData.type === 'email' 
                       ? 'A 6-digit security code was sent to your email.' 
                       : 'Enter the 6-digit verification code from your authenticator app.'}
                   </p>
-                  <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                  <p style={{ fontSize: '12px', color: 'var(--auth-subtext)', marginTop: 4 }}>
                     Enter the code below to complete sign-in
                   </p>
                 </div>
@@ -176,8 +178,8 @@ export default function Login() {
                     onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
                     style={{ 
                       textAlign: 'center', fontSize: '32px', letterSpacing: '12px', fontWeight: 900,
-                      width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '16px', padding: '16px', color: '#fff', outline: 'none'
+                      width: '100%', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)',
+                      borderRadius: '16px', padding: '16px', color: 'var(--auth-input-text)', outline: 'none'
                     }} 
                     autoFocus
                   />
@@ -186,9 +188,9 @@ export default function Login() {
                   type="submit" 
                   disabled={loading}
                   style={{ 
-                    width: '100%', padding: '18px', background: '#007AFF', borderRadius: '16px',
-                    border: 'none', color: '#fff', fontSize: '16px', fontWeight: 800, cursor: 'pointer',
-                    boxShadow: '0 10px 20px rgba(0, 122, 255, 0.3)'
+                    width: '100%', padding: '18px', background: 'var(--auth-btn-bg)', borderRadius: '16px',
+                    border: '2px solid var(--auth-btn-border)', color: 'var(--auth-btn-text)', fontSize: '16px', fontWeight: 800, cursor: 'pointer',
+                    boxShadow: 'none'
                   }}
                 >
                   {loading ? 'VERIFYING...' : 'CONFIRM ACCESS'}
@@ -196,7 +198,7 @@ export default function Login() {
                 <button 
                   type="button"
                   onClick={() => { setOtpData(null); setOtpCode(''); }}
-                  style={{ width: '100%', background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', 
+                  style={{ width: '100%', background: 'var(--auth-btn-bg)', border: '2px solid var(--auth-btn-border)', color: 'var(--auth-btn-text)', 
                     fontSize: '13px', marginTop: 24, cursor: 'pointer', fontWeight: 700 }}
                 >
                   ← BACK TO LOGIN
@@ -208,16 +210,16 @@ export default function Login() {
           {!otpData && (
             <div style={{ marginTop: 32 }}>
               <div style={{ 
-                padding: '16px', borderRadius: '16px', background: 'rgba(0,122,255,0.05)', 
-                border: '1px solid rgba(0,122,255,0.15)', fontSize: '13px', color: 'rgba(255,255,255,0.5)',
+                padding: '16px', borderRadius: '16px', background: 'var(--auth-input-bg)', 
+                border: '1px solid var(--auth-card-border)', fontSize: '13px', color: 'var(--auth-subtext)',
                 lineHeight: 1.5, marginBottom: 32
               }}>
-                <strong style={{ color: '#007AFF' }}>DEMO ADMIN:</strong> admin@cybercrime.gov / Admin@123456
+                <strong style={{ color: 'var(--auth-heading)' }}>DEMO ADMIN:</strong> admin@cybercrime.gov / Admin@123456
               </div>
 
-              <p style={{ textAlign: 'center', fontSize: '14px', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
+              <p style={{ textAlign: 'center', fontSize: '14px', color: 'var(--auth-muted-link)', fontWeight: 600 }}>
                 No credentials?{' '}
-                <Link to="/register" style={{ color: '#007AFF', textDecoration: 'none', fontWeight: 800 }}>
+                <Link to="/register" style={{ color: 'var(--auth-heading)', textDecoration: 'none', fontWeight: 800 }}>
                   Request Access
                 </Link>
               </p>

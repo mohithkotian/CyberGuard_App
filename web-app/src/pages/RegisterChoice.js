@@ -71,7 +71,9 @@ export default function RegisterChoice() {
             }}
             onClick={() => navigate('/register?role=user')}
           >
-            <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(0, 255, 170, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, fontSize: 24 }}>🛡️</div>
+            <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(0, 255, 170, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+              <img src="/icons/cyberguard/citizen-shield.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+            </div>
             <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#00ffaa', marginBottom: 12 }}>Citizen</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: 32, lineHeight: 1.6, flexGrow: 1 }}>
               Standard clearance for reporting crimes, tracking cases, and direct communication.
@@ -112,7 +114,9 @@ export default function RegisterChoice() {
             }}
             onClick={() => navigate('/register?role=officer')}
           >
-            <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(255, 214, 0, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, fontSize: 24 }}>👮</div>
+            <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(255, 214, 0, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+              <img src="/icons/cyberguard/police-badge.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+            </div>
             <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#FFD600', marginBottom: 12 }}>Officer</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: 32, lineHeight: 1.6, flexGrow: 1 }}>
               Enforcement clearance for case management, evidence control, and investigations.
@@ -153,7 +157,9 @@ export default function RegisterChoice() {
             }}
             onClick={() => navigate('/register?role=admin')}
           >
-            <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(0, 180, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, fontSize: 24 }}>⚡</div>
+            <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(0, 180, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+              <img src="/icons/cyberguard/admin-command.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+            </div>
             <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#00B4FF', marginBottom: 12 }}>Admin</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: 32, lineHeight: 1.6, flexGrow: 1 }}>
               Full system clearance for global oversight, trend analysis, and root-level operations.
@@ -194,7 +200,9 @@ export default function RegisterChoice() {
             }}
             onClick={() => navigate('/register?role=education')}
           >
-            <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(168, 85, 247, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, fontSize: 24 }}>🎓</div>
+            <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(168, 85, 247, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+              <img src="/icons/cyberguard/cyber-educator.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
+            </div>
             <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#A855F7', marginBottom: 12 }}>Education</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: 32, lineHeight: 1.6, flexGrow: 1 }}>
               Training clearance for safety awareness, certifications, and academic resources.

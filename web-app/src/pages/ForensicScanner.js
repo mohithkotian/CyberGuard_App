@@ -6,6 +6,20 @@ import { complaintsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import useTranslationStore from '../hooks/useTranslationStore';
 
+function ForensicIcon({ name, size = 16 }) {
+  const paths = {
+    scan: <><circle cx="12" cy="12" r="7" /><path d="M12 9v6M9 12h6" /></>,
+    brain: <><path d="M9.5 4.5a3 3 0 0 0-5 2.2A3.5 3.5 0 0 0 5 13a3 3 0 0 0 2.5 5.5A3 3 0 0 0 13 17V7a3 3 0 0 0-3.5-2.5Z" /><path d="M14.5 4.5a3 3 0 0 1 5 2.2A3.5 3.5 0 0 1 19 13a3 3 0 0 1-2.5 5.5A3 3 0 0 1 11 17V7a3 3 0 0 1 3.5-2.5Z" /></>,
+    arrow: <><path d="M5 12h13M13 7l5 5-5 5" /></>
+  };
+
+  return (
+    <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      {paths[name]}
+    </svg>
+  );
+}
+
 export default function ForensicScanner() {
   const navigate = useNavigate();
   const { t } = useTranslationStore();
@@ -18,31 +32,31 @@ export default function ForensicScanner() {
   const QUICK_SCENARIOS = [
     {
       id: 'sms_elec',
-      label: '⚡ Electricity Bill Smishing',
+      label: 'Electricity Bill Smishing',
       category: 'SMS & UPI Fraud',
       text: 'Dear Customer, Your electricity power supply will be disconnected tonight at 9:30 PM because your previous month bill was not updated. Please immediately contact our Electricity Officer at 9876543210 or update via http://power-bill-update.online/pay.apk'
     },
     {
       id: 'bank_kyc',
-      label: '🏦 Urgent Bank KYC Phishing',
+      label: 'Urgent Bank KYC Phishing',
       category: 'Phishing & Impersonation',
       text: 'URGENT: Your SBI NetBanking and Debit Card will be permanently blocked within 24 hours due to pending RBI KYC mandate. Click here http://sbi-secure-kyc-verify.xyz/retail/login.php to verify your 16-digit card number, CVV, and PIN.'
     },
     {
       id: 'job_task',
-      label: '💼 Telegram Like & Earn Scam',
+      label: 'Telegram Like & Earn Scam',
       category: 'Financial / Task Fraud',
       text: 'Congratulations! You are selected for Part-Time YouTube Video Liking Job. Earn Rs. 3000 to Rs. 8000 daily from home. Join Telegram channel @vip_crypto_tasks and send deposit to UPI: taskrewards@okaxis to activate your Level 1 VIP account.'
     },
     {
       id: 'digital_arrest',
-      label: '🚨 Fake Police Digital Arrest',
+      label: 'Fake Police Digital Arrest',
       category: 'Extortion / Impersonation',
       text: 'NOTICE FROM NARCOTICS & CBI CYBER CELL: A parcel containing 5 passports and illegal contraband linked to your Aadhaar card number 4892-1928-3910 was intercepted at Mumbai Airport. You are placed under Digital Arrest. Immediately join Skype video interrogation or pay clearance fee to RBI Treasury A/C 918273645102, IFSC: SBIN0001234.'
     },
     {
       id: 'courier_fee',
-      label: '📦 Courier Custom Clearance',
+      label: 'Courier Custom Clearance',
       category: 'Delivery Fraud',
       text: 'FedEx Alert: Your international package #FDX-99214 cannot be delivered due to unpaid customs duty of Rs. 499. Pay immediately at https://fedex-customs-clearance.top/pay before the parcel is returned to sender.'
     }
@@ -127,27 +141,27 @@ export default function ForensicScanner() {
       let riskScore = 30; // base
 
       if (lower.includes('urgent') || lower.includes('immediately') || lower.includes('disconnected tonight') || lower.includes('within 24 hours')) {
-        tactics.push('⚡ Artificial Urgency / Pressure Tactic');
+      tactics.push('Artificial Urgency / Pressure Tactic');
         riskScore += 25;
       }
       if (lower.includes('kyc') || lower.includes('netbanking') || lower.includes('card number') || lower.includes('pin') || lower.includes('cvv') || lower.includes('otp')) {
-        tactics.push('💳 Credential & Financial Harvesting Indicator');
+        tactics.push('Credential & Financial Harvesting Indicator');
         riskScore += 30;
       }
       if (lower.includes('digital arrest') || lower.includes('cbi') || lower.includes('police') || lower.includes('customs duty') || lower.includes('narcotics')) {
-        tactics.push('🚨 Authority Impersonation & Extortion Pattern');
+      tactics.push('Authority Impersonation & Extortion Pattern');
         riskScore += 35;
       }
       if (iocs.urls.length > 0) {
-        tactics.push(`🌐 Unverified Web Endpoint Detected (${iocs.urls.length} found)`);
+      tactics.push(`Unverified Web Endpoint Detected (${iocs.urls.length} found)`);
         const isSuspiciousTLD = iocs.urls.some(u => u.includes('.xyz') || u.includes('.top') || u.includes('.online') || u.includes('.apk') || u.includes('.buzz') || u.includes('.ru'));
         if (isSuspiciousTLD) {
-          tactics.push('☣️ High-Risk / Rogue TLD (.xyz, .top, .online, or .apk payload)');
+          tactics.push('High-Risk / Rogue TLD (.xyz, .top, .online, or .apk payload)');
           riskScore += 25;
         }
       }
       if (iocs.upis.length > 0 || iocs.bankAccounts.length > 0) {
-        tactics.push('💸 Direct P2P Money Destination / Drop Account');
+        tactics.push('Direct P2P Money Destination / Drop Account');
         riskScore += 20;
       }
 
@@ -209,7 +223,7 @@ export default function ForensicScanner() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#030812', color: '#fff', paddingBottom: '80px' }}>
+      <div style={{ minHeight: '100vh', background: '#050505', color: '#fff', paddingBottom: '80px', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
       <Navbar />
 
       {/* Hero Header */}
@@ -219,33 +233,31 @@ export default function ForensicScanner() {
         padding: '40px 24px 20px',
         position: 'relative'
       }}>
-        {/* Glowing cyber banner */}
+        {/* Scanner banner */}
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: 8,
-          background: 'rgba(0, 180, 255, 0.12)',
-          border: '1px solid rgba(0, 180, 255, 0.3)',
-          borderRadius: '30px',
+          background: '#0B0B0B',
+          border: '1px solid #292929',
+          borderRadius: '6px',
           padding: '6px 16px',
           marginBottom: 16
         }}>
-          <span style={{ fontSize: 14 }}>🧠</span>
-          <span style={{ fontSize: 11, fontFamily: 'Orbitron, monospace', letterSpacing: '2px', color: '#00FFD1', fontWeight: 700 }}>
+          <span style={{ color: '#22D3EE', display: 'inline-flex' }}><ForensicIcon name="brain" size={16} /></span>
+          <span style={{ fontSize: 11, fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', color: '#A7A7A7', fontWeight: 650 }}>
             NEURAL THREAT & FORENSIC SCANNER
           </span>
-          <span style={{ background: '#00FFD1', width: 6, height: 6, borderRadius: '50%', boxShadow: '0 0 8px #00FFD1' }} />
+          <span style={{ background: '#22D3EE', width: 5, height: 5, borderRadius: '50%' }} />
         </div>
 
         <h1 style={{
-          fontFamily: 'Orbitron, monospace',
-          fontSize: '2.5rem',
-          fontWeight: 900,
-          letterSpacing: '-0.5px',
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          fontSize: 'clamp(2rem, 4vw, 2.5rem)',
+          fontWeight: 700,
+          letterSpacing: '-0.03em',
           margin: '0 0 12px 0',
-          background: 'linear-gradient(135deg, #FFFFFF 0%, #00FFD1 50%, #007AFF 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
+          color: '#fff'
         }}>
           DEEP FORENSIC INTELLIGENCE SCAN
         </h1>
@@ -255,8 +267,8 @@ export default function ForensicScanner() {
 
         {/* Quick Scenario Preset Chips */}
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <span style={{ fontSize: 11, color: '#00B4FF', fontFamily: 'Orbitron, monospace', letterSpacing: '1px', fontWeight: 700 }}>
-            ⚡ TEST COMMON THREAT VECTORS (1-CLICK RUN):
+          <span style={{ fontSize: 11, color: '#22D3EE', fontFamily: 'Inter, sans-serif', letterSpacing: '0.08em', fontWeight: 650 }}>
+                  TEST COMMON THREAT VECTORS (1-CLICK RUN):
           </span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
             {QUICK_SCENARIOS.map(sc => (
@@ -299,20 +311,19 @@ export default function ForensicScanner() {
           
           {/* Left Column: Input Console */}
           <div style={{
-            background: 'rgba(10, 20, 40, 0.6)',
-            border: '1px solid rgba(0, 180, 255, 0.25)',
-            borderRadius: '18px',
+            background: '#0B0B0B',
+            border: '1px solid #292929',
+            borderRadius: '8px',
             padding: '24px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-            backdropFilter: 'blur(20px)',
+            boxShadow: 'none',
             display: 'flex',
             flexDirection: 'column'
           }}>
             {/* Input Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 16 }}>🔍</span>
-                <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 13, fontWeight: 700, color: '#fff' }}>
+                <span style={{ color: '#22D3EE', display: 'inline-flex' }}><ForensicIcon name="scan" size={16} /></span>
+                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 650, letterSpacing: '0.02em', color: '#fff' }}>
                   FORENSIC INPUT CONSOLE
                 </span>
               </div>
@@ -340,20 +351,20 @@ export default function ForensicScanner() {
               style={{
                 width: '100%',
                 boxSizing: 'border-box',
-                background: 'rgba(3, 8, 18, 0.8)',
-                border: '1px solid rgba(0, 180, 255, 0.2)',
-                borderRadius: '12px',
+                background: '#111111',
+                border: '1px solid #292929',
+                borderRadius: '6px',
                 padding: '16px',
                 color: '#fff',
                 fontSize: 13,
-                fontFamily: 'Inter, monospace',
+                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 lineHeight: 1.6,
                 resize: 'vertical',
                 outline: 'none',
                 transition: 'border-color 0.2s'
               }}
-              onFocus={e => e.target.style.borderColor = '#00FFD1'}
-              onBlur={e => e.target.style.borderColor = 'rgba(0, 180, 255, 0.2)'}
+              onFocus={e => e.target.style.borderColor = '#22D3EE'}
+              onBlur={e => e.target.style.borderColor = '#292929'}
             />
 
             {/* Action Bar */}
@@ -364,16 +375,16 @@ export default function ForensicScanner() {
                 style={{
                   flex: 1,
                   padding: '14px',
-                  borderRadius: '12px',
-                  background: scanning ? 'rgba(0, 180, 255, 0.3)' : 'linear-gradient(135deg, #00FFD1 0%, #007AFF 100%)',
-                  color: '#02060A',
-                  border: 'none',
-                  fontFamily: 'Orbitron, monospace',
-                  fontWeight: 900,
+                  borderRadius: '6px',
+                  background: scanning ? '#333333' : '#ffffff',
+                  color: '#050505',
+                  border: '1px solid #ffffff',
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 650,
                   fontSize: 13,
                   letterSpacing: '1px',
                   cursor: scanning || !inputText.trim() ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 0 25px rgba(0, 255, 209, 0.3)',
+                  boxShadow: 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -381,7 +392,7 @@ export default function ForensicScanner() {
                   transition: 'all 0.2s'
                 }}
               >
-                {scanning ? '⚡ NEURAL SCAN IN PROGRESS...' : 'RUN NEURAL INFERENCE ⚡'}
+                    {scanning ? 'NEURAL SCAN IN PROGRESS...' : 'RUN NEURAL INFERENCE'}
               </button>
             </div>
 
@@ -414,20 +425,19 @@ export default function ForensicScanner() {
 
           {/* Right Column: Scan Dossier / Results */}
           <div style={{
-            background: 'rgba(10, 20, 40, 0.6)',
+            background: '#0B0B0B',
             border: scanResult ? (scanResult.riskScore >= 75 ? '1px solid rgba(255, 59, 48, 0.5)' : '1px solid rgba(0, 255, 209, 0.4)') : '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '18px',
+            borderRadius: '8px',
             padding: '24px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-            backdropFilter: 'blur(20px)',
+            boxShadow: 'none',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center'
           }}>
             {!scanResult && !scanning ? (
               <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-                <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.6 }}>🛡️</div>
-                <h3 style={{ fontFamily: 'Orbitron, monospace', fontSize: 16, color: '#E0E8FF', margin: '0 0 8px 0' }}>
+                <img src="/icons/cyberguard/forensic-scan.png" alt="Forensic scanner" style={{ width: 64, height: 64, objectFit: 'contain', marginBottom: 16, opacity: 0.85 }} />
+                <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: 16, color: '#E0E8FF', margin: '0 0 8px 0' }}>
                   NEURAL SCANNER READY
                 </h3>
                 <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, maxWidth: 360, margin: '0 auto' }}>
@@ -436,19 +446,17 @@ export default function ForensicScanner() {
               </div>
             ) : scanning ? (
               <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
+                <div
                   style={{
                     width: 60,
                     height: 60,
-                    border: '3px solid rgba(0, 255, 209, 0.2)',
-                    borderTopColor: '#00FFD1',
+                    border: '2px solid #292929',
+                    borderTopColor: '#22D3EE',
                     borderRadius: '50%',
                     margin: '0 auto 20px'
                   }}
                 />
-                <h3 style={{ fontFamily: 'Orbitron, monospace', fontSize: 15, color: '#00FFD1', letterSpacing: '1px' }}>
+                <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, color: '#22D3EE', letterSpacing: '0.04em' }}>
                   DEEP FORENSIC SCAN RUNNING
                 </h3>
                 <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 6 }}>
@@ -462,7 +470,7 @@ export default function ForensicScanner() {
                   <div>
                     <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '1.5px' }}>THREAT CLASSIFICATION</div>
                     <h2 style={{
-                      fontFamily: 'Orbitron, monospace',
+                      fontFamily: 'Inter, sans-serif',
                       fontSize: '1.4rem',
                       fontWeight: 900,
                       margin: '4px 0 0 0',
@@ -479,7 +487,7 @@ export default function ForensicScanner() {
                       borderRadius: 8,
                       padding: '4px 10px',
                       fontSize: 11,
-                      fontFamily: 'Orbitron, monospace',
+                      fontFamily: 'Inter, sans-serif',
                       fontWeight: 800
                     }}>
                       {scanResult.severity} RISK
@@ -492,7 +500,7 @@ export default function ForensicScanner() {
 
                 {/* Threat Tactics Detected */}
                 <div style={{ marginTop: 16 }}>
-                  <div style={{ fontSize: 11, color: '#00B4FF', fontFamily: 'Orbitron, monospace', fontWeight: 700, marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: '#22D3EE', fontFamily: 'Inter, sans-serif', fontWeight: 650, letterSpacing: '0.04em', marginBottom: 8 }}>
                     DETECTED THREAT PATTERNS:
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -513,7 +521,7 @@ export default function ForensicScanner() {
 
                 {/* Extracted IOCs */}
                 <div style={{ marginTop: 16 }}>
-                  <div style={{ fontSize: 11, color: '#00FFD1', fontFamily: 'Orbitron, monospace', fontWeight: 700, marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: '#22D3EE', fontFamily: 'Inter, sans-serif', fontWeight: 650, letterSpacing: '0.04em', marginBottom: 8 }}>
                     EXTRACTED INDICATORS OF COMPROMISE (IOCs):
                   </div>
                   <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 8, padding: 12, fontSize: 12 }}>
@@ -549,21 +557,21 @@ export default function ForensicScanner() {
                       width: '100%',
                       padding: '12px',
                       borderRadius: '10px',
-                      background: 'linear-gradient(135deg, #FF3B30 0%, #FF9500 100%)',
-                      color: '#fff',
-                      border: 'none',
-                      fontFamily: 'Orbitron, monospace',
-                      fontWeight: 800,
+                      background: '#fff',
+                      color: '#050505',
+                      border: '1px solid #fff',
+                      fontFamily: 'Inter, sans-serif',
+                      fontWeight: 650,
                       fontSize: 12,
                       cursor: 'pointer',
-                      boxShadow: '0 4px 15px rgba(255, 59, 48, 0.4)',
+                      boxShadow: 'none',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: 8
                     }}
                   >
-                    🚨 FILE INCIDENT COMPLAINT WITH THIS EVIDENCE →
+              FILE INCIDENT COMPLAINT WITH THIS EVIDENCE <ForensicIcon name="arrow" size={16} />
                   </button>
                 </div>
               </motion.div>
