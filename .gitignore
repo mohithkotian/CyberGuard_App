@@ -18,8 +18,10 @@ scratch/*
 # macOS
 .DS_Store
 **/.DS_Store
-Icon?
-Icon*
+/Icon?
+/Icon*
+
+
 
 # Dependencies & Build
 node_modules/

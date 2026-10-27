@@ -99,7 +99,17 @@ export default function Navbar() {
       {/* Brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
         <Link to="/" style={{ textDecoration: 'none' }}>
-          <img src="/icons/cyberguard/cyberguard-white.png" alt="CyberGuard" style={{ display: 'block', width: 148, height: 38, objectFit: 'contain' }} />
+          <img 
+            src="/icons/cyberguard/cyberguard-white.png" 
+            alt="CyberGuard" 
+            onError={(e) => {
+              if (!e.target.dataset.triedSvg) {
+                e.target.dataset.triedSvg = 'true';
+                e.target.src = '/icons/cyberguard/cyberguard-white.svg';
+              }
+            }}
+            style={{ display: 'block', width: 148, height: 38, objectFit: 'contain' }} 
+          />
         </Link>
       </div>
 
