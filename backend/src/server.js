@@ -89,6 +89,8 @@ app.get('/health', (req, res) => {
 // attachments retain their existing path until chat attachment authorization
 // is handled in the dedicated chat security work.
 app.use('/uploads/chats', express.static(path.join(__dirname, '..', 'uploads', 'chats')));
+app.use('/uploads/avatars', express.static(path.join(__dirname, '..', 'uploads', 'avatars')));
+
 // Global rate limiting for auth to prevent brute force
 const authLimiter = rateLimit({
   windowMs: process.env.NODE_ENV === 'development' ? 1 * 60 * 1000 : 15 * 60 * 1000,

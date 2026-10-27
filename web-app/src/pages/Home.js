@@ -335,7 +335,17 @@ export default function Home() {
             onClick={() => navigate('/')}
             style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
           >
-            <img src="/icons/cyberguard/cyberguard-white.png" alt="CyberGuard" style={{ width: 176, height: 44, objectFit: 'contain' }} />
+            <img 
+              src="/icons/cyberguard/cyberguard-white.png" 
+              alt="CyberGuard" 
+              onError={(e) => {
+                if (!e.target.dataset.triedSvg) {
+                  e.target.dataset.triedSvg = 'true';
+                  e.target.src = '/icons/cyberguard/cyberguard-white.svg';
+                }
+              }}
+              style={{ width: 176, height: 44, objectFit: 'contain' }} 
+            />
           </div>
         </div>
         <nav style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 40, position: 'relative' }}>
