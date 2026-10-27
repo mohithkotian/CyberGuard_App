@@ -80,6 +80,9 @@ const Settings = () => {
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      setAvatarPreview(objectUrl);
+
       const toastId = toast.loading('Uploading neural signature...');
       try {
         const fd = new FormData();
@@ -88,8 +91,13 @@ const Settings = () => {
         if (data.status === 'success') {
           toast.success('Avatar updated', { id: toastId });
           await syncUser();
+          if (data.data?.user?.avatar) {
+            setAvatarPreview(getAvatarUrl(data.data.user.avatar, Date.now()));
+          }
         }
-      } catch (err) { toast.error('Upload failed', { id: toastId }); }
+      } catch (err) { 
+        toast.error('Upload failed', { id: toastId }); 
+      }
     }
   };
 
@@ -229,7 +237,16 @@ const Settings = () => {
                 fontSize: '40px', fontWeight: 900, color: '#fff', 
                 boxShadow: '0 20px 40px rgba(0, 122, 255, 0.3)', overflow: 'hidden' 
               }}>
-                {avatarPreview ? <img src={avatarPreview} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Avatar" /> : user?.name?.[0]}
+                {avatarPreview ? (
+                  <img 
+                    src={avatarPreview} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    alt="Avatar" 
+                    onError={() => setAvatarPreview(null)} 
+                  />
+                ) : (
+                  user?.name?.[0]
+                )}
               </div>
               <div>
                 <input type="file" ref={fileInputRef} onChange={handleAvatarChange} style={{ display: 'none' }} accept="image/*" />
