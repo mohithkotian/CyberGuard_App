@@ -20,7 +20,7 @@ VECTORIZER_PATH = os.path.join(os.path.dirname(__file__), 'models', 'vectorizer.
 os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
 
 # ── Load data ─────────────────────────────────────────────────────────────────
-print('📂 Loading dataset...')
+print('[LOAD] Loading dataset...')
 df = pd.read_csv(DATA_PATH)
 df.dropna(subset=['text', 'label'], inplace=True)
 df['text']  = df['text'].astype(str)
@@ -29,7 +29,7 @@ print(f'   Loaded {len(df)} samples across {df["label"].nunique()} categories')
 print(f'   Distribution:\n{df["label"].value_counts().to_string()}')
 
 # ── Preprocess ────────────────────────────────────────────────────────────────
-print('\n🔧 Preprocessing text...')
+print('\n[PROCESS] Preprocessing text...')
 prep = TextPreprocessor()
 df['cleaned'] = df['text'].apply(prep.preprocess)
 
@@ -40,12 +40,12 @@ X_train, X_test, y_train, y_test = train_test_split(
 print(f'   Train: {len(X_train)}   Test: {len(X_test)}')
 
 # ── Train on full training split ───────────────────────────────────────────────
-print('\n🤖 Training model...')
+print('\n[TRAIN] Training model...')
 clf = CybercrimeClassifier()
 clf.fit(X_train.tolist(), y_train.tolist())
 
 # ── Evaluate ──────────────────────────────────────────────────────────────────
-print('\n📊 Evaluating on test set...')
+print('\n[EVAL] Evaluating on test set...')
 X_test_vec = clf.vectorizer.transform(X_test)
 y_pred     = clf.model.predict(X_test_vec)
 acc        = accuracy_score(y_test, y_pred)
@@ -53,12 +53,12 @@ print(f'   Accuracy : {acc:.4f}')
 print(f'\n{classification_report(y_test, y_pred)}')
 
 # Train final model on entire dataset for maximum real-world production coverage
-print('\n🌟 Retraining final production model on full dataset...')
+print('\n[FINAL] Retraining final production model on full dataset...')
 full_clf = CybercrimeClassifier()
 full_clf.fit(df['cleaned'].tolist(), df['label'].tolist())
 
 # ── Save ──────────────────────────────────────────────────────────────────────
 full_clf.save(MODEL_PATH, VECTORIZER_PATH)
-print(f'\n✅ Production Model saved to      {MODEL_PATH}')
-print(f'✅ Production Vectorizer saved to {VECTORIZER_PATH}')
-print('\n🚀 Ready! Start the service with: python3 src/app.py')
+print(f'\n[OK] Production Model saved to      {MODEL_PATH}')
+print(f'[OK] Production Vectorizer saved to {VECTORIZER_PATH}')
+print('\n[START] Ready! Start the service with: python3 src/app.py')

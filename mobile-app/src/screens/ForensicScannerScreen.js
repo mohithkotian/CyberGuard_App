@@ -8,19 +8,19 @@ const { width } = Dimensions.get('window');
 
 const ATTACK_PRESETS = [
   {
-    title: '⚡ Electricity Cut Notice',
+    title: 'Electricity Cut Notice',
     text: 'Dear Consumer, Your Electricity power will be disconnected tonight at 9.30 PM from electricity office because your previous month bill was not updated. Please immediately contact our power officer 9800000001 or pay via upi: fast.power@paytm'
   },
   {
-    title: '🏦 Urgent KYC Block Notice',
+    title: 'Urgent KYC Block Notice',
     text: 'URGENT: SBI customer, your YONO account is suspended today due to missing Aadhaar KYC. Update immediately at http://sbi-kyc-secure-auth.com or your account will be permanently blocked within 24 hours.'
   },
   {
-    title: '👮 Digital Arrest Threat',
+    title: 'Digital Arrest Threat',
     text: 'CBI & Cyber Crime Cell Notice: A parcel containing illicit narcotics and fake passports under your Aadhaar has been seized at Mumbai Airport. Join immediate Skype investigation or arrest warrant will be issued. Contact DCP Officer at +91 9800000009.'
   },
   {
-    title: '💼 Part-Time YouTube Job',
+    title: 'Part-Time YouTube Job',
     text: 'Earn Rs 5000 to Rs 15000 daily by liking YouTube videos and rating Google maps. No experience needed! Free registration. Join telegram channel @crypto_wealth_signals_vip to claim your Rs 500 joining bonus.'
   }
 ];
@@ -166,7 +166,7 @@ export default function ForensicScannerScreen({ navigation }) {
           />
 
           <TouchableOpacity style={[globalStyles.btnPrimary, { marginTop: 12 }]} onPress={analyzeContent}>
-            <Text style={globalStyles.btnPrimaryText}>⚡ RUN NEURAL ANALYSIS</Text>
+            <Text style={globalStyles.btnPrimaryText}>» RUN NEURAL ANALYSIS</Text>
           </TouchableOpacity>
 
           {/* Preset Attack Scenarios */}
@@ -194,7 +194,7 @@ export default function ForensicScannerScreen({ navigation }) {
         {/* Forensic Report Dossier */}
         {report && (
           <View style={{ marginTop: 10 }}>
-            <Text style={globalStyles.sectionTitle}>🧪 FORENSIC EVALUATION REPORT</Text>
+            <Text style={globalStyles.sectionTitle}>◈ FORENSIC EVALUATION REPORT</Text>
             
             {/* Score & Risk Banner */}
             <View style={[
@@ -234,7 +234,7 @@ export default function ForensicScannerScreen({ navigation }) {
                 <Text style={globalStyles.label}>DETECTED HEURISTICS & PATTERNS</Text>
                 {report.indicators.map((ind, i) => (
                   <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                    <Text style={{ color: colors.danger, fontSize: 12 }}>⚠️</Text>
+                    <Text style={{ color: colors.danger, fontSize: 12 }}>!</Text>
                     <Text style={{ color: colors.text, fontSize: 12 }}>{ind}</Text>
                   </View>
                 ))}
@@ -246,28 +246,28 @@ export default function ForensicScannerScreen({ navigation }) {
                 
                 {report.iocs.phones.length > 0 && (
                   <View style={styles.iocRow}>
-                    <Text style={styles.iocLabel}>📞 Phones:</Text>
+                    <Text style={styles.iocLabel}>⌕ Phones:</Text>
                     <Text style={styles.iocValue}>{report.iocs.phones.join(', ')}</Text>
                   </View>
                 )}
 
                 {report.iocs.upis.length > 0 && (
                   <View style={styles.iocRow}>
-                    <Text style={styles.iocLabel}>💳 UPI IDs:</Text>
+                    <Text style={styles.iocLabel}>◇ UPI IDs:</Text>
                     <Text style={styles.iocValue}>{report.iocs.upis.join(', ')}</Text>
                   </View>
                 )}
 
                 {report.iocs.urls.length > 0 && (
                   <View style={styles.iocRow}>
-                    <Text style={styles.iocLabel}>🌐 Links:</Text>
+                    <Text style={styles.iocLabel}>◉ Links:</Text>
                     <Text style={styles.iocValue}>{report.iocs.urls.join(', ')}</Text>
                   </View>
                 )}
 
                 {report.iocs.ifscs.length > 0 && (
                   <View style={styles.iocRow}>
-                    <Text style={styles.iocLabel}>🏦 IFSC:</Text>
+                    <Text style={styles.iocLabel}>▣ IFSC:</Text>
                     <Text style={styles.iocValue}>{report.iocs.ifscs.join(', ')}</Text>
                   </View>
                 )}
@@ -278,7 +278,7 @@ export default function ForensicScannerScreen({ navigation }) {
                 style={[globalStyles.btnCyber, { marginTop: 16 }]}
                 onPress={handleExportToComplaint}
               >
-                <Text style={globalStyles.btnCyberText}>🚀 File Complaint With This Evidence →</Text>
+                <Text style={globalStyles.btnCyberText}>» File Complaint With This Evidence →</Text>
               </TouchableOpacity>
             </View>
           </View>

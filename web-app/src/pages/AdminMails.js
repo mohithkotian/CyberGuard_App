@@ -147,7 +147,7 @@ export default function AdminMails() {
         }}>
           {/* Search Box */}
           <div style={{ position: 'relative', flex: 1, minWidth: '280px' }}>
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>🔍</span>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>⌕</span>
             <input
               type="text"
               placeholder="Search by recipient, phone, complaint ID or message..."
@@ -227,13 +227,13 @@ export default function AdminMails() {
                   <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', width: '290px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>Message Body</span>
-                      <span style={{ fontSize: '9px', background: 'rgba(0,180,255,0.15)', color: '#00B4FF', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(0,180,255,0.3)' }}>✉️ EMAIL</span>
+                      <span style={{ fontSize: '9px', background: 'rgba(0,180,255,0.15)', color: '#00B4FF', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(0,180,255,0.3)' }}>@ EMAIL</span>
                     </div>
                   </th>
                   <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: '11px', color: '#00FFAA', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', width: '310px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>Text Message</span>
-                      <span style={{ fontSize: '9px', background: 'rgba(0,255,170,0.15)', color: '#00FFAA', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(0,255,170,0.3)' }}>💬 SMS</span>
+                      <span style={{ fontSize: '9px', background: 'rgba(0,255,170,0.15)', color: '#00FFAA', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(0,255,170,0.3)' }}>@ SMS</span>
                     </div>
                   </th>
                 </tr>
@@ -284,7 +284,7 @@ export default function AdminMails() {
                         </div>
                         {hasPhone ? (
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px', background: 'rgba(0,255,170,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', color: '#00FFAA', fontWeight: 600 }}>
-                            <span>📱</span> {mail.recipientPhone}
+                            <span>⌕</span> {mail.recipientPhone}
                           </div>
                         ) : (
                           <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
@@ -387,7 +387,7 @@ export default function AdminMails() {
                               }}
                               title="Copy SMS text"
                             >
-                              {copiedId === mail._id ? '✓ COPIED' : '📋 COPY'}
+                              {copiedId === mail._id ? 'v COPIED' : '⧉ COPY'}
                             </button>
                           </div>
 
@@ -486,7 +486,7 @@ export default function AdminMails() {
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
                       <span style={{ fontSize: '12px', color: '#00FFAA', fontWeight: 800, background: 'rgba(0,255,170,0.1)', padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(0,255,170,0.3)' }}>
-                        ✓ DISPATCH LOGGED
+                        v DISPATCH LOGGED
                       </span>
                       {selectedMail.complaintId && (
                         <span style={{ fontSize: '12px', color: '#00B4FF', fontWeight: 800, background: 'rgba(0,180,255,0.1)', padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(0,180,255,0.3)', fontFamily: 'Orbitron, monospace' }}>
@@ -518,7 +518,7 @@ export default function AdminMails() {
                       justifyContent: 'center'
                     }}
                   >
-                    ✕
+                    x
                   </button>
                 </div>
 
@@ -536,7 +536,7 @@ export default function AdminMails() {
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '18px' }}>✉️</span>
+                        <span style={{ fontSize: '18px' }}>@</span>
                         <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#00B4FF', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
                           Email Dispatch
                         </h3>
@@ -579,7 +579,7 @@ export default function AdminMails() {
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '18px' }}>💬</span>
+                        <span style={{ fontSize: '18px' }}>@</span>
                         <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#00FFAA', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
                           Text Message (SMS)
                         </h3>
@@ -626,7 +626,7 @@ export default function AdminMails() {
                           cursor: 'pointer'
                         }}
                       >
-                        {copiedId === 'modal' ? '✓ Copied SMS' : '📋 Copy SMS Text'}
+                        {copiedId === 'modal' ? 'v Copied SMS' : '⧉ Copy SMS Text'}
                       </button>
                     </div>
                   </div>

@@ -107,7 +107,7 @@ export default function AdminSafety() {
           location: prev.location || `${data.city || 'Detected Location'}, ${data.region || ''}`,
           pincode: prev.pincode || (data.postal ? String(data.postal).slice(0, 6) : '')
         }));
-        toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''} 🌐`, { id: toastId });
+        toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''} ◉`, { id: toastId });
         return true;
       }
     } catch (e) {
@@ -153,7 +153,7 @@ export default function AdminSafety() {
           location: placeName || prev.location,
           pincode: pin || prev.pincode
         }));
-        toast.success(`📍 GPS locked: ${placeName}`, { id: toastId });
+        toast.success(`⌖ GPS locked: ${placeName}`, { id: toastId });
       },
       (error) => {
         console.warn('GPS unavailable, falling back to IP geolocation:', error.message);
@@ -201,7 +201,7 @@ export default function AdminSafety() {
       const complaintId = newComplaint?.complaintId || 'CMP-RECORDED';
       
       setLastSubmittedId(complaintId);
-      toast.success(`🚨 TOP PRIORITY REPORT LODGED: ${complaintId}`, { duration: 6000 });
+      toast.success(`! TOP PRIORITY REPORT LODGED: ${complaintId}`, { duration: 6000 });
       
       setFormData({ 
         title: '', victim: '', location: '', mobile: '', pincode: '', lat: null, lng: null, 
@@ -225,7 +225,7 @@ export default function AdminSafety() {
     try {
       await api.patch(`/complaints/${id}/status`, {
         status: 'investigating',
-        message: '🚨 EMERGENCY RESPONSE DISPATCHED: Quick Reaction Team (QRT) mobilized to incident location.'
+        message: '! EMERGENCY RESPONSE DISPATCHED: Quick Reaction Team (QRT) mobilized to incident location.'
       });
       toast.success(`Response Unit Dispatched for ${incident.complaintId}`);
       await fetchIncidents();
@@ -693,7 +693,7 @@ export default function AdminSafety() {
                       transition: 'all 0.3s'
                     }}
                   >
-                    {loading ? 'TRANSMITTING REPORT...' : '🚨 LODGE PRIORITY REPORT'}
+                    {loading ? 'TRANSMITTING REPORT...' : '! LODGE PRIORITY REPORT'}
                   </button>
                   <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: 6 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00FFD1" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>

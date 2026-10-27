@@ -108,7 +108,7 @@ export default function ScamSearchScreen({ navigation }) {
             />
             {query.length > 0 && (
               <TouchableOpacity onPress={() => { setQuery(''); setSearched(false); setResults([]); }} style={styles.clearBtn}>
-                <Text style={{ color: colors.muted, fontSize: 16 }}>✕</Text>
+                <Text style={{ color: colors.muted, fontSize: 16 }}>x</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -121,7 +121,7 @@ export default function ScamSearchScreen({ navigation }) {
             {loading ? (
               <ActivityIndicator color="#030A14" />
             ) : (
-              <Text style={globalStyles.btnPrimaryText}>🔍 RUN THREAT SCAN</Text>
+              <Text style={globalStyles.btnPrimaryText}>⌕ RUN THREAT SCAN</Text>
             )}
           </TouchableOpacity>
 
@@ -149,14 +149,14 @@ export default function ScamSearchScreen({ navigation }) {
           <View style={{ marginTop: 15 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <Text style={globalStyles.sectionTitle}>
-                {results.length > 0 ? `🚨 THREAT SIGNALS FOUND (${results.length})` : '🛡️ VERIFICATION RESULT'}
+                {results.length > 0 ? `! THREAT SIGNALS FOUND (${results.length})` : '◈ VERIFICATION RESULT'}
               </Text>
             </View>
 
             {results.length === 0 ? (
               <View style={[globalStyles.glassCard, { alignItems: 'center', padding: 24, borderColor: 'rgba(0, 200, 150, 0.3)' }]}>
                 <View style={[styles.statusIconCircle, { backgroundColor: 'rgba(0, 200, 150, 0.15)', borderColor: colors.success }]}>
-                  <Text style={{ fontSize: 32 }}>✓</Text>
+                  <Text style={{ fontSize: 32 }}>v</Text>
                 </View>
                 <Text style={{ color: colors.success, fontSize: 16, fontWeight: '900', letterSpacing: 1.5, marginTop: 12 }}>
                   CLEAN RECORD
@@ -179,7 +179,7 @@ export default function ScamSearchScreen({ navigation }) {
                   <View key={i} style={[globalStyles.glassCard, { borderColor: isCrit ? 'rgba(255, 59, 48, 0.4)' : 'rgba(255, 159, 28, 0.4)' }]}>
                     <View style={globalStyles.spaceBetween}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={{ fontSize: 14 }}>{r.type === 'PHONE' ? '📞' : r.type === 'WEBSITE' ? '🌐' : '⚠️'}</Text>
+                        <Text style={{ fontSize: 14 }}>{r.type === 'PHONE' ? '⌕' : r.type === 'WEBSITE' ? '◉' : '!'}</Text>
                         <Text style={[globalStyles.mono, { color: colors.cyber, fontSize: 12, fontWeight: '700' }]}>
                           {r.complaintId}
                         </Text>
@@ -208,7 +208,7 @@ export default function ScamSearchScreen({ navigation }) {
                         style={styles.actionPill}
                         onPress={() => navigation.navigate('Submit', { prefillSuspect: r.identifier, prefillCategory: r.category })}
                       >
-                        <Text style={styles.actionPillText}>🚨 File Complaint With This Intel</Text>
+                        <Text style={styles.actionPillText}>! File Complaint With This Intel</Text>
                       </TouchableOpacity>
                     </View>
                   </View>

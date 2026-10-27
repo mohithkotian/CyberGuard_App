@@ -7,6 +7,7 @@ import {
 } from 'recharts';
 import { animate } from "framer-motion";
 import Navbar from '../components/Navbar';
+import UiIcon from '../components/UiIcon';
 import api, { analyticsAPI, adminAPI } from '../services/api';
 import { onNewComplaint, offNewComplaint } from '../services/socket';
 import useAuthStore from '../hooks/useAuthStore';
@@ -64,7 +65,7 @@ function StatCard({ label, value, sub, color, icon, trend, decimals, suffix }) {
         boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
       }}
     >
-      <div style={{ position: 'absolute', top: 20, right: 20, fontSize: 32, opacity: 0.1 }}>{icon}</div>
+      <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.35 }}><UiIcon name={icon} size={34} /></div>
       <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 800 }}>{label}</p>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
         <h2 style={{ fontSize: '36px', fontWeight: 900, color: '#fff', letterSpacing: '-1.5px', margin: 0 }}>
@@ -250,10 +251,10 @@ export default function AdminDashboard() {
             
             {/* Real-time Stats Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
-              <StatCard label="Live Cases" value={overview?.totalComplaints} sub="Total incidents" icon="📂" trend={5.2} />
-              <StatCard label="Critical" value={overview?.criticalComplaints} color="#FF3B30" sub="Urgent action" icon="🚨" trend={-2.1} />
-              <StatCard label="Uptime" value={liveStats.uptime} color="#34C759" sub="Nodes operational" icon="🌐" decimals={1} suffix="%" />
-              <StatCard label="Neural Engine" value={liveStats.accuracy} color="#AF52DE" sub="AI accuracy" icon="🧠" decimals={1} suffix="%" />
+              <StatCard label="Live Cases" value={overview?.totalComplaints} sub="Total incidents" icon="live-cases" trend={5.2} />
+              <StatCard label="Critical" value={overview?.criticalComplaints} color="#FF3B30" sub="Urgent action" icon="critical-action" trend={-2.1} />
+              <StatCard label="Uptime" value={liveStats.uptime} color="#34C759" sub="Nodes operational" icon="operational-nodes" decimals={1} suffix="%" />
+              <StatCard label="Neural Engine" value={liveStats.accuracy} color="#AF52DE" sub="AI accuracy" icon="neural-accuracy" decimals={1} suffix="%" />
             </div>
 
             {/* Charts Section */}
@@ -462,7 +463,7 @@ export default function AdminDashboard() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                   }}
                 >
-                  <span>👥</span> USER & PERSONNEL DIRECTORY (INFO)
+                  <UiIcon name="personnel-directory" size={18} /> USER & PERSONNEL DIRECTORY (INFO)
                 </button>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   {['AUDIT', 'ALERT', 'SYNC', 'PURGE'].map((label, i) => (

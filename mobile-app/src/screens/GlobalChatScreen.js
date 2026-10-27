@@ -165,7 +165,7 @@ export default function GlobalChatScreen({ navigation }) {
             onPress={handleSend}
             disabled={!text.trim() || sending}
           >
-            <Text style={{ color: '#030A14', fontSize: 16, fontWeight: '900' }}>➤</Text>
+            <Text style={{ color: '#030A14', fontSize: 16, fontWeight: '900' }}>→</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

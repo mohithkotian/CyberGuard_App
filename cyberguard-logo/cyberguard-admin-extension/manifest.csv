@@ -1,0 +1,45 @@
+filename,purpose
+admin-live-cases.svg,live cases
+admin-critical-action.svg,critical action
+admin-operational-nodes.svg,operational nodes
+admin-neural-accuracy.svg,neural accuracy
+admin-personnel-directory.svg,personnel directory
+admin-enroll-personnel.svg,enroll personnel
+admin-all-personnel.svg,all personnel
+admin-officer-filter.svg,officer filter
+admin-administrator-filter.svg,administrator filter
+admin-qrt-operations.svg,qrt operations
+admin-two-factor-filter.svg,two factor filter
+admin-user-search.svg,user search
+admin-table-view.svg,table view
+admin-card-view.svg,card view
+admin-registered-phone.svg,registered phone
+admin-copy-credentials.svg,copy credentials
+admin-protected-account.svg,protected account
+admin-view-dossier.svg,view dossier
+admin-password-override.svg,password override
+admin-revoke-user.svg,revoke user
+admin-edit-profile.svg,edit profile
+admin-dangerous-action.svg,dangerous action
+admin-scam-phone-tab.svg,scam phone tab
+admin-phishing-links.svg,phishing links
+admin-other-threats.svg,other threats
+admin-ocr-identifiers.svg,ocr identifiers
+admin-link-search.svg,link search
+admin-voip-region.svg,voip region
+admin-external-link.svg,external link
+admin-copy-url.svg,copy url
+admin-extracted-phones.svg,extracted phones
+admin-payment-identifiers.svg,payment identifiers
+admin-investigator-protocol.svg,investigator protocol
+admin-mail-search.svg,mail search
+admin-email-dispatch.svg,email dispatch
+admin-sms-dispatch.svg,sms dispatch
+admin-recipient-phone.svg,recipient phone
+admin-copy-message.svg,copy message
+admin-settings-about.svg,settings about
+admin-settings-notifications.svg,settings notifications
+admin-settings-theme.svg,settings theme
+admin-settings-language.svg,settings language
+admin-settings-connection.svg,settings connection
+admin-settings-security.svg,settings security

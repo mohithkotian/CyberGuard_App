@@ -74,7 +74,7 @@ export default function TrackScreen({ navigation }) {
             {loading ? (
               <ActivityIndicator color="#030A14" />
             ) : (
-              <Text style={globalStyles.btnPrimaryText}>🔍 RETRIEVE CASE STATUS</Text>
+              <Text style={globalStyles.btnPrimaryText}>⌕ RETRIEVE CASE STATUS</Text>
             )}
           </TouchableOpacity>
 
@@ -96,7 +96,7 @@ export default function TrackScreen({ navigation }) {
         {/* Search Results Case Dossier */}
         {complaint && (
           <View style={{ marginTop: 10 }}>
-            <Text style={globalStyles.sectionTitle}>📋 LIVE CASE DOSSIER</Text>
+            <Text style={globalStyles.sectionTitle}>⧉ LIVE CASE DOSSIER</Text>
 
             <View style={globalStyles.glassCard}>
               <View style={globalStyles.spaceBetween}>
@@ -127,7 +127,7 @@ export default function TrackScreen({ navigation }) {
                   return (
                     <View key={i} style={{ flexDirection: 'row', gap: 12, marginBottom: 12 }}>
                       <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: `${stepColor}20`, borderWidth: 2, borderColor: stepColor, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 10 }}>{t.status === 'resolved' ? '✓' : '●'}</Text>
+                        <Text style={{ fontSize: 10 }}>{t.status === 'resolved' ? 'v' : '●'}</Text>
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>{t.message}</Text>

@@ -301,7 +301,7 @@ export default function GlobalChat() {
                 transition: '0.2s'
               }}
             >
-              <div style={{ fontWeight: 'bold', color: '#00B4FF', fontSize: '14px' }}>🌐 Global Network</div>
+              <div style={{ fontWeight: 'bold', color: '#00B4FF', fontSize: '14px' }}>◉ Global Network</div>
               <div style={{ fontSize: '11px', color: '#5A6480' }}>Internal broadcast channel</div>
             </div>
 
@@ -486,7 +486,7 @@ export default function GlobalChat() {
                                 textDecoration: 'underline'
                               }}
                             >
-                              📎 {att?.filename || 'Attachment'}
+                              ⌕ {att?.filename || 'Attachment'}
                             </a>
                           ))}
                         </div>
@@ -536,7 +536,7 @@ export default function GlobalChat() {
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#5A6480', cursor: 'pointer', fontSize: '18px', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 title="Add Attachment"
               >
-                📎
+                ⌕
               </button>
               
               <AnimatePresence>
@@ -560,10 +560,10 @@ export default function GlobalChat() {
                       width: '150px'
                     }}
                   >
-                    <div onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false); }} style={{ cursor: 'pointer', padding: '8px 12px', color: '#fff', fontSize: '13px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>📄 Document</div>
-                    <div onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false); }} style={{ cursor: 'pointer', padding: '8px 12px', color: '#fff', fontSize: '13px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>📷 Image / Video</div>
-                    <div onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false); }} style={{ cursor: 'pointer', padding: '8px 12px', color: '#fff', fontSize: '13px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>🎵 Voice Note</div>
-                    <div onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false); }} style={{ cursor: 'pointer', padding: '8px 12px', color: '#fff', fontSize: '13px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>👤 Contact</div>
+                    <div onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false); }} style={{ cursor: 'pointer', padding: '8px 12px', color: '#fff', fontSize: '13px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}><img src="/icons/cyberguard/evidence-document.svg" alt="" style={{ width: 14, height: 14, marginRight: 8, verticalAlign: "middle" }} /> Document</div>
+                    <div onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false); }} style={{ cursor: 'pointer', padding: '8px 12px', color: '#fff', fontSize: '13px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}><img src="/icons/cyberguard/evidence-attachment.svg" alt="" style={{ width: 14, height: 14, marginRight: 8, verticalAlign: "middle" }} /> Image / Video</div>
+                    <div onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false); }} style={{ cursor: 'pointer', padding: '8px 12px', color: '#fff', fontSize: '13px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}><img src="/icons/cyberguard/connection-signal.svg" alt="" style={{ width: 14, height: 14, marginRight: 8, verticalAlign: "middle" }} /> Voice Note</div>
+                    <div onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false); }} style={{ cursor: 'pointer', padding: '8px 12px', color: '#fff', fontSize: '13px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}><img src="/icons/cyberguard/profile-user.svg" alt="" style={{ width: 14, height: 14, marginRight: 8, verticalAlign: "middle" }} /> Contact</div>
                   </motion.div>
                 )}
               </AnimatePresence>

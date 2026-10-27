@@ -23,7 +23,7 @@ const useNotificationStore = create(
 
         // Trigger toast
         toast(newNotification.message, {
-          icon: notification.type === 'alert' ? '🚨' : '📩',
+          icon: notification.type === 'alert' ? '!' : '@',
           style: {
             background: '#111',
             color: '#fff',

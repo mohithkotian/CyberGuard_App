@@ -22,9 +22,9 @@ import { getActiveApiUrl, setCustomApiUrl, testApiHealth } from '../services/api
 const { width } = Dimensions.get('window');
 
 const DEMO_LOGINS = [
-  { label: '👮 Officer Demo', email: 'officer@cyberguard.gov', pass: 'Officer@123' },
-  { label: '🛡️ Admin Demo',   email: 'admin@cyberguard.gov',   pass: 'Admin@12345' },
-  { label: '👤 Citizen Demo', email: 'citizen@test.com',       pass: 'Citizen@123' },
+  { label: 'Officer Demo', email: 'officer@cyberguard.gov', pass: 'Officer@123' },
+  { label: '◈ Admin Demo',   email: 'admin@cyberguard.gov',   pass: 'Admin@12345' },
+  { label: 'Citizen Demo', email: 'citizen@test.com',       pass: 'Citizen@123' },
 ];
 
 export default function LoginScreen({ navigation }) {
@@ -82,7 +82,7 @@ export default function LoginScreen({ navigation }) {
         err.message || 'Invalid credentials or server connection error.',
         isTimeout ? [
           { text: 'Cancel', style: 'cancel' },
-          { text: '⚙️ Configure Server URL', onPress: () => setConfigModal(true) }
+          { text: '≡ Configure Server URL', onPress: () => setConfigModal(true) }
         ] : [{ text: 'OK' }]
       );
     }
@@ -119,7 +119,7 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.serverPillText} numberOfLines={1}>
               API: {activeUrl.replace('http://', '').replace('https://', '')}
             </Text>
-            <Text style={styles.serverPillEdit}>⚙️ EDIT</Text>
+            <Text style={styles.serverPillEdit}>≡ EDIT</Text>
           </TouchableOpacity>
 
           {/* Login Card */}
@@ -201,7 +201,7 @@ export default function LoginScreen({ navigation }) {
       <Modal visible={configModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>⚡ BACKEND SERVER CONFIG</Text>
+            <Text style={styles.modalTitle}>» BACKEND SERVER CONFIG</Text>
             <Text style={styles.modalDesc}>
               When using Personal Hotspot or remote networks, enter your Mac IP or Tunnel URL (e.g. http://192.0.0.2:5002/api or https://xxxx.loca.lt/api):
             </Text>
@@ -226,7 +226,7 @@ export default function LoginScreen({ navigation }) {
                 <ActivityIndicator color={colors.accent} size="small" />
               ) : (
                 <Text style={globalStyles.btnSecondaryText}>
-                  {pingResult ? (pingResult.success ? `✅ Online (${pingResult.latency}ms)` : `❌ Failed (${pingResult.error})`) : '📡 TEST PING & LATENCY'}
+                  {pingResult ? (pingResult.success ? `v Online (${pingResult.latency}ms)` : `× Failed (${pingResult.error})`) : '⌁ TEST PING & LATENCY'}
                 </Text>
               )}
             </TouchableOpacity>

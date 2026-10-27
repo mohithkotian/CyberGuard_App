@@ -96,7 +96,7 @@ export default function CommunityComplaints() {
               color: '#A855F7',
               letterSpacing: '2px',
             }}>
-              🌐 PUBLIC BROWSER
+              ◉ PUBLIC BROWSER
             </div>
             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontWeight: 700, letterSpacing: '1px' }}>
               ANONYMISED • PII PROTECTED
@@ -201,7 +201,7 @@ export default function CommunityComplaints() {
           fontSize: '13px',
           color: 'rgba(255,255,255,0.5)',
         }}>
-          <span style={{ fontSize: '18px' }}>🔒</span>
+          <span style={{ fontSize: '18px' }}>◇</span>
           <span>
             All personal information in community complaints is <strong style={{ color: '#A855F7' }}>masked by the server</strong> before reaching your browser.
             You will see <strong style={{ color: '#A855F7' }}>PERSON_1</strong>, <strong style={{ color: '#A855F7' }}>PHONE_1</strong>, etc. instead of real PII.
@@ -223,7 +223,7 @@ export default function CommunityComplaints() {
             textAlign: 'center',
             padding: 80,
           }}>
-            <div style={{ fontSize: '64px', marginBottom: 24 }}>📭</div>
+            <div style={{ fontSize: '64px', marginBottom: 24 }}>▤</div>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '18px', fontWeight: 500 }}>
               No complaints found in the community registry.
             </p>
@@ -288,7 +288,7 @@ export default function CommunityComplaints() {
                             border: '1px solid rgba(168,85,247,0.3)',
                             letterSpacing: '1px',
                           }}>
-                            🔒 MASKED
+                            ◇ MASKED
                           </span>
                         )}
                       </div>

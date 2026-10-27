@@ -33,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 
 // ─────────────────────────────────────────────────────────
-// ✅ FIXED CORS & SOCKET CONFIGURATION
+// [OK] FIXED CORS & SOCKET CONFIGURATION
 // ─────────────────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || [
   'http://localhost:3000',
@@ -236,11 +236,11 @@ const PORT = process.env.PORT || 5002;
 
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
-    console.error(`\n⚠️  PORT ${PORT} IS ALREADY IN USE!`);
-    console.error(`👉 Another instance of the backend is already running on port ${PORT}.`);
-    console.error(`👉 To free the port on macOS, run: kill -9 $(lsof -ti:${PORT})\n`);
+    console.error(`\n[WARN]️  PORT ${PORT} IS ALREADY IN USE!`);
+    console.error(`[>>] Another instance of the backend is already running on port ${PORT}.`);
+    console.error(`[>>] To free the port on macOS, run: kill -9 $(lsof -ti:${PORT})\n`);
   } else {
-    console.error(`❌ Server Error: ${error.message}`);
+    console.error(`[ERROR] Server Error: ${error.message}`);
   }
   process.exit(1);
 });
@@ -250,10 +250,10 @@ const startServer = async () => {
     await connectDB();
 
     server.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 Main Server running on http://localhost:${PORT}`);
+      console.log(`[START] Main Server running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error(`❌ Startup Error: ${error.message}`);
+    console.error(`[ERROR] Startup Error: ${error.message}`);
   }
 };
 

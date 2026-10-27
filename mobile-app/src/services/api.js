@@ -48,9 +48,9 @@ const api = axios.create({
     if (custom && custom.trim()) {
       BASE_URL = custom.trim();
       api.defaults.baseURL = BASE_URL;
-      console.log('⚡ Using custom API URL:', BASE_URL);
+      console.log('[CONFIG] Using custom API URL:', BASE_URL);
     } else {
-      console.log('🌐 Using auto-detected API URL:', BASE_URL);
+      console.log('[NETWORK] Using auto-detected API URL:', BASE_URL);
     }
   } catch (e) {
     console.warn('Could not load custom_api_url', e);

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+﻿import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-hot-toast';
@@ -217,7 +217,7 @@ const CyberReport = () => {
         const parts = match.display_name.split(',').map(s => s.trim());
         const area = parts[1] || parts[0];
         const state = parts[parts.length - 2] || 'India';
-        
+
         setLocation({
           lat,
           lng,
@@ -236,13 +236,13 @@ const CyberReport = () => {
         const po = pinData[0].PostOffice[0];
         const district = po.District;
         const state = po.State;
-        
+
         // Search city coordinates
         const citySearchRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(district + ', ' + state + ', India')}&format=json`);
         const citySearchData = await citySearchRes.json();
         const lat = citySearchData?.[0]?.lat ? parseFloat(citySearchData[0].lat) : 12.97;
         const lng = citySearchData?.[0]?.lon ? parseFloat(citySearchData[0].lon) : 77.59;
-        
+
         setLocation({
           lat,
           lng,
@@ -339,7 +339,7 @@ const CyberReport = () => {
       async (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        
+
         const geo = await reverseGeocode(lat, lng);
         if (geo) {
           setLocation({
@@ -425,7 +425,7 @@ const CyberReport = () => {
       formData.append('lostMoney', lostMoney);
       formData.append('relationshipWithVictim', relationshipWithVictim || 'Self');
 
-      formData.append('victimDetails', JSON.stringify({ 
+      formData.append('victimDetails', JSON.stringify({
         incidentDate: incidentDateTime,
         incidentOccurredWhere,
         pincode,
@@ -434,14 +434,14 @@ const CyberReport = () => {
         countryCode,
         mobile
       }));
-      
+
       if (location) {
         formData.append('location', JSON.stringify({
           type: 'Point',
           coordinates: [location.lng, location.lat]
         }));
       }
-      
+
       files.forEach(file => {
         formData.append('evidence', file);
       });
@@ -487,10 +487,10 @@ const CyberReport = () => {
   ];
 
   return (
-    <section style={{ 
-      maxWidth: '1040px', 
-      margin: '0 auto', 
-      padding: '80px 24px', 
+    <section style={{
+      maxWidth: '1040px',
+      margin: '0 auto',
+      padding: '80px 24px',
       position: 'relative',
       minHeight: '100vh',
       display: 'flex',
@@ -498,16 +498,16 @@ const CyberReport = () => {
       alignItems: 'center'
     }}>
       {/* Liquid Back Button */}
-      <button 
+      <button
         onClick={() => navigate('/')}
-        style={{ 
+        style={{
           position: 'fixed',
           left: '40px',
           top: '40px',
-          width: 50, height: 50, borderRadius: '50%', 
-          background: 'rgba(255,255,255,0.05)', 
+          width: 50, height: 50, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.05)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.1)', 
+          border: '1px solid rgba(255,255,255,0.1)',
           color: '#00B4FF', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
           zIndex: 100,
@@ -526,7 +526,7 @@ const CyberReport = () => {
       </button>
 
       {/* Main Liquid Glass Container */}
-      <div style={{ 
+      <div style={{
         width: '100%',
         background: 'rgba(10, 15, 30, 0.45)',
         backdropFilter: 'blur(40px) saturate(200%)',
@@ -543,9 +543,9 @@ const CyberReport = () => {
         <div style={{ position: 'absolute', bottom: '-100px', left: '-100px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%)', zIndex: -1 }}></div>
 
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h2 style={{ 
-            fontSize: '3.2rem', 
-            margin: '0 0 12px 0', 
+          <h2 style={{
+            fontSize: '3.2rem',
+            margin: '0 0 12px 0',
             fontWeight: 800,
             background: 'linear-gradient(to bottom, #fff 30%, rgba(255,255,255,0.5) 100%)',
             WebkitBackgroundClip: 'text',
@@ -575,10 +575,10 @@ const CyberReport = () => {
             boxShadow: `0 8px 25px ${aiDetection.style.color}22`
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <span style={{ 
-                width: '12px', height: '12px', borderRadius: '50%', 
-                background: aiDetection.style.color, 
-                boxShadow: `0 0 14px ${aiDetection.style.color}` 
+              <span style={{
+                width: '12px', height: '12px', borderRadius: '50%',
+                background: aiDetection.style.color,
+                boxShadow: `0 0 14px ${aiDetection.style.color}`
               }}></span>
               <div>
                 <div style={{ color: '#fff', fontSize: '15px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -589,7 +589,7 @@ const CyberReport = () => {
                   </span>
                 </div>
                 <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', marginTop: '3px' }}>
-                  Sub-Type: <strong>{aiDetection.subcategory}</strong> • Severity: <span style={{ textTransform: 'uppercase', color: aiDetection.style.color }}>{aiDetection.severity}</span>
+                  Sub-Type: <strong>{aiDetection.subcategory}</strong> â€¢ Severity: <span style={{ textTransform: 'uppercase', color: aiDetection.style.color }}>{aiDetection.severity}</span>
                 </div>
               </div>
             </div>
@@ -639,7 +639,7 @@ const CyberReport = () => {
               </label>
               <div style={{ position: 'relative' }}>
                 <textarea
-                  style={{ 
+                  style={{
                     width: '100%',
                     background: 'rgba(255,255,255,0.03)',
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -660,7 +660,7 @@ const CyberReport = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
-                <div style={{ 
+                <div style={{
                   position: 'absolute',
                   bottom: '15px',
                   right: '15px',
@@ -682,7 +682,7 @@ const CyberReport = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* CATEGORY DROPDOWN */}
             <div>
               <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>
@@ -768,7 +768,7 @@ const CyberReport = () => {
               <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Have You Lost Money in INR?</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <span style={{ color: !lostMoney ? '#fff' : 'rgba(255,255,255,0.4)' }}>No</span>
-                <div 
+                <div
                   onClick={() => setLostMoney(!lostMoney)}
                   style={{ width: '50px', height: '26px', background: lostMoney ? '#00B4FF' : 'rgba(255,255,255,0.2)', borderRadius: '13px', position: 'relative', cursor: 'pointer', transition: '0.3s' }}
                 >
@@ -777,7 +777,7 @@ const CyberReport = () => {
                 <span style={{ color: lostMoney ? '#00B4FF' : 'rgba(255,255,255,0.4)' }}>Yes</span>
               </div>
             </div>
-            
+
             <div>
               <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Where did the Incident Occur?</label>
               <select
@@ -802,7 +802,7 @@ const CyberReport = () => {
               </select>
             </div>
           </div>
-          
+
           {/* LOCATION GRID */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '24px', alignItems: 'start' }}>
             <div>
@@ -814,7 +814,7 @@ const CyberReport = () => {
               </div>
               <input
                 type="text"
-                style={{ 
+                style={{
                   width: '100%',
                   background: 'rgba(255,255,255,0.03)',
                   border: '1px solid rgba(255,255,255,0.1)',
@@ -904,10 +904,10 @@ const CyberReport = () => {
                   </button>
                 </div>
               ) : (
-                <div 
+                <div
                   onClick={handleGetLocation}
-                  style={{ 
-                    background: location ? 'rgba(0, 180, 255, 0.1)' : 'rgba(255,255,255,0.03)', 
+                  style={{
+                    background: location ? 'rgba(0, 180, 255, 0.1)' : 'rgba(255,255,255,0.03)',
                     border: location ? '1px solid rgba(0, 180, 255, 0.3)' : '1px solid rgba(255,255,255,0.1)',
                     color: location ? '#00B4FF' : 'rgba(255,255,255,0.7)',
                     padding: '16px',
@@ -946,7 +946,7 @@ const CyberReport = () => {
               <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Email Address</label>
               <input
                 type="email"
-                style={{ 
+                style={{
                   width: '100%',
                   background: 'rgba(255,255,255,0.03)',
                   border: '1px solid rgba(255,255,255,0.1)',
@@ -968,7 +968,7 @@ const CyberReport = () => {
               <div style={{ display: 'flex', gap: '12px' }}>
                 <input
                   type="text"
-                  style={{ 
+                  style={{
                     width: '80px',
                     background: 'rgba(255,255,255,0.03)',
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -985,7 +985,7 @@ const CyberReport = () => {
                 />
                 <input
                   type="text"
-                  style={{ 
+                  style={{
                     flex: 1,
                     background: 'rgba(255,255,255,0.03)',
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -1004,10 +1004,10 @@ const CyberReport = () => {
           </div>
 
           {/* EVIDENCE SECTION */}
-          <div style={{ 
-            background: 'rgba(255,255,255,0.02)', 
-            border: '1px dashed rgba(255,255,255,0.15)', 
-            borderRadius: '24px', 
+          <div style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px dashed rgba(255,255,255,0.15)',
+            borderRadius: '24px',
             padding: '30px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
@@ -1018,12 +1018,12 @@ const CyberReport = () => {
                 Auto-Extracts UPIs, Phone Numbers & Accounts
               </span>
             </div>
-            
-            <div 
-              {...getRootProps()} 
-              style={{ 
-                padding: '40px 20px', 
-                textAlign: 'center', 
+
+            <div
+              {...getRootProps()}
+              style={{
+                padding: '40px 20px',
+                textAlign: 'center',
                 borderRadius: '16px',
                 border: isDragActive ? '1px solid #00B4FF' : 'none',
                 background: isDragActive ? 'rgba(0,180,255,0.05)' : 'transparent',
@@ -1035,10 +1035,10 @@ const CyberReport = () => {
               <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: '20px' }}>
                 Drag & Drop screenshots of phishing emails, transaction receipts, WhatsApp threats, or ransomware screens
               </p>
-              <button 
+              <button
                 type="button"
                 onClick={open}
-                style={{ 
+                style={{
                   background: '#fff',
                   color: '#000',
                   border: 'none',
@@ -1067,13 +1067,13 @@ const CyberReport = () => {
             {files.length > 0 && (
               <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                 {files.map((file, idx) => (
-                  <div key={idx} style={{ 
-                    background: 'rgba(255,255,255,0.05)', 
-                    padding: '8px 14px', 
+                  <div key={idx} style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    padding: '8px 14px',
                     borderRadius: '12px',
-                    border: '1px solid rgba(255,255,255,0.1)', 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: '10px',
                     fontSize: '13px',
                     color: '#fff',
@@ -1083,7 +1083,7 @@ const CyberReport = () => {
                     <span style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.9 }}>
                       {file.name}
                     </span>
-                    <button 
+                    <button
                       onClick={() => removeFile(idx)}
                       style={{ background: 'rgba(255,59,48,0.2)', border: 'none', color: '#FF3B30', cursor: 'pointer', padding: '2px', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}
                     >
@@ -1096,10 +1096,10 @@ const CyberReport = () => {
           </div>
 
           {/* COMPLAINANT DETAILS SECTION */}
-          <div style={{ 
-            background: 'rgba(255,255,255,0.02)', 
-            border: '1px dashed rgba(255,255,255,0.1)', 
-            borderRadius: '24px', 
+          <div style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px dashed rgba(255,255,255,0.1)',
+            borderRadius: '24px',
             padding: '30px'
           }}>
             <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px', display: 'block' }}>Complainant Verification</label>
@@ -1135,10 +1135,10 @@ const CyberReport = () => {
                     background: '#fff', color: '#000', padding: '10px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', transition: '0.3s', boxShadow: '0 8px 16px rgba(255,255,255,0.1)'
                   }}>
                     Upload ID
-                    <input 
-                      type="file" 
-                      style={{ display: 'none' }} 
-                      accept=".jpg,.jpeg,.png,.pdf" 
+                    <input
+                      type="file"
+                      style={{ display: 'none' }}
+                      accept=".jpg,.jpeg,.png,.pdf"
                       onChange={(e) => setNationalIdFile(e.target.files[0])}
                     />
                   </label>
@@ -1156,7 +1156,7 @@ const CyberReport = () => {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              style={{ 
+              style={{
                 width: '100%',
                 background: 'linear-gradient(135deg, #00B4FF 0%, #A855F7 100%)',
                 color: '#fff',
@@ -1189,7 +1189,7 @@ const CyberReport = () => {
                   {t('REPORT.SUBMITTING', 'ANALYZING & FILING CASE ON CHAIN...')}
                 </div>
               ) : t('REPORT.SUBMIT', 'AUTHENTICATE & SUBMIT COMPLAINT')}
-              
+
               {/* Shine effect */}
               <div style={{ position: 'absolute', top: 0, left: '-100%', width: '50%', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)', animation: 'shine 3s infinite' }}></div>
             </button>
@@ -1201,7 +1201,7 @@ const CyberReport = () => {
         {`
           @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
           @keyframes shine { 0% { left: -100%; } 100% { left: 200%; } }
-          
+
           .liquid-input:focus {
             background: rgba(255,255,255,0.06) !important;
             border-color: rgba(0, 180, 255, 0.5) !important;

@@ -268,8 +268,8 @@ export default function TrackComplaint() {
                   </div>
                   <h2 style={{ fontSize: '2.2rem', color: '#fff', margin: '0 0 16px 0', fontWeight: 800, letterSpacing: '-0.5px' }}>{complaint.title}</h2>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>
-                    <span>📅 {format(new Date(complaint.createdAt), 'dd MMM yyyy')}</span>
-                    <span>📂 {complaint.category}</span>
+                    <span>▦ {format(new Date(complaint.createdAt), 'dd MMM yyyy')}</span>
+                    <span>▤ {complaint.category}</span>
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>

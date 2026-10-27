@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../components/Navbar';
+import UiIcon from '../components/UiIcon';
 import useAuthStore from '../hooks/useAuthStore';
 import useTranslationStore from '../hooks/useTranslationStore';
 import toast from 'react-hot-toast';
@@ -14,7 +15,7 @@ const SCENARIOS = [
     category: 'PHISHING & PUNYCODE',
     timeEstimate: '1 min',
     points: 100,
-    icon: '🔍',
+    icon: '⌕',
     difficulty: 'EASY',
     description: 'A customer received an urgent SMS claiming their net banking is locked. Inspect the browser mockup below and identify the critical security red flag.',
     mockupType: 'browser',
@@ -41,7 +42,7 @@ const SCENARIOS = [
     category: 'SMISHING & UPI FRAUD',
     timeEstimate: '1 min',
     points: 100,
-    icon: '📱',
+    icon: '⌕',
     difficulty: 'MEDIUM',
     description: 'You receive an urgent SMS at 8:15 PM regarding electricity disconnection. Analyze the message and choose the safe protocol.',
     mockupType: 'phone',
@@ -65,7 +66,7 @@ const SCENARIOS = [
     category: 'MALWARE & RANSOMWARE',
     timeEstimate: '1 min',
     points: 100,
-    icon: '⚠️',
+    icon: '!',
     difficulty: 'MEDIUM',
     description: 'Your inbox received an unexpected email with a high-priority financial attachment. Examine the email headers and attachment filename.',
     mockupType: 'email',
@@ -90,7 +91,7 @@ const SCENARIOS = [
     category: 'INVESTMENT & TASK FRAUD',
     timeEstimate: '1 min',
     points: 100,
-    icon: '💼',
+    icon: '▣',
     difficulty: 'EASY',
     description: 'A stranger contacts you on WhatsApp offering ₹3,000/day for liking YouTube videos and following Instagram influencers.',
     mockupType: 'chat',
@@ -114,7 +115,7 @@ const SCENARIOS = [
     category: 'NETWORK DEFENSE',
     timeEstimate: '1 min',
     points: 100,
-    icon: '📶',
+    icon: '⌁',
     difficulty: 'HARD',
     description: 'While waiting at a busy airport terminal, your laptop detects two open Wi-Fi networks. Analyze the safest way to connect.',
     mockupType: 'wifi',
@@ -195,7 +196,7 @@ export default function Learn() {
   // Share badge via Web Share API or clipboard fallback
   const handleShareBadge = async () => {
     const shareUrl = window.location.origin + '/learn?cert=' + certId;
-    const shareText = `I just earned my Official Cyber Defender Certificate from CyberGuard! 🛡️ Verified ID: ${certId}. Take the challenge yourself!`;
+    const shareText = `I just earned my Official Cyber Defender Certificate from CyberGuard! Verified ID: ${certId}. Take the challenge yourself!`;
     
     if (navigator.share) {
       try {
@@ -294,10 +295,10 @@ export default function Learn() {
   };
 
   const getRank = () => {
-    if (xp >= 550) return { title: 'Master Cyber Defender', badge: '🏅', color: '#00FFD1' };
-    if (xp >= 350) return { title: 'Sentinel Cyber Guard', badge: '🛡️', color: '#00B4FF' };
-    if (xp >= 200) return { title: 'Cyber Intelligence Scout', badge: '⚡', color: '#FFD600' };
-    return { title: 'Cadet Cyber Defender', badge: '🔰', color: '#8892B0' };
+    if (xp >= 550) return { title: 'Master Cyber Defender', badge: '◆', color: '#00FFD1' };
+    if (xp >= 350) return { title: 'Sentinel Cyber Guard', badge: '◈', color: '#00B4FF' };
+    if (xp >= 200) return { title: 'Cyber Intelligence Scout', badge: '»', color: '#FFD600' };
+    return { title: 'Cadet Cyber Defender', badge: '◈', color: '#8892B0' };
   };
 
   const rank = getRank();
@@ -350,7 +351,7 @@ export default function Learn() {
               textTransform: 'uppercase',
               marginBottom: 12
             }}>
-              <span>🎮</span> {t('LEARN.TITLE', 'Gamified Cyber Awareness Hub')}
+              <span>▶</span> {t('LEARN.TITLE', 'Gamified Cyber Awareness Hub')}
             </div>
             <h1 style={{
               fontSize: '2.8rem',
@@ -380,7 +381,7 @@ export default function Learn() {
             alignItems: 'center'
           }}>
             <div style={{ textAlign: 'center', paddingRight: 16, borderRight: '1px solid rgba(255,255,255,0.1)' }}>
-              <div style={{ fontSize: 24 }}>{rank.badge}</div>
+              <UiIcon name="shield" size={24} label={`${rank.title} badge`} />
               <div style={{ fontSize: 11, fontWeight: 700, color: rank.color, textTransform: 'uppercase', marginTop: 4 }}>
                 {rank.title}
               </div>
@@ -449,7 +450,7 @@ export default function Learn() {
                   fontSize: 14,
                   fontWeight: 800
                 }}>
-                  {isDone ? '✓' : idx + 1}
+                  {isDone ? 'v' : idx + 1}
                 </div>
                 <div style={{ overflow: 'hidden' }}>
                   <div style={{ fontSize: 10, color: '#00B4FF', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>
@@ -509,7 +510,7 @@ export default function Learn() {
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap'
               }}>
-                <span>⚠️ Insecure:</span> {currentScenario.url || 'sms://vk-pwrdis/thread'}
+                <span>! Insecure:</span> {currentScenario.url || 'sms://vk-pwrdis/thread'}
               </div>
             </div>
 
@@ -526,7 +527,7 @@ export default function Learn() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #0056B3', paddingBottom: 12, marginBottom: 16 }}>
                     <div style={{ fontWeight: 900, color: '#0056B3', fontSize: 18 }}>{currentScenario.browserContent.bankName}</div>
                     <div style={{ fontSize: 11, background: '#FFEBEB', color: '#D32F2F', padding: '4px 8px', borderRadius: 4, fontWeight: 700 }}>
-                      ⚠️ VERIFY SESSION
+                      ! VERIFY SESSION
                     </div>
                   </div>
                   <div style={{ background: '#FFF3CD', borderLeft: '4px solid #FFC107', padding: '10px 14px', fontSize: 12, fontWeight: 700, color: '#856404', marginBottom: 16 }}>
@@ -573,7 +574,7 @@ export default function Learn() {
                     {currentScenario.phoneMessage.text}
                   </div>
                   <div style={{ marginTop: 14, textAlign: 'center', fontSize: 11, color: '#FF453A', fontWeight: 600 }}>
-                    ⚠️ Sender unverified. Contains executable link.
+                    ! Sender unverified. Contains executable link.
                   </div>
                 </div>
               )}
@@ -601,7 +602,7 @@ export default function Learn() {
                     justifyContent: 'space-between'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <span style={{ fontSize: 24 }}>📄</span>
+                      <span style={{ fontSize: 24 }}>▤</span>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 700, color: '#FF453A', fontFamily: 'monospace' }}>
                           {currentScenario.emailData.attachment}
@@ -666,7 +667,7 @@ export default function Learn() {
                       }}>
                         <span style={{ fontSize: 12, fontWeight: 600 }}>{net.name}</span>
                         <span style={{ fontSize: 11, fontWeight: 700, color: net.secure ? '#00FFD1' : '#FF453A' }}>
-                          {net.secure ? '🔒 Authenticated' : '⚠️ Open / No Password'}
+                          {net.secure ? '◇ Authenticated' : '! Open / No Password'}
                         </span>
                       </div>
                     ))}
@@ -782,7 +783,7 @@ export default function Learn() {
                   }}
                 >
                   <strong style={{ color: '#00B4FF', display: 'block', marginBottom: 4 }}>
-                    🛡️ Forensic Security Insight:
+                    <UiIcon name="investigator-protocol" size={16} /> Forensic Security Insight:
                   </strong>
                   {currentScenario.explanation}
                 </motion.div>
@@ -830,7 +831,7 @@ export default function Learn() {
                         cursor: 'pointer'
                       }}
                     >
-                      {t('LEARN.NEXT_QUESTION', 'NEXT SCENARIO')} ➔
+                      {t('LEARN.NEXT_QUESTION', 'NEXT SCENARIO')} ->
                     </button>
                   ) : (
                     <button
@@ -850,7 +851,7 @@ export default function Learn() {
                         boxShadow: '0 0 30px rgba(255, 214, 0, 0.4)'
                       }}
                     >
-                      🏅 {t('LEARN.CLAIM_BADGE', 'CLAIM CYBER DEFENDER CERTIFICATE')}
+                      <UiIcon name="personnel-directory" size={18} /> {t('LEARN.CLAIM_BADGE', 'CLAIM CYBER DEFENDER CERTIFICATE')}
                     </button>
                   )}
                 </div>
@@ -874,7 +875,7 @@ export default function Learn() {
         }}>
           <div>
             <div style={{ fontSize: 12, color: '#FFD600', fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 8 }}>
-              🌟 OFFICIAL CREDENTIAL VERIFICATION
+              <UiIcon name="personnel-directory" size={16} /> OFFICIAL CREDENTIAL VERIFICATION
             </div>
             <h3 style={{ fontSize: '1.8rem', fontWeight: 800, margin: '0 0 8px 0' }}>
               Cyber Defender National Certification
@@ -900,7 +901,7 @@ export default function Learn() {
               boxShadow: '0 0 30px rgba(0, 255, 209, 0.3)'
             }}
           >
-            📜 {t('LEARN.VIEW_CERTIFICATE', 'VIEW DEFENDER CERTIFICATE')}
+            <UiIcon name="document" size={18} /> {t('LEARN.VIEW_CERTIFICATE', 'VIEW DEFENDER CERTIFICATE')}
           </button>
         </div>
       </div>
@@ -957,7 +958,7 @@ export default function Learn() {
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
-              <span style={{ fontSize: 16, lineHeight: 1 }}>✕</span>
+              <span style={{ fontSize: 16, lineHeight: 1 }}>x</span>
               <span>CLOSE</span>
             </button>
 
@@ -1006,7 +1007,7 @@ export default function Learn() {
                   e.currentTarget.style.color = '#FF3B30';
                 }}
               >
-                ✕
+                x
               </button>
 
               {/* ====== CERTIFICATE DESIGN ====== */}
@@ -1047,7 +1048,7 @@ export default function Learn() {
                       opacity: 0.03,
                       pointerEvents: 'none',
                       lineHeight: 1
-                    }}>🛡️</div>
+                    }}>◈</div>
 
                     {/* Header Section */}
                     <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
@@ -1065,7 +1066,7 @@ export default function Learn() {
                         border: '2px solid rgba(255, 215, 0, 0.3)',
                         boxShadow: '0 0 30px rgba(255, 215, 0, 0.15), inset 0 0 20px rgba(0, 180, 255, 0.1)'
                       }}>
-                        🛡️
+                        ◈
                       </div>
 
                       {/* Organization */}
@@ -1352,7 +1353,7 @@ export default function Learn() {
                   onMouseOver={e => !downloading && (e.currentTarget.style.transform = 'translateY(-2px)')}
                   onMouseOut={e => !downloading && (e.currentTarget.style.transform = 'translateY(0)')}
                 >
-                  {downloading ? '⏳ Rendering...' : '📄 Download Certificate'}
+                  {downloading ? '… Rendering...' : '▤ Download Certificate'}
                 </button>
                 <button
                   onClick={handleShareBadge}
@@ -1373,7 +1374,7 @@ export default function Learn() {
                   onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                   onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
-                  🔗 Share Badge
+                  ↗ Share Badge
                 </button>
                 <button
                   onClick={() => setShowCertModal(false)}
@@ -1394,7 +1395,7 @@ export default function Learn() {
                   onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,59,48,0.25)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                   onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,59,48,0.12)'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
-                  ✕ Close Window
+                  x Close Window
                 </button>
               </div>
             </motion.div>
