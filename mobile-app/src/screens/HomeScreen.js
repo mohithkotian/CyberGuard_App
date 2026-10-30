@@ -100,7 +100,7 @@ export default function HomeScreen({ navigation }) {
           style={styles.sosButton}
           onPress={handleCallSOS}
         >
-          <Text style={{ fontSize: 13 }}>🚨</Text>
+          <Text style={{ fontSize: 13 }}>!</Text>
           <Text style={styles.sosText}>1930</Text>
         </TouchableOpacity>
       </View>
@@ -108,12 +108,12 @@ export default function HomeScreen({ navigation }) {
       {/* Quick Action Matrix */}
       <View style={styles.actionMatrix}>
         {[
-          { label: 'REPORT INCIDENT', icon: '📝', screen: 'Submit', color: colors.accent },
-          { label: 'TRACK DOSSIER',   icon: '🔍', screen: 'Track',  color: colors.cyber },
-          { label: 'SCAM RADAR',      icon: '🛡️', screen: 'ScamSearch', color: colors.warn },
-          { label: 'FORENSIC SCAN',   icon: '🧪', screen: 'Forensics', color: '#A855F7' },
-          { label: 'THREAT MAP',      icon: '🌐', screen: 'ThreatRadar', color: colors.success },
-          { label: 'DEFENSE CHAT',    icon: '💬', screen: 'Comms', color: '#EC4899' },
+          { label: 'REPORT INCIDENT', icon: '▤', screen: 'Submit', color: colors.accent },
+          { label: 'TRACK DOSSIER',   icon: '⌕', screen: 'Track',  color: colors.cyber },
+          { label: 'SCAM RADAR',      icon: '◈', screen: 'ScamSearch', color: colors.warn },
+          { label: 'FORENSIC SCAN',   icon: '◈', screen: 'Forensics', color: '#A855F7' },
+          { label: 'THREAT MAP',      icon: '◉', screen: 'ThreatRadar', color: colors.success },
+          { label: 'DEFENSE CHAT',    icon: '@', screen: 'Comms', color: '#EC4899' },
         ].map((act, i) => (
           <TouchableOpacity 
             key={i} 
@@ -130,7 +130,7 @@ export default function HomeScreen({ navigation }) {
 
       {/* Live Telemetry Ticker */}
       <View style={[globalStyles.glassCard, { marginTop: 10, padding: 14 }]}>
-        <Text style={globalStyles.sectionTitle}>⚡ LIVE THREAT TELEMETRY</Text>
+        <Text style={globalStyles.sectionTitle}>» LIVE THREAT TELEMETRY</Text>
         <View style={styles.statsRow}>
           <View style={styles.statCol}>
             <Text style={[styles.statVal, { color: colors.cyber }]}>
@@ -162,11 +162,11 @@ export default function HomeScreen({ navigation }) {
 
       {/* Incident Stream Search & Tabs */}
       <View style={{ marginTop: 14 }}>
-        <Text style={globalStyles.sectionTitle}>📡 INCIDENT FEED & DOSSIERS</Text>
+        <Text style={globalStyles.sectionTitle}>⌁ INCIDENT FEED & DOSSIERS</Text>
         
         {/* Search Bar */}
         <View style={styles.searchContainer}>
-          <Text style={{ fontSize: 14, marginRight: 8 }}>🔍</Text>
+          <Text style={{ fontSize: 14, marginRight: 8 }}>⌕</Text>
           <TextInput
             style={styles.searchInput}
             placeholder="Search by ID, keyword, or category..."
@@ -176,7 +176,7 @@ export default function HomeScreen({ navigation }) {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Text style={{ color: colors.muted, fontSize: 14 }}>✕</Text>
+              <Text style={{ color: colors.muted, fontSize: 14 }}>x</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -253,7 +253,7 @@ export default function HomeScreen({ navigation }) {
         ListEmptyComponent={
           !loading && (
             <View style={[globalStyles.glassCard, { alignItems: 'center', padding: 30, marginTop: 10 }]}>
-              <Text style={{ fontSize: 32, marginBottom: 8 }}>📡</Text>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>⌁</Text>
               <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '900' }}>NO INCIDENTS MATCH FILTER</Text>
               <Text style={{ color: colors.muted, fontSize: 11, textAlign: 'center', marginTop: 4 }}>
                 Try selecting a different status tab or search query.

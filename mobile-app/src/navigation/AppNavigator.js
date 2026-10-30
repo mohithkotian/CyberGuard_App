@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import useAuthStore from '../hooks/useAuthStore';
 import { colors } from '../utils/theme';
+import IconGlyph from '../components/IconGlyph';
 
 // Screens
 import LoginScreen           from '../screens/LoginScreen';
@@ -52,17 +53,16 @@ function UserTabs() {
           letterSpacing: 0.5,
         },
         tabBarIcon: ({ focused, color }) => {
-          let icon = '📡';
-          if (route.name === 'Home') icon = '📡';
-          else if (route.name === 'Submit') icon = '📝';
-          else if (route.name === 'ScamSearch') icon = '🛡️';
-          else if (route.name === 'Comms') icon = '💬';
-          else if (route.name === 'Profile') icon = '⚙️';
-          else if (route.name === 'Admin') icon = '⚡';
+          let icon = 'home';
+          if (route.name === 'Submit') icon = 'report';
+          else if (route.name === 'ScamSearch') icon = 'radar';
+          else if (route.name === 'Comms') icon = 'chat';
+          else if (route.name === 'Profile') icon = 'settings';
+          else if (route.name === 'Admin') icon = 'shield';
 
           return (
             <View style={[styles.tabIconWrap, focused && styles.tabIconWrapActive]}>
-              <Text style={{ fontSize: 18 }}>{icon}</Text>
+              <IconGlyph name={icon} size={20} color={focused ? colors.accent : '#5A6E8C'} label={`${route.name} navigation`} />
             </View>
           );
         },

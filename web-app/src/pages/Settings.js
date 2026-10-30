@@ -133,7 +133,7 @@ const Settings = () => {
       !settings.instantPurge 
         ? 'Instant Purge Activated: Sessions will self-destruct on idle.'
         : 'Instant Purge Deactivated.',
-      { icon: !settings.instantPurge ? '🔥' : '🛡️' }
+      { icon: !settings.instantPurge ? '!' : '◈' }
     );
   };
 
@@ -215,12 +215,12 @@ const Settings = () => {
   };
 
   const tabs = [
-    { id: 'about', label: t('SETTINGS.PROFILE', 'About Me'), icon: '👤' },
-    { id: 'notifications', label: t('SETTINGS.NOTIFICATIONS', 'Notifications'), icon: '🔔' },
-    { id: 'theme', label: t('SETTINGS.APPEARANCE', 'Display & Theme'), icon: '🎨' },
-    { id: 'language', label: t('SETTINGS.LANGUAGE_TAB', 'Language'), icon: '🌐' },
-    { id: 'internet', label: 'Internet & Connection', icon: '📡' },
-    { id: 'security', label: t('SETTINGS.SECURITY', 'Security'), icon: '🛡️' },
+    { id: 'about', label: t('SETTINGS.PROFILE', 'About Me'), icon: <img src="/icons/cyberguard/profile-user.svg" alt="" style={{ width: 20, height: 20, objectFit: "contain", verticalAlign: "middle" }} /> },
+    { id: 'notifications', label: t('SETTINGS.NOTIFICATIONS', 'Notifications'), icon: '•' },
+    { id: 'theme', label: t('SETTINGS.APPEARANCE', 'Display & Theme'), icon: '◈' },
+    { id: 'language', label: t('SETTINGS.LANGUAGE_TAB', 'Language'), icon: '◉' },
+    { id: 'internet', label: 'Internet & Connection', icon: '⌁' },
+    { id: 'security', label: t('SETTINGS.SECURITY', 'Security'), icon: '◈' },
   ];
 
   const renderContent = () => {
@@ -466,7 +466,7 @@ const Settings = () => {
               justifyContent: 'space-between'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <span style={{ fontSize: '24px' }}>🛡️</span>
+                <span style={{ fontSize: '24px' }}>◈</span>
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>
                     Instant Real-Time Localization

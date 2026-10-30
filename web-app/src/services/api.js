@@ -26,7 +26,7 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config;
 
-    // 🛡️ SKIP refresh logic for login/register/refresh endpoints to avoid infinite loops
+    // SECURITY️ SKIP refresh logic for login/register/refresh endpoints to avoid infinite loops
     const isAuthPath = originalRequest.url.includes('/auth/login') ||
       originalRequest.url.includes('/auth/register') ||
       originalRequest.url.includes('/auth/refresh');

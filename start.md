@@ -257,19 +257,19 @@ Open: **http://localhost:3000**
 
 ## Common Errors & Fixes
 
-### ❌ `Error: accountSid must start with AC`
+### [ERROR] `Error: accountSid must start with AC`
 **Cause:** `TWILIO_ACCOUNT_SID` is a placeholder value in `.env`.  
 **Fix:** Either add a real Twilio SID starting with `AC`, or leave `TWILIO_ACCOUNT_SID=` empty. The app skips SMS gracefully.
 
 ---
 
-### ❌ `MONGODB_URI is not defined`
+### [ERROR] `MONGODB_URI is not defined`
 **Cause:** `backend/.env` is missing or not in the `backend/` directory.  
 **Fix:** Ensure the file is at `backend/.env` (not the root).
 
 ---
 
-### ❌ `ModuleNotFoundError: No module named 'classifier'`
+### [ERROR] `ModuleNotFoundError: No module named 'classifier'`
 **Cause:** ML service started from the wrong directory (Flask reloader loses `src/` in PATH).  
 **Fix:** Always start with:
 ```powershell
@@ -279,7 +279,7 @@ from inside the `ml-service/` directory.
 
 ---
 
-### ❌ `LookupError: Resource 'punkt_tab' not found`
+### [ERROR] `LookupError: Resource 'punkt_tab' not found`
 **Cause:** NLTK data not downloaded.  
 **Fix:**
 ```powershell
@@ -288,7 +288,7 @@ python -c "import nltk; nltk.download('punkt_tab'); nltk.download('stopwords'); 
 
 ---
 
-### ❌ `Model not loaded. Run train_model.py first.`
+### [ERROR] `Model not loaded. Run train_model.py first.`
 **Cause:** `ml-service/models/classifier.pkl` does not exist.  
 **Fix:**
 ```powershell
@@ -299,7 +299,7 @@ python train_model.py
 
 ---
 
-### ❌ Web app: `ECONNRESET` during `npm install`
+### [ERROR] Web app: `ECONNRESET` during `npm install`
 **Cause:** Transient network drop during large dependency download.  
 **Fix:** Retry with:
 ```powershell
@@ -308,7 +308,7 @@ npm install --prefer-offline --no-audit
 
 ---
 
-### ❌ JARVIS returns `GEMINI_API_KEY is not configured`
+### [ERROR] JARVIS returns `GEMINI_API_KEY is not configured`
 **Cause:** `GEMINI_API_KEY` is empty in `backend/.env`.  
 **Fix:** Add your Google Gemini API key:
 1. Go to https://aistudio.google.com/app/apikey
@@ -317,7 +317,7 @@ npm install --prefer-offline --no-audit
 
 ---
 
-### ❌ Admin seeding fails with `Invalid Indian phone number`
+### [ERROR] Admin seeding fails with `Invalid Indian phone number`
 **Cause:** The default phone in database.js was `0000000000` (not a valid Indian number).  
 **Status:** Already fixed in this repo — phone is now `9000000000`.
 

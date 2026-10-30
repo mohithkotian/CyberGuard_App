@@ -13,12 +13,12 @@ export const connectSocket = (userId, isAdmin = false) => {
   });
 
   socket.on('connect', () => {
-    console.log('🔌 Socket connected');
+    console.log('Socket connected');
     if (userId) socket.emit('join-room', userId);
     if (isAdmin) socket.emit('join-admin');
   });
 
-  socket.on('disconnect', () => console.log('🔌 Socket disconnected'));
+  socket.on('disconnect', () => console.log('Socket disconnected'));
   return socket;
 };
 

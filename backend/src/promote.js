@@ -18,9 +18,9 @@ const promoteUser = async (email) => {
       { new: true }
     );
     if (user) {
-      console.log(`✅ User ${email} promoted to admin!`);
+      console.log(`[OK] User ${email} promoted to admin!`);
     } else {
-      console.log(`❌ User ${email} not found.`);
+      console.log(`[ERROR] User ${email} not found.`);
     }
     await mongoose.disconnect();
   } catch (error) {

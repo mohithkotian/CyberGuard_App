@@ -21,8 +21,6 @@ scratch/*
 /Icon?
 /Icon*
 
-
-
 # Dependencies & Build
 node_modules/
 **/node_modules/

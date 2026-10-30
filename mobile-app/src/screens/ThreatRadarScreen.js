@@ -62,25 +62,25 @@ export default function ThreatRadarScreen({ navigation }) {
         {/* Core Radar KPIs */}
         <View style={styles.kpiGrid}>
           <View style={[globalStyles.glassCard, styles.kpiCard]}>
-            <Text style={{ fontSize: 20 }}>📡</Text>
+            <Text style={{ fontSize: 20 }}>⌁</Text>
             <Text style={[styles.kpiValue, { color: colors.cyber }]}>{overview?.totalComplaints || total}</Text>
             <Text style={styles.kpiLabel}>TOTAL INCIDENTS</Text>
           </View>
 
           <View style={[globalStyles.glassCard, styles.kpiCard]}>
-            <Text style={{ fontSize: 20 }}>⚡</Text>
+            <Text style={{ fontSize: 20 }}>»</Text>
             <Text style={[styles.kpiValue, { color: colors.warn }]}>{overview?.underReviewComplaints || overview?.pendingComplaints || 6}</Text>
             <Text style={styles.kpiLabel}>ACTIVE INVESTIGATIONS</Text>
           </View>
 
           <View style={[globalStyles.glassCard, styles.kpiCard]}>
-            <Text style={{ fontSize: 20 }}>🛡️</Text>
+            <Text style={{ fontSize: 20 }}>◈</Text>
             <Text style={[styles.kpiValue, { color: colors.success }]}>{overview?.resolvedComplaints || 14}</Text>
             <Text style={styles.kpiLabel}>RESOLVED CASES</Text>
           </View>
 
           <View style={[globalStyles.glassCard, styles.kpiCard]}>
-            <Text style={{ fontSize: 20 }}>🚨</Text>
+            <Text style={{ fontSize: 20 }}>!</Text>
             <Text style={[styles.kpiValue, { color: colors.danger }]}>{overview?.criticalComplaints || 4}</Text>
             <Text style={styles.kpiLabel}>HIGH SEVERITY</Text>
           </View>
@@ -88,7 +88,7 @@ export default function ThreatRadarScreen({ navigation }) {
 
         {/* Threat Categories Breakdown */}
         <View style={[globalStyles.glassCard, { marginTop: 10 }]}>
-          <Text style={globalStyles.sectionTitle}>🎯 CATEGORY DISTRIBUTION (CLOUD DB)</Text>
+          <Text style={globalStyles.sectionTitle}>◆ CATEGORY DISTRIBUTION (CLOUD DB)</Text>
           <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: 14 }}>
             Proportion of reported cyber vectors classified by AI neural engine.
           </Text>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { analyticsAPI } from '../services/api';
 import Navbar from '../components/Navbar';
+import UiIcon from '../components/UiIcon';
 import toast from 'react-hot-toast';
 
 /* ───────── STATIC FORENSIC DATABASE ───────── */
@@ -81,10 +82,10 @@ const OTHER_THREATS = [
 
 /* ───────── TAB CONFIG ───────── */
 const TABS = [
-  { id: 'phones', label: 'Scam Phone Numbers', icon: '📱', color: '#FF3B30', glow: 'rgba(255,59,48,0.15)' },
-  { id: 'phishing', label: 'Phishing Links', icon: '🔗', color: '#FF9500', glow: 'rgba(255,149,0,0.15)' },
-  { id: 'other', label: 'Other Threats', icon: '⚠️', color: '#B026FF', glow: 'rgba(176,38,255,0.15)' },
-  { id: 'ocr', label: 'OCR Identifiers', icon: '🔍', color: '#00B4FF', glow: 'rgba(0,180,255,0.15)' },
+  { id: 'phones', label: 'Scam Phone Numbers', icon: 'scam-phone-tab', color: '#FF3B30', glow: 'rgba(255,59,48,0.15)' },
+  { id: 'phishing', label: 'Phishing Links', icon: 'phishing-links', color: '#FF9500', glow: 'rgba(255,149,0,0.15)' },
+  { id: 'other', label: 'Other Threats', icon: 'other-threats', color: '#B026FF', glow: 'rgba(176,38,255,0.15)' },
+  { id: 'ocr', label: 'OCR Identifiers', icon: 'ocr-identifiers', color: '#00B4FF', glow: 'rgba(0,180,255,0.15)' },
 ];
 
 const RISK_COLORS = {
@@ -273,7 +274,7 @@ export default function AdminLinkAnalysis() {
                   boxShadow: active ? `0 4px 20px ${tab.color}22` : 'none',
                 }}
               >
-                <span style={{ fontSize: 18 }}>{tab.icon}</span>
+                <UiIcon name={tab.icon} size={20} label={tab.label} />
                 {tab.label}
               </motion.button>
             );
@@ -288,7 +289,7 @@ export default function AdminLinkAnalysis() {
         }}>
           {/* Search */}
           <div style={{ position: 'relative', flex: 1, minWidth: 260 }}>
-            <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>🔍</span>
+            <UiIcon name="link-search" size={16} decorative style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
@@ -325,9 +326,9 @@ export default function AdminLinkAnalysis() {
             <div style={{ display: 'flex', gap: 6 }}>
               {[
                 { id: 'all', label: 'All Regions' },
-                { id: 'india', label: '🇮🇳 India' },
-                { id: 'na', label: '🇺🇸 North America' },
-                { id: 'voip', label: '📡 VoIP' },
+                { id: 'india', label: 'IN India' },
+                { id: 'na', label: 'NA North America' },
+                { id: 'voip', label: '⌁ VoIP' },
               ].map(r => (
                 <button
                   key={r.id}
@@ -418,7 +419,7 @@ export default function AdminLinkAnalysis() {
                                 color: phone.region === 'India' ? '#FF9500' : phone.region === 'Unknown' ? '#FF3B30' : '#00B4FF',
                                 border: `1px solid ${phone.region === 'India' ? 'rgba(255,149,0,0.3)' : phone.region === 'Unknown' ? 'rgba(255,59,48,0.3)' : 'rgba(0,180,255,0.3)'}`,
                               }}>
-                                {phone.region === 'India' ? '🇮🇳 India' : phone.region === 'Unknown' ? '📡 VoIP' : '🇺🇸 North America'}
+                                {phone.region === 'India' ? 'IN India' : phone.region === 'Unknown' ? '⌁ VoIP' : 'NA North America'}
                               </span>
                             </td>
                             <td style={{ padding: '18px 24px', fontSize: 13, color: '#E2E8F0', fontWeight: 500 }}>
@@ -490,7 +491,7 @@ export default function AdminLinkAnalysis() {
                                   background: 'rgba(255,149,0,0.1)', border: '1px solid rgba(255,149,0,0.25)',
                                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
                                   flexShrink: 0,
-                                }}>🔗</div>
+                                }}>↗</div>
                                 <div>
                                   <div style={{ fontSize: 14, fontWeight: 700, color: '#FF9500', wordBreak: 'break-all' }}>
                                     {link.domain}
@@ -530,7 +531,7 @@ export default function AdminLinkAnalysis() {
                                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,149,0,0.12)'; e.currentTarget.style.color = '#FF9500'; }}
                                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
                               >
-                                📋 Copy
+                                ⧉ Copy
                               </button>
                             </td>
                           </motion.tr>
@@ -608,7 +609,7 @@ export default function AdminLinkAnalysis() {
                   {/* OCR Phones */}
                   <div>
                     <h3 style={{ fontSize: 14, fontWeight: 800, color: 'rgba(255,255,255,0.3)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, letterSpacing: 1, textTransform: 'uppercase' }}>
-                      <span style={{ fontSize: 22 }}>📱</span> OCR-EXTRACTED PHONE NUMBERS ({ocrLinks.phones?.length || 0})
+                      <UiIcon name="extracted-phones" size={22} /> OCR-EXTRACTED PHONE NUMBERS ({ocrLinks.phones?.length || 0})
                     </h3>
                     {(!ocrLinks.phones || ocrLinks.phones.length === 0) ? (
                       <div style={{ color: 'rgba(255,255,255,0.3)', padding: 48, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 24, textAlign: 'center', fontSize: 14 }}>
@@ -638,7 +639,7 @@ export default function AdminLinkAnalysis() {
                   {/* OCR UPIs */}
                   <div>
                     <h3 style={{ fontSize: 14, fontWeight: 800, color: 'rgba(255,255,255,0.3)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10, letterSpacing: 1, textTransform: 'uppercase' }}>
-                      <span style={{ fontSize: 22 }}>💳</span> OCR-EXTRACTED UPI IDENTIFIERS ({ocrLinks.upis?.length || 0})
+                      <UiIcon name="payment-identifiers" size={22} /> OCR-EXTRACTED UPI IDENTIFIERS ({ocrLinks.upis?.length || 0})
                     </h3>
                     {(!ocrLinks.upis || ocrLinks.upis.length === 0) ? (
                       <div style={{ color: 'rgba(255,255,255,0.3)', padding: 48, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 24, textAlign: 'center', fontSize: 14 }}>
@@ -732,7 +733,7 @@ export default function AdminLinkAnalysis() {
           boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
         }}>
           <h4 style={{ margin: '0 0 14px 0', fontSize: 13, color: '#FF3B30', fontWeight: 800, letterSpacing: 1, fontFamily: 'Orbitron, monospace' }}>
-            🛡️ INVESTIGATOR PROTOCOL
+            <UiIcon name="investigator-protocol" size={18} /> INVESTIGATOR PROTOCOL
           </h4>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.7, margin: 0 }}>
             This forensics database aggregates intelligence from multiple sources: OCR-extracted identifiers from uploaded evidence, curated scam phone number registries, and known phishing domain blacklists. All identifiers should be cross-referenced against original evidence before initiating legal action. Multiple independent reports against the same identifier indicate high-confidence serial criminal activity.

@@ -24,7 +24,7 @@ const connectDB = async () => {
       socketTimeoutMS: 45000,
     });
 
-    logger.info(`✅ MongoDB Connected: ${conn.connection.host}`);
+    logger.info(`[OK] MongoDB Connected: ${conn.connection.host}`);
 
     // Reconnection & Error Listeners
     mongoose.connection.on('error', (err) => {
@@ -45,7 +45,7 @@ const connectDB = async () => {
 
     return conn;
   } catch (error) {
-    logger.error(`❌ MongoDB connection failed: ${error.message}`);
+    logger.error(`[ERROR] MongoDB connection failed: ${error.message}`);
     // We exit here because the app cannot function without the DB
     process.exit(1);
   }
@@ -67,7 +67,7 @@ const seedAdmin = async () => {
       isVerified: true,
       phone: '9000000000',   // placeholder; real admin can update via profile
     });
-    logger.info('✅ Admin user seeded successfully');
+    logger.info('[OK] Admin user seeded successfully');
   }
 };
 

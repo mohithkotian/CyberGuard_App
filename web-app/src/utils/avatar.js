@@ -30,7 +30,7 @@ export const getAvatarUrl = (avatar, timestamp = null) => {
 };
 
 export const getAvatarFallback = (name, isOwner = false) => {
-  if (isOwner) return '👑';
+  if (isOwner) return '◆';
   if (!name || typeof name !== 'string') return 'U';
   return name.trim().charAt(0).toUpperCase() || 'U';
 };

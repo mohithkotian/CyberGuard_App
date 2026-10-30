@@ -2,11 +2,11 @@
 // Supports English (en), Hindi (hi), Kannada (kn), Tamil (ta), and Telugu (te)
 
 export const SUPPORTED_LANGUAGES = [
-  { code: 'en', name: 'English', nativeName: 'English', flag: '🌐', region: 'Global / National' },
-  { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', flag: '🇮🇳', region: 'National / Northern' },
-  { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ', flag: '🟡🔴', region: 'Karnataka' },
-  { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்', flag: '🏛️', region: 'Tamil Nadu' },
-  { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', flag: '⚡', region: 'Andhra / Telangana' }
+  { code: 'en', name: 'English', nativeName: 'English', flag: 'Global', region: 'Global / National' },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिंदी', flag: 'IN', region: 'National / Northern' },
+  { code: 'kn', name: 'Kannada', nativeName: 'ಕನ್ನಡ', flag: 'KN', region: 'Karnataka' },
+  { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்', flag: 'TA', region: 'Tamil Nadu' },
+  { code: 'te', name: 'Telugu', nativeName: 'తెలుగు', flag: 'TG', region: 'Andhra / Telangana' }
 ];
 
 export const translations = {

@@ -226,7 +226,7 @@ export default function SuspectSearch() {
                       alignItems: 'center', justifyContent: 'center', fontSize: '10px',
                       fontWeight: 'bold', zIndex: 1, boxShadow: '0 0 10px rgba(0, 180, 255, 0.5)'
                     }}>
-                      ✓
+                      v
                     </div>
                   )}
           <img src={`/icons/cyberguard/${cat.icon}`} alt="" style={{ width: 42, height: 42, objectFit: 'contain', marginBottom: '8px' }} />

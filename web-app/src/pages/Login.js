@@ -69,7 +69,7 @@ export default function Login() {
         animate={{ opacity: 1, y: 0 }}
         style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}
       >
-        {/* Branding */}
+        {/* CyberGuard brand mark for the admin/officer access gateway */}
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <div style={{ 
             width: 72, height: 72, borderRadius: '22px',

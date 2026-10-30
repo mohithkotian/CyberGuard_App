@@ -34,9 +34,9 @@ model_loaded = False
 try:
     classifier.load(MODEL_PATH, VECTORIZER_PATH)
     model_loaded = True
-    logger.info(f'✅ Advanced Cybercrime Model loaded successfully from: {MODEL_PATH}')
+    logger.info(f'[OK] Advanced Cybercrime Model loaded successfully from: {MODEL_PATH}')
 except Exception as e:
-    logger.warning(f'⚠️  Model not found — run train_model.py first. ({e})')
+    logger.warning(f'[WARN]️  Model not found — run train_model.py first. ({e})')
 
 @app.route('/health', methods=['GET'])
 def health():
@@ -104,5 +104,5 @@ def model_info():
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5003))
     debug = os.getenv('FLASK_ENV', 'development') == 'development'
-    logger.info(f'🚀 Cybercrime ML Microservice running on port {port}')
+    logger.info(f'[START] Cybercrime ML Microservice running on port {port}')
     app.run(host='0.0.0.0', port=port, debug=debug)

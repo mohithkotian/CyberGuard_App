@@ -496,7 +496,7 @@ export default function AdminUsers() {
                 transition: '0.2s'
               }}
             >
-              🔄 REFRESH
+              ↻ REFRESH
             </button>
 
             <button
@@ -515,7 +515,7 @@ export default function AdminUsers() {
                 gap: '8px'
               }}
             >
-              📥 CSV EXPORT
+              ⇩ CSV EXPORT
             </button>
 
             <button
@@ -534,7 +534,7 @@ export default function AdminUsers() {
                 gap: '8px'
               }}
             >
-              📄 JSON
+              ▤ JSON
             </button>
 
             <button
@@ -555,7 +555,7 @@ export default function AdminUsers() {
                 letterSpacing: '0.5px'
               }}
             >
-              <span>➕</span> ENROLL NEW PERSONNEL
+              <span>+</span> ENROLL NEW PERSONNEL
             </button>
           </div>
         </div>
@@ -593,7 +593,7 @@ export default function AdminUsers() {
               title: 'TOTAL REGISTERED',
               value: stats ? stats.total : total,
               sub: 'Across all clearance levels',
-              icon: '👥',
+              icon: <img src="/icons/cyberguard/admin/admin-personnel-directory.svg" alt="" style={{ width: 22, height: 22, objectFit: "contain", verticalAlign: "middle" }} />,
               color: '#00B4FF',
               bg: 'rgba(0, 180, 255, 0.05)',
               border: 'rgba(0, 180, 255, 0.2)'
@@ -602,7 +602,7 @@ export default function AdminUsers() {
               title: 'ACTIVE CITIZENS',
               value: stats ? stats.citizens : users.filter(u => u.role === 'user').length,
               sub: `${stats ? stats.active : '—'} active in network`,
-              icon: '🛡️',
+              icon: '◈',
               color: '#00FF88',
               bg: 'rgba(0, 255, 136, 0.05)',
               border: 'rgba(0, 255, 136, 0.2)'
@@ -611,7 +611,7 @@ export default function AdminUsers() {
               title: 'FIELD OFFICERS',
               value: stats ? stats.officers : users.filter(u => u.role === 'officer').length,
               sub: 'Law enforcement agents',
-              icon: '⭐',
+              icon: '◆',
               color: '#FFB800',
               bg: 'rgba(255, 184, 0, 0.05)',
               border: 'rgba(255, 184, 0, 0.2)'
@@ -620,7 +620,7 @@ export default function AdminUsers() {
               title: 'ADMINISTRATORS',
               value: stats ? stats.admins : users.filter(u => u.role === 'admin').length,
               sub: 'Command level access',
-              icon: '⚡',
+              icon: '»',
               color: '#AF52DE',
               bg: 'rgba(175, 82, 222, 0.05)',
               border: 'rgba(175, 82, 222, 0.2)'
@@ -629,7 +629,7 @@ export default function AdminUsers() {
               title: '2FA SHIELDED',
               value: stats ? stats.twoFactor : users.filter(u => u.isTwoFactorEnabled).length,
               sub: 'Multi-factor protected',
-              icon: '🔒',
+              icon: '◇',
               color: '#FF2D55',
               bg: 'rgba(255, 45, 85, 0.05)',
               border: 'rgba(255, 45, 85, 0.2)'
@@ -688,7 +688,7 @@ export default function AdminUsers() {
           {/* Search bar */}
           <div style={{ flex: '1 1 320px', position: 'relative' }}>
             <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>
-              🔍
+              ⌕
             </span>
             <input
               placeholder="Search by name, email, mobile phone, city, state..."
@@ -775,7 +775,7 @@ export default function AdminUsers() {
                   cursor: 'pointer'
                 }}
               >
-                📑 TABLE
+                ▤ TABLE
               </button>
               <button
                 onClick={() => setViewMode('cards')}
@@ -790,7 +790,7 @@ export default function AdminUsers() {
                   cursor: 'pointer'
                 }}
               >
-                🗂️ CARDS
+                ▤ CARDS
               </button>
             </div>
           </div>
@@ -805,7 +805,7 @@ export default function AdminUsers() {
             borderRadius: '32px',
             border: '1px solid rgba(255, 255, 255, 0.06)'
           }}>
-            <div style={{ fontSize: '32px', marginBottom: '16px' }}>⏳</div>
+            <div style={{ fontSize: '32px', marginBottom: '16px' }}>…</div>
             <div style={{ color: '#00B4FF', fontSize: '15px', fontWeight: 800, letterSpacing: '2px' }}>
               QUERYING PERSONNEL SURVEILLANCE DATABASE...
             </div>
@@ -818,7 +818,7 @@ export default function AdminUsers() {
             borderRadius: '32px',
             border: '1px solid rgba(255, 255, 255, 0.06)'
           }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
+            <div style={{ fontSize: '40px', marginBottom: '12px' }}>⌕</div>
             <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 8px 0' }}>No Personnel Records Found</h3>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', margin: 0 }}>
               No matches found for "{search}". Try adjusting your search query or clearance filter.
@@ -939,7 +939,7 @@ export default function AdminUsers() {
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
                             <span style={{ fontSize: '12px', color: u.phone ? '#00B4FF' : 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
-                              📞 {u.phone || 'No Mobile Registered'}
+                              ⌕ {u.phone || 'No Mobile Registered'}
                             </span>
                             {u.phone && (
                               <button
@@ -954,7 +954,7 @@ export default function AdminUsers() {
                                 }}
                                 title="Copy Phone"
                               >
-                                📋
+                                ⧉
                               </button>
                             )}
                           </div>
@@ -1028,14 +1028,14 @@ export default function AdminUsers() {
                                   color: '#00B4FF',
                                   border: '1px solid rgba(0, 180, 255, 0.3)',
                                 }}>
-                                  ✓ VERIFIED
+                                  v VERIFIED
                                 </span>
                               )}
                             </div>
 
                             {u.isTwoFactorEnabled && (
                               <span style={{ fontSize: '10px', color: '#FF2D55', fontWeight: 700 }}>
-                                🔒 2FA Protected
+                                ◇ 2FA Protected
                               </span>
                             )}
                           </div>
@@ -1072,7 +1072,7 @@ export default function AdminUsers() {
                                 transition: '0.2s'
                               }}
                             >
-                              👁️
+                              ◉
                             </button>
 
                             {/* Edit Profile */}
@@ -1091,7 +1091,7 @@ export default function AdminUsers() {
                                 transition: '0.2s'
                               }}
                             >
-                              ✏️ EDIT
+                              EDIT
                             </button>
 
                             {/* Reset Password */}
@@ -1110,7 +1110,7 @@ export default function AdminUsers() {
                                 transition: '0.2s'
                               }}
                             >
-                              🔑
+                              ◇
                             </button>
 
                             {/* Terminate / Restore Status */}
@@ -1151,7 +1151,7 @@ export default function AdminUsers() {
                                   transition: '0.2s'
                                 }}
                               >
-                                🗑️
+                                ⌫
                               </button>
                             )}
                           </div>
@@ -1319,7 +1319,7 @@ export default function AdminUsers() {
                         cursor: 'pointer'
                       }}
                     >
-                      ✏️ EDIT INFO
+                      EDIT INFO
                     </button>
 
                     <button
@@ -1335,7 +1335,7 @@ export default function AdminUsers() {
                         cursor: 'pointer'
                       }}
                     >
-                      🔑 PASSWORD
+                      ◇ PASSWORD
                     </button>
 
                     <button
@@ -1351,7 +1351,7 @@ export default function AdminUsers() {
                         cursor: 'pointer'
                       }}
                     >
-                      👁️ DOSSIER
+                      ◉ DOSSIER
                     </button>
 
                     {!isOwner ? (
@@ -1436,7 +1436,7 @@ export default function AdminUsers() {
                   onClick={() => setEditModalOpen(false)}
                   style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#fff', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer', fontSize: '16px' }}
                 >
-                  ✕
+                  x
                 </button>
               </div>
 
@@ -1855,7 +1855,7 @@ export default function AdminUsers() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#FFB800' }}>
-                    🔑 PASSWORD OVERRIDE
+                    ◇ PASSWORD OVERRIDE
                   </h2>
                   <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
                     Target: {selectedUser.name} ({selectedUser.email})
@@ -1865,7 +1865,7 @@ export default function AdminUsers() {
                   onClick={() => setPasswordModalOpen(false)}
                   style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#fff', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer' }}
                 >
-                  ✕
+                  x
                 </button>
               </div>
 
@@ -1908,7 +1908,7 @@ export default function AdminUsers() {
                         fontSize: '14px'
                       }}
                     >
-                      {showPassword ? '🙈' : '👁️'}
+                      {showPassword ? '◉' : '◉'}
                     </button>
                   </div>
                 </div>
@@ -1929,7 +1929,7 @@ export default function AdminUsers() {
                       cursor: 'pointer'
                     }}
                   >
-                    ⚡ GENERATE SECURE
+                    » GENERATE SECURE
                   </button>
 
                   {newPassword && (
@@ -1947,7 +1947,7 @@ export default function AdminUsers() {
                         cursor: 'pointer'
                       }}
                     >
-                      📋 COPY
+                      ⧉ COPY
                     </button>
                   )}
                 </div>
@@ -2066,7 +2066,7 @@ export default function AdminUsers() {
                   onClick={() => setDossierModalOpen(false)}
                   style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#fff', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer' }}
                 >
-                  ✕
+                  x
                 </button>
               </div>
 
@@ -2188,7 +2188,7 @@ export default function AdminUsers() {
                         cursor: 'pointer'
                       }}
                     >
-                      ✏️ EDIT PROFILE
+                      EDIT PROFILE
                     </button>
                     <button
                       onClick={() => setDossierModalOpen(false)}
@@ -2257,7 +2257,7 @@ export default function AdminUsers() {
                   onClick={() => setCreateModalOpen(false)}
                   style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#fff', width: 36, height: 36, borderRadius: '50%', cursor: 'pointer' }}
                 >
-                  ✕
+                  x
                 </button>
               </div>
 
@@ -2377,7 +2377,7 @@ export default function AdminUsers() {
                       }}
                       style={{ background: 'transparent', border: 'none', color: '#00B4FF', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
                     >
-                      ⚡ AUTO GENERATE
+                      » AUTO GENERATE
                     </button>
                   </div>
                   <input
@@ -2532,7 +2532,7 @@ export default function AdminUsers() {
                 textAlign: 'center'
               }}
             >
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>!</div>
               <h2 style={{ margin: '0 0 10px', fontSize: '20px', fontWeight: 800, color: '#FF2D55' }}>
                 PURGE PERSONNEL ACCOUNT?
               </h2>

@@ -113,7 +113,7 @@ export default function SubmitComplaintScreen({ route, navigation }) {
       const newCase = data.data?.complaint || data.data;
 
       Alert.alert(
-        'Complaint Lodged Successfully! 🛡️',
+        'Complaint Lodged Successfully! ◈',
         `Incident Docket: ${newCase?.complaintId || 'Registered'}\nAI Category: ${(newCase?.category || 'General Fraud').replace(/_/g, ' ')}\nStatus: Pending Investigation`,
         [
           {
@@ -208,7 +208,7 @@ export default function SubmitComplaintScreen({ route, navigation }) {
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}
               >
                 <View style={[styles.checkbox, form.isAnonymous && styles.checkboxActive]}>
-                  {form.isAnonymous && <Text style={{ color: '#030A14', fontSize: 12, fontWeight: '900' }}>✓</Text>}
+                  {form.isAnonymous && <Text style={{ color: '#030A14', fontSize: 12, fontWeight: '900' }}>v</Text>}
                 </View>
                 <Text style={{ color: colors.text, fontSize: 13 }}>File Anonymously (Hide identity on public feed)</Text>
               </TouchableOpacity>
@@ -239,7 +239,7 @@ export default function SubmitComplaintScreen({ route, navigation }) {
                 placeholder="Mumbai"
               />
 
-              <Text style={[globalStyles.sectionTitle, { marginTop: 12 }]}>🚨 SUSPECT IDENTIFIERS (OPTIONAL)</Text>
+              <Text style={[globalStyles.sectionTitle, { marginTop: 12 }]}>! SUSPECT IDENTIFIERS (OPTIONAL)</Text>
 
               <Field
                 k="suspectPhone"
@@ -273,7 +273,7 @@ export default function SubmitComplaintScreen({ route, navigation }) {
               </Text>
 
               <TouchableOpacity onPress={pickFile} style={styles.uploadBox}>
-                <Text style={{ fontSize: 32, marginBottom: 6 }}>📎</Text>
+                <Text style={{ fontSize: 32, marginBottom: 6 }}>⌕</Text>
                 <Text style={{ color: colors.accent, fontSize: 13, fontWeight: '800' }}>TAP TO ATTACH EVIDENCE</Text>
                 <Text style={{ color: colors.muted, fontSize: 10, marginTop: 4 }}>
                   Images, PDF, TXT, Logs (Max 10MB per file)
@@ -282,10 +282,10 @@ export default function SubmitComplaintScreen({ route, navigation }) {
 
               {files.map((f, i) => (
                 <View key={i} style={styles.fileCard}>
-                  <Text style={{ fontSize: 16 }}>📄</Text>
+                  <Text style={{ fontSize: 16 }}>▤</Text>
                   <Text style={styles.fileName} numberOfLines={1}>{f.name}</Text>
                   <TouchableOpacity onPress={() => setFiles(prev => prev.filter((_, j) => j !== i))}>
-                    <Text style={{ color: colors.danger, fontSize: 16, padding: 4 }}>✕</Text>
+                    <Text style={{ color: colors.danger, fontSize: 16, padding: 4 }}>x</Text>
                   </TouchableOpacity>
                 </View>
               ))}
@@ -319,7 +319,7 @@ export default function SubmitComplaintScreen({ route, navigation }) {
               ))}
 
               <View style={styles.neuralBanner}>
-                <Text style={{ fontSize: 16 }}>🤖</Text>
+                <Text style={{ fontSize: 16 }}>◈</Text>
                 <Text style={{ color: colors.accent, fontSize: 11, flex: 1 }}>
                   Neural ML Engine will automatically compute threat severity and triage this incident in MongoDB Atlas.
                 </Text>
@@ -345,7 +345,7 @@ export default function SubmitComplaintScreen({ route, navigation }) {
                 {loading ? (
                   <ActivityIndicator color="#030A14" />
                 ) : (
-                  <Text style={globalStyles.btnPrimaryText}>🚀 SUBMIT INCIDENT TO CLOUD DB</Text>
+                  <Text style={globalStyles.btnPrimaryText}>» SUBMIT INCIDENT TO CLOUD DB</Text>
                 )}
               </TouchableOpacity>
             )}

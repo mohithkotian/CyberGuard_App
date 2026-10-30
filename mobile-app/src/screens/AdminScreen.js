@@ -111,7 +111,7 @@ export default function AdminScreen({ navigation }) {
             style={[styles.triageBtn, { flex: 1 }]}
             onPress={() => openTriageModal(item)}
           >
-            <Text style={styles.triageBtnText}>⚡ Triage & Update</Text>
+            <Text style={styles.triageBtnText}>» Triage & Update</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -157,7 +157,7 @@ export default function AdminScreen({ navigation }) {
             <View style={globalStyles.spaceBetween}>
               <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '900' }}>CASE TRIAGE CONTROL</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={{ color: colors.muted, fontSize: 18 }}>✕</Text>
+                <Text style={{ color: colors.muted, fontSize: 18 }}>x</Text>
               </TouchableOpacity>
             </View>
 

@@ -183,7 +183,7 @@ export default function OfficerDashboard() {
             background: 'rgba(255,255,255,0.02)', borderRadius: '32px',
             border: '1px dashed rgba(255,255,255,0.1)'
           }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📁</div>
+            <img src="/icons/cyberguard/evidence-folder.svg" alt="" style={{ width: 48, height: 48, marginBottom: 16, objectFit: "contain" }} />
             <h3 style={{ fontSize: '20px', fontWeight: 800, marginBottom: 8, color: '#fff' }}>NO RECORDS FOUND</h3>
             <p style={{ color: 'rgba(255,255,255,0.4)' }}>Your case list is currently empty.</p>
           </div>
@@ -266,7 +266,7 @@ export default function OfficerDashboard() {
                   }}>
                     {c.status.replace(/_/g,' ').toUpperCase()}
                   </div>
-                  <div style={{ color: '#00B4FF', opacity: 0.5 }}>❯</div>
+                  <div style={{ color: "#00B4FF", opacity: 0.5 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg></div>
                 </div>
               </motion.div>
             ))}

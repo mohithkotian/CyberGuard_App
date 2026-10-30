@@ -131,7 +131,10 @@ export default function ComplaintDetails() {
             fontWeight: 600
           }}
         >
-          ❮ BACK
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          BACK
         </button>
 
         {/* Case Header */}
@@ -163,9 +166,9 @@ export default function ComplaintDetails() {
               </div>
               <h2 style={{ fontSize: '2.2rem', color: '#fff', margin: '0 0 16px 0', fontWeight: 800, letterSpacing: '-0.5px' }}>{complaint.title}</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>
-                <span>📅 {format(new Date(complaint.createdAt), 'dd MMM yyyy HH:mm')}</span>
-                <span>📂 {complaint.category}</span>
-                {complaint.source && <span>🌐 Source: {complaint.source.toUpperCase()}</span>}
+                <span>▦ {format(new Date(complaint.createdAt), 'dd MMM yyyy HH:mm')}</span>
+                <span>▤ {complaint.category}</span>
+                {complaint.source && <span>◉ Source: {complaint.source.toUpperCase()}</span>}
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
@@ -210,7 +213,7 @@ export default function ComplaintDetails() {
                   INCIDENT BRIEF
                 </h4>
                 {!complaint.description && (
-                  <span style={{ fontSize: '9px', fontWeight: 900, color: '#A855F7', background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)', borderRadius: '6px', padding: '2px 8px', letterSpacing: '1px' }}>🔒 MASKED</span>
+                  <span style={{ fontSize: '9px', fontWeight: 900, color: '#A855F7', background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.3)', borderRadius: '6px', padding: '2px 8px', letterSpacing: '1px' }}>◇ MASKED</span>
                 )}
               </div>
               <p style={{ fontSize: '15px', color: complaint.description ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.45)', lineHeight: '1.7', whiteSpace: 'pre-wrap', margin: 0 }}>

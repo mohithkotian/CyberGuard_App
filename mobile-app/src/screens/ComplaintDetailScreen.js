@@ -164,7 +164,7 @@ export default function ComplaintDetailScreen({ route, navigation }) {
         {/* AI Neural Classification */}
         {complaint.mlPrediction && (
           <View style={[globalStyles.glassCard, { borderColor: 'rgba(0, 255, 209, 0.3)' }]}>
-            <Text style={globalStyles.sectionTitle}>🤖 AI NEURAL CLASSIFICATION</Text>
+            <Text style={globalStyles.sectionTitle}>◈ AI NEURAL CLASSIFICATION</Text>
             <View style={globalStyles.spaceBetween}>
               <Text style={{ color: colors.text, fontSize: 13 }}>Predicted Category:</Text>
               <Text style={{ color: colors.accent, fontSize: 13, fontWeight: '800' }}>
@@ -183,7 +183,7 @@ export default function ComplaintDetailScreen({ route, navigation }) {
         {/* Suspect Identifiers */}
         {complaint.suspectInfo && (complaint.suspectInfo.phone || complaint.suspectInfo.email || complaint.suspectInfo.bankDetails) && (
           <View style={globalStyles.glassCard}>
-            <Text style={globalStyles.sectionTitle}>🚨 SUSPECT IDENTIFIERS</Text>
+            <Text style={globalStyles.sectionTitle}>! SUSPECT IDENTIFIERS</Text>
             {complaint.suspectInfo.phone && (
               <View style={styles.suspectRow}>
                 <Text style={styles.suspectLabel}>Phone:</Text>
@@ -208,10 +208,10 @@ export default function ComplaintDetailScreen({ route, navigation }) {
         {/* Evidence Dossier */}
         {complaint.evidence && complaint.evidence.length > 0 && (
           <View style={globalStyles.glassCard}>
-            <Text style={globalStyles.sectionTitle}>📁 ATTACHED EVIDENCE ({complaint.evidence.length})</Text>
+            <Text style={globalStyles.sectionTitle}>▤ ATTACHED EVIDENCE ({complaint.evidence.length})</Text>
             {complaint.evidence.map((ev, i) => (
               <View key={i} style={styles.evidenceItem}>
-                <Text style={{ fontSize: 14 }}>📄</Text>
+                <Text style={{ fontSize: 14 }}>▤</Text>
                 <Text style={styles.evidenceName} numberOfLines={1}>
                   {ev.filename || ev.url?.split('/').pop() || `Evidence_File_${i+1}`}
                 </Text>
@@ -223,7 +223,7 @@ export default function ComplaintDetailScreen({ route, navigation }) {
 
         {/* Timeline Stepper */}
         <View style={globalStyles.glassCard}>
-          <Text style={globalStyles.sectionTitle}>⏳ INVESTIGATION TIMELINE</Text>
+          <Text style={globalStyles.sectionTitle}>… INVESTIGATION TIMELINE</Text>
           {(complaint.timeline && complaint.timeline.length > 0 ? complaint.timeline : [
             { status: 'pending', message: 'Complaint registered and queued for neural categorization.', timestamp: complaint.createdAt },
             { status: 'under_review', message: 'Initial triage complete. Case dossier verified.', timestamp: complaint.createdAt }
@@ -232,7 +232,7 @@ export default function ComplaintDetailScreen({ route, navigation }) {
             return (
               <View key={i} style={{ flexDirection: 'row', gap: 12, marginBottom: 14 }}>
                 <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: `${stepColor}25`, borderWidth: 2, borderColor: stepColor, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Text style={{ fontSize: 10 }}>{t.status === 'resolved' ? '✓' : '●'}</Text>
+                  <Text style={{ fontSize: 10 }}>{t.status === 'resolved' ? 'v' : '●'}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '700' }}>{t.message}</Text>
@@ -247,7 +247,7 @@ export default function ComplaintDetailScreen({ route, navigation }) {
 
         {/* Officer Case Notes & Citizen Comms */}
         <View style={globalStyles.glassCard}>
-          <Text style={globalStyles.sectionTitle}>💬 CASE LOG & DIRECT OFFICER NOTES</Text>
+          <Text style={globalStyles.sectionTitle}>@ CASE LOG & DIRECT OFFICER NOTES</Text>
           {caseChats.length === 0 ? (
             <Text style={{ color: colors.muted, fontSize: 12, textAlign: 'center', paddingVertical: 10 }}>
               No private officer notes on this case yet.

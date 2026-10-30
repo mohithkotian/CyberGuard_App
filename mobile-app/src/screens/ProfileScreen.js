@@ -81,7 +81,7 @@ export default function ProfileScreen({ navigation }) {
         <View style={globalStyles.glassCard}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
             <View style={styles.avatarCircle}>
-              <Text style={{ fontSize: 24 }}>🛡️</Text>
+              <Text style={{ fontSize: 24 }}>◈</Text>
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '900' }}>
@@ -108,7 +108,7 @@ export default function ProfileScreen({ navigation }) {
 
         {/* Demo Role Switcher */}
         <View style={globalStyles.glassCard}>
-          <Text style={globalStyles.sectionTitle}>⚡ QUICK ROLE TESTER (DEMO)</Text>
+          <Text style={globalStyles.sectionTitle}>» QUICK ROLE TESTER (DEMO)</Text>
           <Text style={{ color: colors.textSecondary, fontSize: 11, marginBottom: 10 }}>
             Switch roles to preview citizen filing, officer triage command, or full system admin privileges.
           </Text>
@@ -136,7 +136,7 @@ export default function ProfileScreen({ navigation }) {
 
         {/* Network & Cloud Uplink Manager */}
         <View style={globalStyles.glassCard}>
-          <Text style={globalStyles.sectionTitle}>🌐 CLOUD BACKEND CONNECTIVITY</Text>
+          <Text style={globalStyles.sectionTitle}>◉ CLOUD BACKEND CONNECTIVITY</Text>
           <Text style={{ color: colors.textSecondary, fontSize: 11, marginBottom: 10 }}>
             Configure the REST API endpoint for physical devices or Expo Go tunnels.
           </Text>
@@ -168,7 +168,7 @@ export default function ProfileScreen({ navigation }) {
             {testingPing ? (
               <ActivityIndicator color={colors.accent} size="small" />
             ) : (
-              <Text style={styles.pingBtnText}>📡 TEST UPLINK LATENCY</Text>
+              <Text style={styles.pingBtnText}>⌁ TEST UPLINK LATENCY</Text>
             )}
           </TouchableOpacity>
 
@@ -178,7 +178,7 @@ export default function ProfileScreen({ navigation }) {
               { borderColor: pingStatus.ok ? colors.success : colors.danger }
             ]}>
               <Text style={{ color: pingStatus.ok ? colors.success : colors.danger, fontSize: 11, fontWeight: '800' }}>
-                {pingStatus.ok ? `✓ CONNECTED (${pingStatus.latency}ms latency)` : `✕ ERROR: ${pingStatus.error || 'Server Unreachable'}`}
+                {pingStatus.ok ? `v CONNECTED (${pingStatus.latency}ms latency)` : `x ERROR: ${pingStatus.error || 'Server Unreachable'}`}
               </Text>
             </View>
           )}

@@ -16,7 +16,7 @@ async function upsertUser(email, password, name, role = 'admin') {
     const uri = process.env.MONGODB_URI;
     console.log('Connecting to MongoDB Atlas...');
     await mongoose.connect(uri, { serverSelectionTimeoutMS: 20000 });
-    console.log('✅ Connected to MongoDB Atlas');
+    console.log('[OK] Connected to MongoDB Atlas');
 
     let user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
@@ -31,7 +31,7 @@ async function upsertUser(email, password, name, role = 'admin') {
         phone: '9876543210'
       });
       await user.save();
-      console.log(`✅ User ${email} created successfully with role: ${role}!`);
+      console.log(`[OK] User ${email} created successfully with role: ${role}!`);
     } else {
       console.log(`User ${email} exists. Updating password & role...`);
       user.password = password;
@@ -40,13 +40,13 @@ async function upsertUser(email, password, name, role = 'admin') {
       user.loginAttempts = 0;
       user.lockUntil = undefined;
       await user.save();
-      console.log(`✅ User ${email} updated successfully with password: ${password} and role: ${role}!`);
+      console.log(`[OK] User ${email} updated successfully with password: ${password} and role: ${role}!`);
     }
 
     await mongoose.disconnect();
     process.exit(0);
   } catch (err) {
-    console.error('❌ Error updating user:', err.message);
+    console.error('[ERROR] Error updating user:', err.message);
     process.exit(1);
   }
 }

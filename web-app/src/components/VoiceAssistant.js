@@ -18,7 +18,7 @@ const VoiceAssistant = () => {
     
     rec.onstart = () => {
       setIsListening(true);
-      toast('Neural Voice Engine Active', { icon: '🎙️' });
+      toast('Neural Voice Engine Active', { icon: '◉' });
     };
     
     rec.onresult = (event) => {

@@ -225,7 +225,7 @@ exports.createComplaint = async (req, res, next) => {
       timeline: [{
         status: 'pending',
         message: isImmediateAction
-          ? '🚨 EMERGENCY PROTOCOL ACTIVATED: High priority Women & Child Safety incident logged for immediate tactical response.'
+          ? '[ALERT] EMERGENCY PROTOCOL ACTIVATED: High priority Women & Child Safety incident logged for immediate tactical response.'
           : 'Complaint submitted successfully. Under review.',
         timestamp: new Date(),
       }],
