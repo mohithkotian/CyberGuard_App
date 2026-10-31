@@ -14,6 +14,7 @@ const path = require('path');
 require('dotenv').config();
 
 const connectDB = require('./config/database');
+const { getConnectionStatus } = require('./config/database');
 const logger = require('./utils/logger');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const User = require('./models/User');
@@ -28,6 +29,21 @@ const adminRoutes = require('./routes/admin');
 const userRoutes = require('./routes/users');
 const chatRoutes = require('./routes/chats');
 const jarvisRoutes = require('./routes/jarvis');
+
+// ─────────────────────────────────────────────────────────
+// PROCESS ERROR RESILIENCE (PREVENT UNHANDLED CRASHES)
+// ─────────────────────────────────────────────────────────
+process.on('uncaughtException', (err) => {
+  logger.error(`[UNCAUGHT EXCEPTION] ${err.message}`, { stack: err.stack });
+  console.error('[UNCAUGHT EXCEPTION]', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  const message = reason instanceof Error ? reason.message : String(reason);
+  const stack = reason instanceof Error ? reason.stack : undefined;
+  logger.error(`[UNHANDLED REJECTION] ${message}`, { stack });
+  console.error('[UNHANDLED REJECTION]', reason);
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -83,7 +99,15 @@ app.use(morgan('dev'));
 // ROUTES & ERROR HANDLING
 // ─────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', service: 'cyberguard-backend' });
+  const dbStatus = getConnectionStatus();
+  const isHealthy = dbStatus.isConnected;
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'ok' : 'degraded',
+    service: 'cyberguard-backend',
+    database: dbStatus,
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString()
+  });
 });
 // Evidence is served through the authorized complaint route below. Chat
 // attachments retain their existing path until chat attachment authorization
@@ -163,76 +187,113 @@ io.on('connection', (socket) => {
 
   // Join a specific complaint chat room
   socket.on('join-chat', async (complaintId, acknowledge) => {
-    const complaint = await Complaint.findOne(complaintLookup(complaintId)).select('userId assignedTo');
-    if (!complaint || !canAccessComplaint(complaint, socket.user)) {
-      if (typeof acknowledge === 'function') acknowledge({ ok: false, error: 'Not authorized' });
-      return;
+    try {
+      const complaint = await Complaint.findOne(complaintLookup(complaintId)).select('userId assignedTo');
+      if (!complaint || !canAccessComplaint(complaint, socket.user)) {
+        if (typeof acknowledge === 'function') acknowledge({ ok: false, error: 'Not authorized' });
+        return;
+      }
+      socket.join(`chat-${complaintId}`);
+      if (typeof acknowledge === 'function') acknowledge({ ok: true });
+      logger.debug(`Socket ${socket.id} joined authorized chat room: chat-${complaintId}`);
+    } catch (err) {
+      logger.error(`Error in join-chat: ${err.message}`);
+      if (typeof acknowledge === 'function') acknowledge({ ok: false, error: 'Internal server error' });
     }
-    socket.join(`chat-${complaintId}`);
-    if (typeof acknowledge === 'function') acknowledge({ ok: true });
-    logger.debug(`Socket ${socket.id} joined authorized chat room: chat-${complaintId}`);
   });
 
   // Relay real-time messages to the room
   socket.on('chat-message', async (data = {}) => {
-    const complaint = await Complaint.findOne(complaintLookup(data.complaintId)).select('userId assignedTo');
-    if (!complaint || !canAccessComplaint(complaint, socket.user)) return;
-    const safeData = {
-      ...data,
-      sender: { _id: socket.user._id, name: socket.user.name, role: socket.user.role }
-    };
-    io.to(`chat-${data.complaintId}`).emit('new-chat-message', safeData);
+    try {
+      const complaint = await Complaint.findOne(complaintLookup(data.complaintId)).select('userId assignedTo');
+      if (!complaint || !canAccessComplaint(complaint, socket.user)) return;
+      const safeData = {
+        ...data,
+        sender: { _id: socket.user._id, name: socket.user.name, role: socket.user.role }
+      };
+      io.to(`chat-${data.complaintId}`).emit('new-chat-message', safeData);
+    } catch (err) {
+      logger.error(`Error in chat-message: ${err.message}`);
+    }
   });
 
   // Global Network Chat
   socket.on('join-global', () => {
-    socket.join('global-network');
-    logger.debug(`Socket ${socket.id} joined global network chat`);
+    try {
+      socket.join('global-network');
+      logger.debug(`Socket ${socket.id} joined global network chat`);
+    } catch (err) {
+      logger.error(`Error in join-global: ${err.message}`);
+    }
   });
 
   socket.on('global-message', (data = {}) => {
-    io.to('global-network').emit('new-global-message', {
-      ...data,
-      sender: { _id: socket.user._id, name: socket.user.name, role: socket.user.role }
-    });
+    try {
+      io.to('global-network').emit('new-global-message', {
+        ...data,
+        sender: { _id: socket.user._id, name: socket.user.name, role: socket.user.role }
+      });
+    } catch (err) {
+      logger.error(`Error in global-message: ${err.message}`);
+    }
   });
 
   // Admin Notification Room
   socket.on('join-admin', () => {
-    if (socket.user.role !== 'admin') return;
-    socket.join('admin-room');
-    logger.debug(`Socket ${socket.id} joined admin-room`);
+    try {
+      if (socket.user.role !== 'admin') return;
+      socket.join('admin-room');
+      logger.debug(`Socket ${socket.id} joined admin-room`);
+    } catch (err) {
+      logger.error(`Error in join-admin: ${err.message}`);
+    }
   });
 
   // User Notification Room
   socket.on('join-room', (userId) => {
-    if (userId?.toString() !== socket.user._id.toString()) return;
-    socket.join(`user-${userId}`);
-    logger.debug(`Socket ${socket.id} joined user room: user-${userId}`);
+    try {
+      if (userId?.toString() !== socket.user._id.toString()) return;
+      socket.join(`user-${userId}`);
+      logger.debug(`Socket ${socket.id} joined user room: user-${userId}`);
+    } catch (err) {
+      logger.error(`Error in join-room: ${err.message}`);
+    }
   });
 
   // Private Messaging
   socket.on('join-user', (userId) => {
-    if (userId?.toString() !== socket.user._id.toString()) return;
-    socket.join(`user-${userId}`);
-    logger.debug(`User ${userId} joined their private room: user-${userId}`);
+    try {
+      if (userId?.toString() !== socket.user._id.toString()) return;
+      socket.join(`user-${userId}`);
+      logger.debug(`User ${userId} joined their private room: user-${userId}`);
+    } catch (err) {
+      logger.error(`Error in join-user: ${err.message}`);
+    }
   });
 
   socket.on('private-message', (data = {}) => {
-    if (!data.recipientId) return;
-    io.to(`user-${data.recipientId}`).to(`user-${socket.user._id}`).emit('new-private-message', {
-      ...data,
-      sender: { _id: socket.user._id, name: socket.user.name, role: socket.user.role }
-    });
+    try {
+      if (!data.recipientId) return;
+      io.to(`user-${data.recipientId}`).to(`user-${socket.user._id}`).emit('new-private-message', {
+        ...data,
+        sender: { _id: socket.user._id, name: socket.user.name, role: socket.user.role }
+      });
+    } catch (err) {
+      logger.error(`Error in private-message: ${err.message}`);
+    }
   });
 
-  socket.on('disconnect', () => {
-    logger.info(`Client disconnected: ${socket.id}`);
+  socket.on('error', (err) => {
+    logger.error(`Socket client error (${socket.id}): ${err.message}`);
+  });
+
+  socket.on('disconnect', (reason) => {
+    logger.info(`Client disconnected: ${socket.id} (${reason})`);
   });
 });
 
 // ─────────────────────────────────────────────────────────
-// START SERVER
+// START SERVER & LIFECYCLE MANAGEMENT
 // ─────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5002;
 
@@ -247,16 +308,41 @@ server.on('error', (error) => {
   process.exit(1);
 });
 
-const startServer = async () => {
-  try {
-    await connectDB();
+const startServer = () => {
+  // Start HTTP server immediately to allow health checks and incoming connections
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`[START] Main Server running on http://localhost:${PORT}`);
+    logger.info(`Main Server running on port ${PORT}`);
+  });
 
-    server.listen(PORT, '0.0.0.0', () => {
-      console.log(`[START] Main Server running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error(`[ERROR] Startup Error: ${error.message}`);
-  }
+  // Asynchronously connect to MongoDB with automatic retry and fallback
+  connectDB().catch((error) => {
+    logger.error(`Initial MongoDB connection failed: ${error.message}. Server continues running in degraded mode.`);
+  });
 };
+
+// Graceful shutdown handling
+const gracefulShutdown = (signal) => {
+  logger.info(`Received ${signal}. Starting graceful shutdown...`);
+  server.close(async () => {
+    logger.info('HTTP server closed.');
+    try {
+      const mongoose = require('mongoose');
+      await mongoose.connection.close(false);
+      logger.info('MongoDB connection closed.');
+    } catch (err) {
+      logger.error(`Error closing MongoDB: ${err.message}`);
+    }
+    process.exit(0);
+  });
+
+  setTimeout(() => {
+    logger.error('Forceful shutdown timeout reached');
+    process.exit(1);
+  }, 10000).unref();
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 startServer();

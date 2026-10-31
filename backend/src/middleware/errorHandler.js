@@ -21,8 +21,24 @@ const handleValidationErrorDB = (err) => {
 };
 const handleJWTError = () => new AppError('Invalid token. Please log in again.', 401);
 const handleJWTExpiredError = () => new AppError('Your token has expired. Please log in again.', 401);
+const handleDBUnavailableError = () =>
+  new AppError('Database service is temporarily unavailable. Please retry in a few seconds.', 503);
+
+const isDBError = (err) =>
+  err.name === 'MongooseServerSelectionError' ||
+  err.name === 'MongoServerSelectionError' ||
+  err.name === 'MongoNetworkError' ||
+  err.name === 'MongoTimeoutError' ||
+  err.message?.includes('buffering timed out');
 
 const sendErrorDev = (err, res) => {
+  if (isDBError(err)) {
+    return res.status(503).json({
+      status: 'error',
+      message: 'Database connection is temporarily unavailable. Please retry in a few seconds.',
+      error: err.name,
+    });
+  }
   res.status(err.statusCode).json({
     status: err.status,
     error: err,
@@ -47,7 +63,8 @@ const errorHandler = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else {
-    let error = { ...err, message: err.message };
+    let error = { ...err, message: err.message, name: err.name, code: err.code };
+    if (isDBError(error)) error = handleDBUnavailableError();
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);
     if (error.name === 'ValidationError') error = handleValidationErrorDB(error);

@@ -1,32 +1,69 @@
 services:
+  # ─────────────────────────────────────────────────────────
+  # BACKEND API (Express + Node.js)
+  # ─────────────────────────────────────────────────────────
   - type: web
     name: cybercrime-backend
     env: node
     plan: free
     rootDir: backend
-    buildCommand: npm install
+    buildCommand: npm ci --omit=dev || npm install
     startCommand: npm start
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
         sync: false
+      - key: MONGODB_URI_FALLBACK
+        sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        sync: false
       - key: ML_SERVICE_URL
         value: https://cybercrime-ml-service.onrender.com
       - key: ADMIN_EMAIL
         value: admin@cybercrime.gov
       - key: ADMIN_PASSWORD
-        value: Admin@123456
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
 
+  # ─────────────────────────────────────────────────────────
+  # ML SERVICE (Python Flask + Gunicorn)
+  # ─────────────────────────────────────────────────────────
   - type: web
     name: cybercrime-ml-service
     env: python
     plan: free
     rootDir: ml-service
     buildCommand: pip install -r requirements.txt && python -c "import nltk; nltk.download('punkt_tab'); nltk.download('stopwords'); nltk.download('wordnet')" && python train_model.py
-    startCommand: python src/app.py
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT src.app:app
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10.0
+        value: 3.10.12
+
+  # ─────────────────────────────────────────────────────────
+  # FRONTEND WEB APP (React SPA)
+  # ─────────────────────────────────────────────────────────
+  - type: web
+    name: cybercrime-web
+    env: static
+    rootDir: web-app
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://cybercrime-backend.onrender.com/api
+      - key: REACT_APP_SOCKET_URL
+        value: https://cybercrime-backend.onrender.com
+      - key: GENERATE_SOURCEMAP
+        value: "false"
