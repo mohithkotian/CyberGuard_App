@@ -4,4 +4,6 @@ python-dotenv
 joblib
 nltk
 scikit-learn
+pandas
+numpy
 gunicorn

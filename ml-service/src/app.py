@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -8,6 +9,10 @@ import joblib
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC_DIR = os.path.dirname(os.path.abspath(__file__))
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
+
 DEFAULT_MODEL_PATH = os.path.join(BASE_DIR, 'models', 'classifier.pkl')
 DEFAULT_VECTOR_PATH = os.path.join(BASE_DIR, 'models', 'vectorizer.pkl')
 
