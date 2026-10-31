@@ -43,6 +43,21 @@ try:
 except Exception as e:
     logger.warning(f'[WARN]️  Model not found — run train_model.py first. ({e})')
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
+        'service': 'CyberGuard ML Classification Service',
+        'status': 'online',
+        'model_loaded': model_loaded,
+        'model_version': MODEL_VERSION,
+        'endpoints': {
+            'health': '/health',
+            'model_info': '/model-info',
+            'predict': 'POST /predict',
+            'batch_predict': 'POST /batch-predict'
+        }
+    })
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({
