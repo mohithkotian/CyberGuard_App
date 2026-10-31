@@ -7,7 +7,7 @@ services:
     env: node
     plan: free
     rootDir: backend
-    buildCommand: npm ci --omit=dev || npm install
+    buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
     envVars:
@@ -41,7 +41,7 @@ services:
     plan: free
     rootDir: ml-service
     buildCommand: pip install -r requirements.txt && python -c "import nltk; nltk.download('punkt_tab'); nltk.download('stopwords'); nltk.download('wordnet')" && python train_model.py
-    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT src.app:app
+    startCommand: gunicorn -w 1 --threads 2 -b 0.0.0.0:$PORT src.app:app
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
