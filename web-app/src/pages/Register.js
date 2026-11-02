@@ -81,7 +81,7 @@ export default function Register() {
             padding: '16px 24px',
             background: 'var(--auth-input-bg)',
             border: '1px solid var(--auth-input-border)',
-            borderRadius: '18px',
+            borderRadius: 'var(--radius-md)',
             color: 'var(--auth-input-text)',
             fontSize: '15px',
             outline: 'none',
@@ -100,7 +100,7 @@ export default function Register() {
 
   return (
     <div className="auth-page" style={{ 
-      minHeight: '100vh', 
+      minHeight: '100dvh', 
       background: 'var(--auth-bg)', 
       display: 'flex',
       alignItems: 'center', 
@@ -108,12 +108,12 @@ export default function Register() {
       padding: '40px 24px',
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: 'var(--font-sans)'
     }}>
       {/* Dynamic Role-Based Background Accents */}
       <div style={{ position: 'fixed', top: '-15%', right: '-10%', width: '60%', height: '60%', background: 'none', pointerEvents: 'none', zIndex: 0 }} />
       <div style={{ position: 'fixed', bottom: '-15%', left: '-10%', width: '60%', height: '60%', background: 'none', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(var(--auth-dot) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
+      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'none', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
 
       <motion.div 
         initial={{ opacity: 0, y: 30, scale: 0.98 }} 
@@ -155,10 +155,10 @@ export default function Register() {
 
         <div style={{ 
           background: 'var(--auth-card)',
-          backdropFilter: 'blur(40px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
           border: '1px solid var(--auth-card-border)',
-          borderRadius: '32px',
+          borderRadius: 'var(--radius-lg)',
           padding: '48px',
           boxShadow: 'none'
         }}>
@@ -181,7 +181,7 @@ export default function Register() {
                 background: 'var(--auth-btn-bg)',
                 color: 'var(--auth-btn-text)',
                 border: '2px solid var(--auth-btn-border)',
-                borderRadius: '18px',
+                borderRadius: 'var(--radius-md)',
                 cursor: 'pointer',
                 transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                 boxShadow: 'none',
@@ -225,3 +225,4 @@ export default function Register() {
     </div>
   );
 }
+

@@ -6,13 +6,13 @@ import toast from 'react-hot-toast';
 
 const CATEGORY_COLORS = {
   'Phishing': '#FFB800',
-  'Financial Fraud': '#00B4FF',
+  'Financial Fraud': '#22D3EE',
   'Ransomware': '#FF3366',
-  'Identity Theft': '#A855F7',
+  'Identity Theft': '#C7C4BC',
   'Cyber Bullying': '#FF6B35',
   'Hacking': '#9C27B0',
   'Data Breach': '#EC4899',
-  'Online Fraud': '#3B82F6',
+  'Online Fraud': '#8E8B85',
   'Child Exploitation': '#EF4444',
   'Women/Child Safety': '#FF2A6D',
   'DDoS / Network Attacks': '#F97316',
@@ -41,7 +41,7 @@ export default function PublicMap() {
 
   const getColor = (category, severity) => {
     if (severity?.toLowerCase() === 'critical') return '#FF2A6D';
-    return CATEGORY_COLORS[category] || '#00B4FF';
+    return CATEGORY_COLORS[category] || '#22D3EE';
   };
 
   const filteredPoints = activeFilter === 'ALL'
@@ -49,23 +49,24 @@ export default function PublicMap() {
     : points.filter(p => (p.category || 'Other').toUpperCase() === activeFilter.toUpperCase());
 
   return (
-    <div className="public-map-page" style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#050505', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
+    <div className="public-map-page" style={{ height: '100dvh', display: 'flex', flexDirection: 'column', background: '#070707', fontFamily: "'IBM Plex Sans', sans-serif" }}>
       <Navbar />
       <div style={{ flex: 1, position: 'relative' }}>
         
         {/* Statistics Header & Filter Bar */}
         <div style={{ 
-          position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', 
-          zIndex: 1000, background: '#0B0B0B', padding: '10px 18px', 
-          borderRadius: '6px', border: '1px solid #292929', 
-          color: '#A7A7A7', 
-          fontFamily: 'Inter, sans-serif', fontSize: '12px', letterSpacing: '0.04em',
-          boxShadow: 'none',
+          position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', 
+          zIndex: 1000, background: '#0d0d0d', padding: '10px 24px', 
+          borderRadius: '8px', border: '1px solid #30302d', 
+          color: '#f2f0ea', 
+          fontFamily: "'IBM Plex Mono', monospace", fontSize: '13px', letterSpacing: '1px',
+          fontWeight: 700,
+          boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
           display: 'flex', alignItems: 'center', gap: '15px'
         }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22D3EE' }}></span>
-            LIVE AI THREAT INTELLIGENCE MAP • {filteredPoints.length} VERIFIED INCIDENTS
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3DF5C0' }}></span>
+            NATIONAL CYBER THREAT HOTSPOT RADAR • {filteredPoints.length} VERIFIED INCIDENTS
           </span>
         </div>
 
@@ -93,23 +94,20 @@ export default function PublicMap() {
                 }}
               >
                 <Popup>
-                  <div style={{ minWidth: '180px', background: '#0B0B0B', color: '#fff', padding: '8px' }}>
-                    <div style={{ fontSize: '10px', color: pColor, fontWeight: 'bold', marginBottom: '4px', fontFamily: 'Inter, sans-serif' }}>
+                  <div style={{ minWidth: '180px', background: '#0d0d0d', color: '#f2f0ea', padding: '10px' }}>
+                    <div style={{ fontSize: '10px', color: pColor, fontWeight: 'bold', marginBottom: '4px', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '1px' }}>
                       {(p.severity || 'HIGH').toUpperCase()} THREAT CLASSIFICATION
                     </div>
-                    <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '4px', fontFamily: "'IBM Plex Sans', sans-serif" }}>
                       {p.category || 'General Cybercrime'}
                     </div>
                     {p.subCategory && (
-                      <div style={{ fontSize: '11px', color: '#00B4FF', marginBottom: '6px' }}>
-                        Sub-Type: {p.subCategory}
+                      <div style={{ fontSize: '11px', color: '#b8b8b0', marginBottom: '6px', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                        Vector: {p.subCategory}
                       </div>
                     )}
-                    <div style={{ fontSize: '10px', color: '#8892B0' }}>
-                      Geospatial Threat Coordinate Active
-                    </div>
-                    <div style={{ marginTop: '8px', fontSize: '9px', color: '#5A6480', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '5px' }}>
-                      Categorized by CyberGuard AI ML Engine
+                    <div style={{ fontSize: '10px', color: '#777', fontFamily: "'IBM Plex Mono', monospace" }}>
+                      Geospatial Node Active
                     </div>
                   </div>
                 </Popup>
@@ -120,18 +118,19 @@ export default function PublicMap() {
 
         {/* Legend */}
         <div style={{ 
-          position: 'absolute', bottom: '30px', right: '20px', zIndex: 1000, 
-          background: '#0B0B0B', padding: '14px', borderRadius: '8px', 
-          border: '1px solid #292929',
-          maxWidth: '260px'
+          position: 'absolute', bottom: '24px', right: '24px', zIndex: 1000, 
+          background: '#0d0d0d', padding: '18px 22px', borderRadius: '20px', 
+          border: '1px solid #30302d',
+          maxWidth: '280px',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.6)'
         }}>
-          <h4 style={{ margin: '0 0 10px 0', fontSize: '11px', color: '#22D3EE', fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em' }}>
-            CYBERCRIME CATEGORIES
+          <h4 style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#888880', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 700 }}>
+            INCIDENT CLASSIFICATIONS
           </h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '10px', color: '#E0E8FF' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', color: '#f2f0ea', fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 600 }}>
             {Object.entries(CATEGORY_COLORS).slice(0, 8).map(([cat, col]) => (
-              <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: col }}></span>
+              <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: col, flexShrink: 0 }}></span>
                 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat}</span>
               </div>
             ))}
@@ -140,49 +139,9 @@ export default function PublicMap() {
 
       </div>
       <style>{`
-        .public-map-page > nav > div:nth-child(2) > div:nth-child(2) {
-          padding-left: 52px !important;
-          padding-right: 72px !important;
-        }
-
-        .public-map-page > nav > div:nth-child(2) > button {
-          width: 28px !important;
-          height: 40px !important;
-          background: #0B0B0B !important;
-          border-color: #292929 !important;
-          box-shadow: none !important;
-          font-size: 16px !important;
-        }
-
-        .leaflet-container { background: #050505 !important; }
-        .leaflet-popup-content-wrapper { background: #0B0B0B !important; color: #fff !important; border: 1px solid #292929 !important; border-radius: 6px !important; }
-        .leaflet-popup-tip { background: #0B0B0B !important; }
-
-        @media (max-width: 760px) {
-          .public-map-page > nav > div:nth-child(2) > div:nth-child(2) {
-            padding-left: 46px !important;
-            padding-right: 58px !important;
-          }
-
-          .public-map-page > div:nth-child(2) > div:first-child {
-            top: 12px !important;
-            max-width: calc(100% - 24px) !important;
-            padding: 9px 12px !important;
-            font-size: 10px !important;
-            white-space: nowrap;
-          }
-
-          .public-map-page > div:nth-child(2) > div:last-child {
-            left: 12px !important;
-            right: 12px !important;
-            bottom: 12px !important;
-            max-width: none !important;
-          }
-
-          .public-map-page > div:nth-child(2) > div:last-child > div {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-          }
-        }
+        .leaflet-container { background: #070707 !important; }
+        .leaflet-popup-content-wrapper { background: #0d0d0d !important; color: #fff !important; border: 1px solid #30302d !important; border-radius: 12px !important; }
+        .leaflet-popup-tip { background: #0d0d0d !important; }
       `}</style>
     </div>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Navigate } from 'react-router-dom';
 import useAuthStore from '../hooks/useAuthStore';
 
@@ -17,3 +17,4 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 };
 
 export default ProtectedRoute;
+

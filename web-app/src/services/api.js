@@ -86,12 +86,27 @@ export const complaintsAPI = {
   getAll: (p) => api.get('/complaints', { params: p }),
   getOne: (id) => api.get(`/complaints/${id}`),
   getEvidence: (complaintId, filename) => api.get(`/complaints/${complaintId}/evidence/${encodeURIComponent(filename)}`, { responseType: 'blob' }),
+  getCustody: (id) => api.get(`/complaints/${id}/custody`),
+  issueBankFreeze: (id, d) => api.post(`/complaints/${id}/bank-freeze`, d),
+  getFIRDraft: (id) => api.get(`/complaints/${id}/fir-draft`),
+  getMagistrateDocket: (id) => api.get(`/complaints/${id}/magistrate-docket`),
+  issueTelecomRequisition: (id, d) => api.post(`/complaints/${id}/telecom-requisition`, d),
+  getRestitutionPetition: (id) => api.get(`/complaints/${id}/restitution-petition`),
+  getMoneyTrail: (id) => api.get(`/complaints/${id}/money-trail`),
+  addMoneyTrailHop: (id, d) => api.post(`/complaints/${id}/money-trail/hop`, d),
+  issueEmergencyTakedown: (id, d) => api.post(`/complaints/${id}/emergency-takedown`, d),
+  getZeroFIRTransfer: (id, params) => api.get(`/complaints/${id}/zero-fir-transfer`, { params }),
+  generateSection65B: (id, payload) => api.post(`/complaints/${id}/section65b-affidavit`, payload),
+  transcribeStatement: (statement, metadata) => api.post('/complaints/transcribe-statement', { statement, metadata }),
+  batchEnforcement: (payload) => api.post('/complaints/batch-enforcement', payload),
+  updateRestitutionMilestone: (id, payload) => api.post(`/complaints/${id}/restitution-milestone`, payload),
+  getRestitutionStatus: (id) => api.get(`/complaints/${id}/restitution-status`),
   track: (id) => api.get(`/complaints/track/${id}`),
   publicSearch: (q) => api.get('/complaints/public/search', { params: { q } }),
   analyze: (text) => api.post('/complaints/analyze', { text }),
   updateStatus: (id, d) => api.patch(`/complaints/${id}/status`, d),
   delete: (id) => api.delete(`/complaints/${id}`),
-  analyze: (text) => api.post('/complaints/analyze', { text }),
+  getRadar: (p) => api.get('/complaints/public/radar', { params: p }),
 };
 
 // ── ANALYTICS API ─────────────────────────────────────────────────────────────
@@ -105,6 +120,11 @@ export const analyticsAPI = {
   mapPoints: () => api.get('/analytics/map-points'),
   publicMapPoints: () => api.get('/analytics/public/map-points'),
   linkAnalysis: () => api.get('/analytics/link-analysis'),
+  syndicateSurges: () => api.get('/analytics/syndicate-surges'),
+  consolidateSyndicateDocket: (data) => api.post('/analytics/syndicate/consolidate-docket', data),
+  getSyndicateDockets: () => api.get('/analytics/syndicate/dockets'),
+  dispatchTelecomRequisition: (data) => api.post('/analytics/telecom/requisition-disconnect', data),
+  getTelecomRequisitions: () => api.get('/analytics/telecom/requisitions'),
 };
 
 // ── ADMIN API ─────────────────────────────────────────────────────────────────
@@ -141,6 +161,14 @@ export const userAPI = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   getProfile: () => api.get('/users/profile'),
+};
+
+export const securityAPI = {
+  breachCheck: (email) => api.post('/security/breach-check', { email }),
+  nodalDirectory: (p) => api.get('/security/nodal-directory', { params: p }),
+  analyzeMessage: (m) => api.post('/security/analyze-message', { message: m }),
+  verifyIntegrity: (query) => api.post('/security/verify-integrity', { query }),
+  detonateArtifact: (payload) => api.post('/security/detonate-artifact', payload),
 };
 
 export default api;

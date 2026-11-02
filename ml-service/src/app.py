@@ -122,7 +122,9 @@ def model_info():
     })
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5003))
+    port = int(os.getenv('ML_PORT', os.getenv('PORT', 5003)))
+    if port == 5002:
+        port = 5003
     debug = os.getenv('FLASK_ENV', 'development') == 'development'
     logger.info(f'[START] Cybercrime ML Microservice running on port {port}')
     app.run(host='0.0.0.0', port=port, debug=debug)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CryptoJS from 'crypto-js';
 import io from 'socket.io-client';
@@ -138,10 +138,10 @@ export default function SecureChat({ complaintId }) {
         alignItems: 'center'
       }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '14px', fontFamily: 'Orbitron, monospace', color: '#00B4FF' }}>
+          <h3 style={{ margin: 0, fontSize: '14px', fontFamily: 'Inter, sans-serif', color: '#EFEDE8' }}>
             SECURE COMMS CHANNEL
           </h3>
-          <span style={{ fontSize: '10px', color: '#00ffaa' }}>● E2EE ENCRYPTION ACTIVE</span>
+          <span style={{ fontSize: '10px', color: '#00ffaa' }}>â— E2EE ENCRYPTION ACTIVE</span>
         </div>
       </div>
 
@@ -188,7 +188,7 @@ export default function SecureChat({ complaintId }) {
                 <div style={{
                   padding: '10px 16px',
                   borderRadius: isMe ? '16px 16px 0 16px' : '16px 16px 16px 0',
-                  background: isMe ? 'linear-gradient(135deg, #0D47A1, #00B4FF)' : 'rgba(255,255,255,0.05)',
+                  background: isMe ? '#1C1C1A' : '#141414', border: '1px solid #242422',
                   border: isMe ? 'none' : '1px solid rgba(255,255,255,0.1)',
                   color: '#fff',
                   fontSize: '13px',
@@ -238,7 +238,7 @@ export default function SecureChat({ complaintId }) {
         <button
           type="submit"
           style={{
-            background: '#00B4FF',
+            background: '#EFEDE8', color: '#0A0A0A',
             border: 'none',
             borderRadius: '8px',
             padding: '0 20px',
@@ -254,3 +254,4 @@ export default function SecureChat({ complaintId }) {
     </div>
   );
 }
+

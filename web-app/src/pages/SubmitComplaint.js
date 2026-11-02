@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
 // 1. Configure the public backend URL through REACT_APP_API_URL.
 const API = axios.create({
@@ -41,3 +41,4 @@ export const authAPI = {
 };
 
 export default API;
+

@@ -49,7 +49,7 @@ export default function Login() {
 
   return (
     <div className="auth-page" style={{ 
-      minHeight: '100vh', 
+      minHeight: '100dvh', 
       background: 'var(--auth-bg)', 
       display: 'flex',
       alignItems: 'center', 
@@ -57,12 +57,12 @@ export default function Login() {
       padding: 24,
       position: 'relative',
       overflow: 'hidden',
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: 'var(--font-sans)'
     }}>
       {/* Liquid Atmospheric Accents */}
       <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '60%', height: '60%', background: 'none', pointerEvents: 'none' }} />
       <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '60%', height: '60%', background: 'none', pointerEvents: 'none' }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(var(--auth-dot) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
+      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'none', backgroundSize: '40px 40px', pointerEvents: 'none' }} />
 
       <motion.div 
         initial={{ opacity: 0, y: 40 }} 
@@ -89,10 +89,10 @@ export default function Login() {
 
         <div style={{ 
           background: 'var(--auth-card)',
-          backdropFilter: 'blur(40px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
           border: '1px solid var(--auth-card-border)',
-          borderRadius: '32px',
+          borderRadius: '16px',
           padding: '40px',
           boxShadow: 'none'
         }}>
@@ -116,7 +116,7 @@ export default function Login() {
                     required 
                     style={{ 
                       width: '100%', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)',
-                      borderRadius: '16px', padding: '16px 20px', color: 'var(--auth-input-text)', fontSize: '16px', outline: 'none'
+                      borderRadius: 'var(--radius-md)', padding: '16px 20px', color: 'var(--auth-input-text)', fontSize: '16px', outline: 'none'
                     }} 
                   />
                 </div>
@@ -131,7 +131,7 @@ export default function Login() {
                     required 
                     style={{ 
                       width: '100%', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)',
-                      borderRadius: '16px', padding: '16px 20px', color: 'var(--auth-input-text)', fontSize: '16px', outline: 'none'
+                      borderRadius: 'var(--radius-md)', padding: '16px 20px', color: 'var(--auth-input-text)', fontSize: '16px', outline: 'none'
                     }} 
                   />
                 </div>
@@ -139,7 +139,7 @@ export default function Login() {
                   type="submit" 
                   disabled={loading}
                   style={{ 
-                    width: '100%', padding: '18px', background: 'var(--auth-btn-bg)', borderRadius: '16px',
+                    width: '100%', padding: '18px', background: 'var(--auth-btn-bg)', borderRadius: 'var(--radius-md)',
                     border: '2px solid var(--auth-btn-border)', color: 'var(--auth-btn-text)', fontSize: '16px', fontWeight: 800, cursor: 'pointer',
                     boxShadow: 'none'
                   }}
@@ -179,7 +179,7 @@ export default function Login() {
                     style={{ 
                       textAlign: 'center', fontSize: '32px', letterSpacing: '12px', fontWeight: 900,
                       width: '100%', background: 'var(--auth-input-bg)', border: '1px solid var(--auth-input-border)',
-                      borderRadius: '16px', padding: '16px', color: 'var(--auth-input-text)', outline: 'none'
+                      borderRadius: 'var(--radius-md)', padding: '16px', color: 'var(--auth-input-text)', outline: 'none'
                     }} 
                     autoFocus
                   />
@@ -188,7 +188,7 @@ export default function Login() {
                   type="submit" 
                   disabled={loading}
                   style={{ 
-                    width: '100%', padding: '18px', background: 'var(--auth-btn-bg)', borderRadius: '16px',
+                    width: '100%', padding: '18px', background: 'var(--auth-btn-bg)', borderRadius: 'var(--radius-md)',
                     border: '2px solid var(--auth-btn-border)', color: 'var(--auth-btn-text)', fontSize: '16px', fontWeight: 800, cursor: 'pointer',
                     boxShadow: 'none'
                   }}
@@ -201,7 +201,7 @@ export default function Login() {
                   style={{ width: '100%', background: 'var(--auth-btn-bg)', border: '2px solid var(--auth-btn-border)', color: 'var(--auth-btn-text)', 
                     fontSize: '13px', marginTop: 24, cursor: 'pointer', fontWeight: 700 }}
                 >
-                  ← BACK TO LOGIN
+                  Back to Login
                 </button>
               </motion.form>
             )}
@@ -210,7 +210,7 @@ export default function Login() {
           {!otpData && (
             <div style={{ marginTop: 32 }}>
               <div style={{ 
-                padding: '16px', borderRadius: '16px', background: 'var(--auth-input-bg)', 
+                padding: '16px', borderRadius: 'var(--radius-md)', background: 'var(--auth-input-bg)', 
                 border: '1px solid var(--auth-card-border)', fontSize: '13px', color: 'var(--auth-subtext)',
                 lineHeight: 1.5, marginBottom: 32
               }}>
@@ -230,3 +230,5 @@ export default function Login() {
     </div>
   );
 }
+
+

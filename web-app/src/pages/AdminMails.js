@@ -72,25 +72,21 @@ export default function AdminMails() {
   }, [emails, searchQuery, filterType]);
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: '#02060A', 
-      color: '#fff',
+    <div className="page-shell" style={{ 
+      minHeight: '100dvh', 
+      background: '#070707', 
+      color: '#f2f0ea',
       position: 'relative',
       overflowX: 'hidden',
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: "'IBM Plex Sans', sans-serif"
     }}>
-      {/* Liquid Atmospheric Accents */}
-      <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 180, 255, 0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 255, 170, 0.05) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
 
       <Navbar />
       
-      <div style={{ 
-        maxWidth: 1400, 
+      <div className="report-layout" style={{ 
+        maxWidth: 1360, 
         margin: '0 auto', 
-        padding: '60px 24px 80px',
+        padding: '44px 32px 100px',
         position: 'relative',
         zIndex: 1
       }}>
@@ -98,21 +94,21 @@ export default function AdminMails() {
         {/* Header Title Section */}
         <div style={{ marginBottom: 36, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '20px' }}>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(0, 180, 255, 0.1)', border: '1px solid rgba(0, 180, 255, 0.25)', borderRadius: '20px', padding: '4px 12px', marginBottom: '12px' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00FFAA', display: 'inline-block', boxShadow: '0 0 8px #00FFAA' }}></span>
-              <span style={{ fontSize: '11px', color: '#00B4FF', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>DUAL-CHANNEL DISPATCH GATEWAY</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#141414', border: '1px solid #30302d', borderRadius: '999px', padding: '4px 12px', marginBottom: '12px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00FFAA', display: 'inline-block', boxShadow: 'none' }}></span>
+              <span style={{ fontSize: '11px', color: '#EFEDE8', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>DUAL-CHANNEL DISPATCH GATEWAY</span>
             </div>
             <h1 style={{ 
               fontSize: '2.8rem', 
               fontWeight: 800,
-              background: 'linear-gradient(to bottom, #fff, rgba(255,255,255,0.6))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: 'var(--text)',
+
+
               margin: '0 0 10px 0',
               letterSpacing: '-1.5px',
-              fontFamily: 'Orbitron, monospace'
+              fontFamily: 'var(--font-sans)'
             }}>
-              Network <span style={{ color: '#00B4FF' }}>Mails &amp; SMS</span>
+              Communication Dispatch Logs
             </h1>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '15px', fontWeight: 400, margin: 0 }}>
               Integrated communications log tracking both Email alerts and SMS text messages sent to citizens and officers ({total} total logs).
@@ -121,22 +117,22 @@ export default function AdminMails() {
 
           {/* Quick Metrics Bar */}
           <div style={{ display: 'flex', gap: '14px' }}>
-            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '12px 18px', textAlign: 'center' }}>
+            <div style={{ background: '#0d0d0d', border: '1px solid #242421', borderRadius: '24px', padding: '12px 18px', textAlign: 'center' }}>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Total Dispatches</div>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: '#fff', fontFamily: 'Orbitron, monospace', marginTop: '2px' }}>{total}</div>
+              <div style={{ fontSize: '20px', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-sans)', marginTop: '2px' }}>{total}</div>
             </div>
-            <div style={{ background: 'rgba(0, 180, 255, 0.05)', border: '1px solid rgba(0, 180, 255, 0.2)', borderRadius: '14px', padding: '12px 18px', textAlign: 'center' }}>
-              <div style={{ fontSize: '11px', color: '#00B4FF', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Email &amp; SMS Sync</div>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: '#00FFAA', fontFamily: 'Orbitron, monospace', marginTop: '2px' }}>100% ACTIVE</div>
+            <div style={{ background: '#0d0d0d', border: '1px solid #242421', borderRadius: '24px', padding: '12px 18px', textAlign: 'center' }}>
+              <div style={{ fontSize: '11px', color: '#EFEDE8', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Email &amp; SMS Sync</div>
+              <div style={{ fontSize: '20px', fontWeight: 800, color: '#00FFAA', fontFamily: 'var(--font-sans)', marginTop: '2px' }}>100% ACTIVE</div>
             </div>
           </div>
         </div>
 
         {/* Filter and Search Bar */}
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '18px',
+          background: '#0d0d0d',
+          border: '1px solid #30302d',
+          borderRadius: '24px',
           padding: '16px 20px',
           marginBottom: '24px',
           display: 'flex',
@@ -147,7 +143,7 @@ export default function AdminMails() {
         }}>
           {/* Search Box */}
           <div style={{ position: 'relative', flex: 1, minWidth: '280px' }}>
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>⌕</span>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>âŒ•</span>
             <input
               type="text"
               placeholder="Search by recipient, phone, complaint ID or message..."
@@ -182,7 +178,7 @@ export default function AdminMails() {
                 style={{
                   background: filterType === tab.id ? 'rgba(0, 180, 255, 0.2)' : 'rgba(255, 255, 255, 0.03)',
                   border: `1px solid ${filterType === tab.id ? 'rgba(0, 180, 255, 0.5)' : 'rgba(255, 255, 255, 0.08)'}`,
-                  color: filterType === tab.id ? '#00B4FF' : 'rgba(255, 255, 255, 0.6)',
+                  color: filterType === tab.id ? '#EFEDE8' : 'rgba(255, 255, 255, 0.6)',
                   padding: '8px 14px',
                   borderRadius: '10px',
                   fontSize: '12px',
@@ -200,11 +196,9 @@ export default function AdminMails() {
 
         {/* Main Table Container */}
         <div style={{ 
-          background: 'rgba(255, 255, 255, 0.02)',
-          backdropFilter: 'blur(40px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '24px',
+          background: '#0d0d0d',
+          border: '1px solid #30302d',
+          borderRadius: '16px',
           overflow: 'hidden',
           boxShadow: '0 30px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
         }}>
@@ -227,7 +221,7 @@ export default function AdminMails() {
                   <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', width: '290px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span>Message Body</span>
-                      <span style={{ fontSize: '9px', background: 'rgba(0,180,255,0.15)', color: '#00B4FF', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(0,180,255,0.3)' }}>@ EMAIL</span>
+                      <span style={{ fontSize: '9px', background: '#1C1C1A', color: '#EFEDE8', padding: '2px 6px', borderRadius: '4px', border: '1px solid #242422' }}>@ EMAIL</span>
                     </div>
                   </th>
                   <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: '11px', color: '#00FFAA', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', width: '310px' }}>
@@ -284,7 +278,7 @@ export default function AdminMails() {
                         </div>
                         {hasPhone ? (
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px', background: 'rgba(0,255,170,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', color: '#00FFAA', fontWeight: 600 }}>
-                            <span>⌕</span> {mail.recipientPhone}
+                            <span>âŒ•</span> {mail.recipientPhone}
                           </div>
                         ) : (
                           <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
@@ -298,15 +292,15 @@ export default function AdminMails() {
                         {mail.complaintId ? (
                           <div style={{ 
                             background: isUrgent ? 'rgba(255,59,48,0.12)' : 'rgba(0,180,255,0.12)', 
-                            border: `1px solid ${isUrgent ? 'rgba(255,59,48,0.3)' : 'rgba(0,180,255,0.3)'}`,
-                            color: isUrgent ? '#FF3B30' : '#00B4FF', 
+                            border: `1px solid ${isUrgent ? 'rgba(255,59,48,0.3)' : '#242422'}`,
+                            color: isUrgent ? '#FF3B30' : '#EFEDE8', 
                             borderRadius: '8px', 
                             padding: '5px 10px', 
                             fontSize: '11px', 
                             fontWeight: 800, 
                             display: 'inline-block', 
                             letterSpacing: '1px', 
-                            fontFamily: 'Orbitron, monospace'
+                            fontFamily: 'var(--font-sans)'
                           }}>
                             {mail.complaintId}
                           </div>
@@ -357,7 +351,7 @@ export default function AdminMails() {
                       <td style={{ padding: '20px 24px' }}>
                         <div 
                           style={{ 
-                            background: 'linear-gradient(135deg, rgba(0, 255, 170, 0.04) 0%, rgba(0, 180, 255, 0.03) 100%)',
+                            color: 'var(--text)',
                             border: '1px solid rgba(0, 255, 170, 0.25)',
                             borderRadius: '10px',
                             padding: '10px 12px',
@@ -387,7 +381,7 @@ export default function AdminMails() {
                               }}
                               title="Copy SMS text"
                             >
-                              {copiedId === mail._id ? 'v COPIED' : '⧉ COPY'}
+                              {copiedId === mail._id ? 'v COPIED' : 'â§‰ COPY'}
                             </button>
                           </div>
 
@@ -454,7 +448,7 @@ export default function AdminMails() {
                 position: 'fixed',
                 inset: 0,
                 background: 'rgba(0, 0, 0, 0.8)',
-                backdropFilter: 'blur(10px)',
+                backdropFilter: 'none',
                 zIndex: 9999,
                 display: 'flex',
                 alignItems: 'center',
@@ -476,7 +470,7 @@ export default function AdminMails() {
                   width: '100%',
                   maxHeight: '90vh',
                   overflowY: 'auto',
-                  boxShadow: '0 30px 80px rgba(0,0,0,0.8), 0 0 40px rgba(0,180,255,0.15)',
+                  boxShadow: '0 30px 80px rgba(0,0,0,0.8), 0 0 40px #1C1C1A',
                   padding: '36px',
                   position: 'relative'
                 }}
@@ -489,7 +483,7 @@ export default function AdminMails() {
                         v DISPATCH LOGGED
                       </span>
                       {selectedMail.complaintId && (
-                        <span style={{ fontSize: '12px', color: '#00B4FF', fontWeight: 800, background: 'rgba(0,180,255,0.1)', padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(0,180,255,0.3)', fontFamily: 'Orbitron, monospace' }}>
+                        <span style={{ fontSize: '12px', color: '#EFEDE8', fontWeight: 800, background: '#1C1C1A', padding: '3px 8px', borderRadius: '6px', border: '1px solid #242422', fontFamily: 'var(--font-sans)' }}>
                           {selectedMail.complaintId}
                         </span>
                       )}
@@ -537,7 +531,7 @@ export default function AdminMails() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '18px' }}>@</span>
-                        <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#00B4FF', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
+                        <h3 style={{ fontSize: '14px', fontWeight: 800, color: '#EFEDE8', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
                           Email Dispatch
                         </h3>
                       </div>
@@ -597,7 +591,7 @@ export default function AdminMails() {
                     {/* Simulated Mobile SMS Bubble */}
                     <div style={{
                       flex: 1,
-                      background: 'linear-gradient(135deg, rgba(0, 180, 255, 0.1) 0%, rgba(0, 255, 170, 0.1) 100%)',
+                      color: 'var(--text)',
                       border: '1px solid rgba(0, 255, 170, 0.3)',
                       borderRadius: '16px 16px 16px 4px',
                       padding: '18px',
@@ -626,7 +620,7 @@ export default function AdminMails() {
                           cursor: 'pointer'
                         }}
                       >
-                        {copiedId === 'modal' ? 'v Copied SMS' : '⧉ Copy SMS Text'}
+                        {copiedId === 'modal' ? 'v Copied SMS' : 'â§‰ Copy SMS Text'}
                       </button>
                     </div>
                   </div>
@@ -641,4 +635,5 @@ export default function AdminMails() {
     </div>
   );
 }
+
 

@@ -39,47 +39,66 @@ export default function AdminML() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0F1E' }}>
+    <div className="page-shell" style={{ 
+      minHeight: '100dvh', 
+      background: '#070707',
+      color: '#f2f0ea',
+      fontFamily: "'IBM Plex Sans', sans-serif"
+    }}>
       <Navbar />
-      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 24px' }}>
-        
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontFamily: 'Orbitron,monospace', fontSize: 24, color: '#fff', marginBottom: 8 }}>Neural Engine Settings</h1>
-          <p style={{ color: '#5A6480' }}>Monitor and test the AI classification model</p>
-        </div>
+      
+      <main className="report-layout" style={{ maxWidth: 1100, margin: '0 auto', padding: '44px 24px 100px' }}>
+        <header style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8, marginBottom: 36 }}>
+          <p className="eyebrow" style={{ color: '#8e8b84', fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', margin: '0 0 10px' }}>
+            NEURAL INFERENCE PIPELINE
+          </p>
+          <h1 style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 'clamp(2.2rem, 3.2vw, 3rem)', fontWeight: 800, color: '#f2f0ea', letterSpacing: '0.04em', textTransform: 'uppercase', margin: '0 0 10px' }}>
+            Neural Engine Configuration
+          </h1>
+          <p style={{ color: '#8e8b84', fontSize: '15px', margin: 0 }}>
+            Inspect and test the automated natural language classification model and vector embeddings.
+          </p>
+        </header>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 24 }}>
           
           {/* Status Card */}
-          <div className="card-cyber" style={{ padding: 24, border: '1px solid rgba(156, 39, 176, 0.2)' }}>
-            <h3 style={{ fontSize: 14, color: '#00B4FF', marginBottom: 20, fontFamily: 'Orbitron,monospace' }}>SYSTEM STATUS</h3>
+          <div style={{ 
+            background: '#0d0d0d', 
+            border: '1px solid #30302d', 
+            borderRadius: '16px', 
+            padding: 32,
+            boxShadow: '0 24px 70px rgba(0,0,0,0.4)'
+          }}>
+            <h3 style={{ fontSize: 12, color: '#8e8b84', marginBottom: 20, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>
+              INFERENCE SERVICE STATUS
+            </h3>
             {loading ? (
-              <p style={{ color: '#5A6480' }}>Checking connection...</p>
+              <p style={{ color: '#8e8b84', fontSize: 13, fontFamily: "'IBM Plex Sans', sans-serif" }}>Querying cluster health...</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ 
-                    width: 12, height: 12, borderRadius: '50%', 
-                    background: (status?.mlService?.status === 'online' || status?.mlService?.status === 'ok') ? '#00FFD1' : '#FF5252',
-                    boxShadow: (status?.mlService?.status === 'online' || status?.mlService?.status === 'ok') ? '0 0 10px #00FFD1' : 'none'
+                    width: 10, height: 10, borderRadius: '50%', 
+                    background: (status?.mlService?.status === 'online' || status?.mlService?.status === 'ok') ? '#3DF5C0' : '#d96464'
                   }} />
-                  <span style={{ fontSize: 16, color: '#fff', fontWeight: 600 }}>
-                    {(status?.mlService?.status === 'online' || status?.mlService?.status === 'ok') ? 'SERVICE OPERATIONAL' : 'SERVICE OFFLINE'}
+                  <span style={{ fontSize: 15, color: '#f2f0ea', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.04em' }}>
+                    {(status?.mlService?.status === 'online' || status?.mlService?.status === 'ok') ? 'CLUSTER OPERATIONAL' : 'CLUSTER OFFLINE'}
                   </span>
                 </div>
                 
-                <div style={{ background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 8 }}>
+                <div style={{ background: '#141414', padding: 20, borderRadius: 16, border: '1px solid #262522' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <span style={{ color: '#5A6480', fontSize: 12 }}>Model Version</span>
-                    <span style={{ color: '#E0E8FF', fontSize: 12 }}>{status?.modelInfo?.version || 'v1.0.4-stable'}</span>
+                    <span style={{ color: '#8e8b84', fontSize: 12, fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 600 }}>MODEL VERSION</span>
+                    <span style={{ color: '#f2f0ea', fontSize: 12, fontFamily: "'IBM Plex Mono', monospace" }}>{status?.modelInfo?.version || 'v1.0.4-stable'}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <span style={{ color: '#5A6480', fontSize: 12 }}>Algorithm</span>
-                    <span style={{ color: '#E0E8FF', fontSize: 12 }}>TF-IDF + Logistic Regression</span>
+                    <span style={{ color: '#8e8b84', fontSize: 12, fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 600 }}>ALGORITHM</span>
+                    <span style={{ color: '#f2f0ea', fontSize: 12, fontFamily: "'IBM Plex Mono', monospace" }}>TF-IDF + Logistic Regression</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#5A6480', fontSize: 12 }}>Accuracy</span>
-                    <span style={{ color: '#00FFD1', fontSize: 12, fontWeight: 700 }}>{status?.modelInfo?.accuracy || '94.8'}%</span>
+                    <span style={{ color: '#8e8b84', fontSize: 12, fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 600 }}>TEST ACCURACY</span>
+                    <span style={{ color: '#3DF5C0', fontSize: 13, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>{status?.modelInfo?.accuracy || '94.8'}%</span>
                   </div>
                 </div>
               </div>
@@ -87,24 +106,40 @@ export default function AdminML() {
           </div>
 
           {/* Model Testing */}
-          <div className="card-cyber" style={{ padding: 24 }}>
-            <h3 style={{ fontSize: 14, color: '#00B4FF', marginBottom: 20, fontFamily: 'Orbitron,monospace' }}>MODEL PLAYGROUND</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ 
+            background: '#0d0d0d', 
+            border: '1px solid #30302d', 
+            borderRadius: '16px', 
+            padding: 32,
+            boxShadow: '0 24px 70px rgba(0,0,0,0.4)'
+          }}>
+            <h3 style={{ fontSize: 12, color: '#8e8b84', marginBottom: 20, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700 }}>
+              INFERENCE PLAYGROUND
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <textarea 
-                className="input-cyber" 
                 rows={4} 
-                placeholder="Enter a crime description to test AI classification..."
+                placeholder="Enter incident transcript or narrative to test classifier..."
                 value={testText}
                 onChange={(e) => setTestText(e.target.value)}
-                style={{ resize: 'none' }}
+                style={{ 
+                  resize: 'none', background: '#141414', border: '1px solid #30302d',
+                  borderRadius: 16, padding: 16, color: '#f2f0ea', fontSize: 13,
+                  outline: 'none', fontFamily: "'IBM Plex Sans', sans-serif"
+                }}
               />
               <button 
-                className="btn-primary" 
                 onClick={handlePredict} 
                 disabled={predicting || !testText.trim()}
-                style={{ width: '100%' }}
+                style={{ 
+                  width: '100%', padding: '14px', borderRadius: '999px',
+                  background: '#f2f0ea', color: '#070707', border: 'none',
+                  fontWeight: 700, fontSize: 13, fontFamily: "'IBM Plex Sans', sans-serif",
+                  letterSpacing: '0.04em', cursor: 'pointer',
+                  opacity: predicting || !testText.trim() ? 0.4 : 1
+                }}
               >
-                {predicting ? 'ANALYZING...' : 'RUN INFERENCE'}
+                {predicting ? 'INFERRING...' : 'RUN INFERENCE CLASSIFIER'}
               </button>
             </div>
 
@@ -112,19 +147,21 @@ export default function AdminML() {
               <motion.div 
                 initial={{ opacity: 0, y: 10 }} 
                 animate={{ opacity: 1, y: 0 }}
-                style={{ marginTop: 20, padding: 16, background: 'rgba(0,180,255,0.05)', borderRadius: 8, border: '1px solid rgba(0,180,255,0.1)' }}
+                style={{ marginTop: 20, padding: 18, background: '#141414', borderRadius: 16, border: '1px solid #30302d' }}
               >
-                <div style={{ fontSize: 11, color: '#5A6480', marginBottom: 4, textTransform: 'uppercase' }}>Prediction Result</div>
+                <div style={{ fontSize: 10, color: '#8e8b84', marginBottom: 4, textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.08em', fontWeight: 700 }}>
+                  Classification Output
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: '#00FFD1', fontWeight: 700, fontSize: 18 }}>{prediction.category}</span>
-                  <span style={{ color: '#00B4FF', fontSize: 12 }}>{Math.round(prediction.confidence * 100)}% Conf.</span>
+                  <span style={{ color: '#EFEDE8', fontWeight: 700, fontSize: 16, fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase' }}>{prediction.category}</span>
+                  <span style={{ color: '#f2f0ea', fontSize: 12, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>{Math.round(prediction.confidence * 100)}% CONFIDENCE</span>
                 </div>
               </motion.div>
             )}
           </div>
 
         </div>
-      </div>
+      </main>
     </div>
   );
 }

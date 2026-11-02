@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 export default function JarvisAssistant({ dbData }) {
@@ -42,7 +42,7 @@ export default function JarvisAssistant({ dbData }) {
     }
   }, [dbData]);
 
-  // ─── CINEMATIC AUDIO ENGINE ───
+  // â”€â”€â”€ CINEMATIC AUDIO ENGINE â”€â”€â”€
   const playAudio = (filename) => {
     const audio = new Audio(`/voices/${filename}`);
     audio.volume = 0.8;
@@ -133,7 +133,7 @@ export default function JarvisAssistant({ dbData }) {
       pulse = 1.04 - 0.04 * Math.sin(((progress - 0.42) / 0.28) * Math.PI / 2);
     }
 
-    // ─── HIGH PERFORMANCE AUTOMATIC DRIFT & TILT SYSTEM ───
+    // â”€â”€â”€ HIGH PERFORMANCE AUTOMATIC DRIFT & TILT SYSTEM â”€â”€â”€
     // Medium and soft drift oscillation to mimic slow cinematic floating
     const autoX = 12 * Math.sin(t * 0.6); // slower, softer frequency
     const autoY = 16 * Math.cos(t * 0.45); // slower, softer frequency
@@ -179,7 +179,7 @@ export default function JarvisAssistant({ dbData }) {
     ctx.stroke();
     ctx.restore();
 
-    // ─── DYNAMIC ORBITING NODES ───
+    // â”€â”€â”€ DYNAMIC ORBITING NODES â”€â”€â”€
     nodes.forEach((n, i) => {
       const angle = n.angle + t * n.speed;
       const x = cx + Math.cos(angle) * n.orbitR * pulse;
@@ -199,7 +199,7 @@ export default function JarvisAssistant({ dbData }) {
       ctx.stroke();
     });
 
-    // ─── OUTER SPARKS ───
+    // â”€â”€â”€ OUTER SPARKS â”€â”€â”€
     sparks.forEach((sp, i) => {
       const life = (sp.life + t * 0.03) % 1;
       const r = life * sp.maxR * pulse;
@@ -214,7 +214,7 @@ export default function JarvisAssistant({ dbData }) {
       ctx.fill();
     });
 
-    // ─── INTERACTIVE AUDIO WAVEFORM sweep on listening ───
+    // â”€â”€â”€ INTERACTIVE AUDIO WAVEFORM sweep on listening â”€â”€â”€
     if (listening) {
       ctx.strokeStyle = 'rgba(255, 180, 50, 0.25)';
       ctx.lineWidth = 1.5;
@@ -320,7 +320,7 @@ export default function JarvisAssistant({ dbData }) {
             justifyContent: 'center'
           }}
         >
-          {/* Heartbeat Pulse Wrapper (Double peak pulse rhythm - slow and medium) */}
+          {/* Holographic Core Wrapper (Restrained, static aperture) */}
           <div
             style={{
               position: 'absolute',
@@ -330,47 +330,20 @@ export default function JarvisAssistant({ dbData }) {
               alignItems: 'center',
               justifyContent: 'center',
               transformStyle: 'preserve-3d',
-              animation: isListening ? 'heartbeat-listening 1.8s infinite linear' : 'heartbeat 3.0s infinite linear'
+              border: isListening ? '2px solid #3DF5C0' : '1px solid #242422',
+              borderRadius: '50%',
+              transition: 'border-color 0.2s ease'
             }}
           >
-            {/* Concentric slices spinning independently inside each other (4 concentric circles!) */}
-            
-            {/* 1. Inner Aperture Core (Static rotation, pulses with parent) */}
+            {/* Core Aperture (Static, zero decorative spin loops) */}
             <div style={{
               ...baseLayerStyle,
               transform: 'translateZ(-25px)',
-              WebkitMaskImage: 'radial-gradient(circle, black 18%, transparent 20%)',
-              maskImage: 'radial-gradient(circle, black 18%, transparent 20%)'
+              borderRadius: '50%',
+              background: '#0E0E0E'
             }} />
 
-            {/* 2. New Small City Ring (Spins counter-clockwise) */}
-            <div style={{
-              ...baseLayerStyle,
-              transform: 'translateZ(-5px)',
-              animation: 'spin-reverse 95s linear infinite',
-              WebkitMaskImage: 'radial-gradient(circle, transparent 19%, black 21%, black 42%, transparent 44%)',
-              maskImage: 'radial-gradient(circle, transparent 19%, black 21%, black 42%, transparent 44%)'
-            }} />
-
-            {/* 3. Middle Main City Ring Section (Spins counter-clockwise) */}
-            <div style={{
-              ...baseLayerStyle,
-              transform: 'translateZ(15px)',
-              animation: 'spin-reverse 55s linear infinite',
-              WebkitMaskImage: 'radial-gradient(circle, transparent 43%, black 45%, black 72%, transparent 74%)',
-              maskImage: 'radial-gradient(circle, transparent 43%, black 45%, black 72%, transparent 74%)'
-            }} />
-
-            {/* 4. Outer Ring Structure (Spins clockwise) */}
-            <div style={{
-              ...baseLayerStyle,
-              transform: 'translateZ(35px)',
-              animation: 'spin 180s linear infinite',
-              WebkitMaskImage: 'radial-gradient(circle, transparent 71%, black 73%, black 100%)',
-              maskImage: 'radial-gradient(circle, transparent 71%, black 73%, black 100%)'
-            }} />
-
-            {/* Layer 5: Interactive HUD Canvas Overlay (Particles, Arcs) */}
+            {/* Interactive HUD Canvas Overlay */}
             <canvas 
               ref={canvasRef}
               style={{
@@ -387,41 +360,17 @@ export default function JarvisAssistant({ dbData }) {
 
       {/* Voice Assistant Speech Visualizer */}
       <div style={{ marginTop: 20, textAlign: 'center', minHeight: 90, zIndex: 10 }}>
-        <p style={{ color: 'rgba(255, 140, 20, 0.75)', fontSize: 14, fontFamily: 'Orbitron, monospace', fontStyle: 'normal', letterSpacing: '6px', fontWeight: 'bold' }}>
+        <p style={{ color: isListening ? '#3DF5C0' : '#8E8B85', fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", fontStyle: 'normal', letterSpacing: '3px', fontWeight: '600' }}>
           {isListening ? (transcript || "J.A.R.V.I.S.") : (transcript ? `> ${transcript.toUpperCase()}` : "J.A.R.V.I.S.")}
         </p>
-        <p style={{ color: '#ffcc00', fontSize: 16, fontFamily: 'Orbitron, monospace', marginTop: 12, maxWidth: 580, lineHeight: 1.6, textShadow: '0 0 15px rgba(255, 150, 0, 0.6)' }}>
+        <p style={{ color: '#EFEDE8', fontSize: 15, fontFamily: "'IBM Plex Sans', sans-serif", marginTop: 12, maxWidth: 580, lineHeight: 1.6 }}>
           {jarvisResponse}
         </p>
       </div>
 
       {/* Embedded CSS Animations for High Performance */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes spin-reverse {
-          from { transform: rotate(360deg); }
-          to { transform: rotate(0deg); }
-        }
-        @keyframes heartbeat {
-          0% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(255, 140, 20, 0)); }
-          14% { transform: scale(1.02); filter: drop-shadow(0 0 10px rgba(255, 140, 20, 0.2)); }
-          28% { transform: scale(1.005); filter: drop-shadow(0 0 2px rgba(255, 140, 20, 0.05)); }
-          42% { transform: scale(1.04); filter: drop-shadow(0 0 20px rgba(255, 140, 20, 0.3)); }
-          70% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(255, 140, 20, 0)); }
-          100% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(255, 140, 20, 0)); }
-        }
-        @keyframes heartbeat-listening {
-          0% { transform: scale(1.02); filter: drop-shadow(0 0 5px rgba(255, 140, 20, 0.1)); }
-          14% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(255, 140, 20, 0.35)); }
-          28% { transform: scale(1.03); filter: drop-shadow(0 0 8px rgba(255, 140, 20, 0.15)); }
-          42% { transform: scale(1.07); filter: drop-shadow(0 0 25px rgba(255, 140, 20, 0.5)); }
-          70% { transform: scale(1.02); filter: drop-shadow(0 0 5px rgba(255, 140, 20, 0.1)); }
-          100% { transform: scale(1.02); filter: drop-shadow(0 0 5px rgba(255, 140, 20, 0.1)); }
-        }
-      `}} />
+      
     </div>
   );
 }
+
