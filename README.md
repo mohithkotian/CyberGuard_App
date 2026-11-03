@@ -11,9 +11,11 @@
 
 ## Product Demo
 
-> End-to-end walkthrough — incident intake → PII masking → ML classification → statutory case tracking.
+End-to-end walkthrough — incident intake → PII masking → ML classification → statutory case tracking.
 
-<video src="docs/media/cyberguard-product-film.mp4" autoplay loop muted playsinline width="100%"></video>
+[![CyberGuard Product Demo](docs/media/cyberguard-product-film-preview.gif)](docs/media/cyberguard-product-film.mp4)
+
+*Watch the 15-second CyberGuard product walkthrough.*
 
 ---
 
