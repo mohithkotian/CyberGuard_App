@@ -19,6 +19,7 @@ End-to-end walkthrough — incident intake → PII masking → ML classification
 
 ---
 
+
 ## Live Deployment
 
 | Service | URL |
@@ -33,15 +34,15 @@ End-to-end walkthrough — incident intake → PII masking → ML classification
 
 ## Overview
 
-CyberGuard AI is an AI-powered cybercrime complaint reporting, investigation, and threat intelligence platform. It follows a **zero-trust, role-based privacy architecture**: PII is automatically detected and masked, forensic indicators are extracted from evidence via OCR, incidents are classified using a TF-IDF + Logistic Regression NLP model across 13 attack categories, and real-time intelligence is delivered to citizens, forensic investigators, and law enforcement agencies.
+CyberGuard AI is an AI-powered cybercrime complaint reporting, investigation, and threat intelligence platform. It follows a **zero-trust, role-based privacy architecture**: PII is automatically d[...]
 
-**Onee**, the built-in interactive AI guide, walks citizens through the complaint form step by step — highlighting each field, validating input in real time, and offering a draft helper for writing incident narratives.
+**Onee**, the built-in interactive AI guide, walks citizens through the complaint form step by step — highlighting each field, validating input in real time, and offering a draft helper for incident[...]
 
 ---
 
 ## Key Features
 
-- **AI Cybercrime Classification** — automated NLP categorization into 13 attack vectors: Financial Fraud, Phishing, Ransomware, Cyberbullying, Hacking, Identity Theft, Data Breach, Online Fraud, Child Exploitation, Women/Child Safety, DDoS/Network Attacks, Cryptocurrency Scams, and Other. Falls back to a rule-based local classifier if the ML service is unavailable.
+- **AI Cybercrime Classification** — automated NLP categorization into 13 attack vectors: Financial Fraud, Phishing, Ransomware, Cyberbullying, Hacking, Identity Theft, Data Breach, Online Fraud, an[...]
 - **Zero-Trust Role-Based Privacy Architecture**
   - **Complaint Owner** — full unmasked access to their own filing.
   - **Officer / Admin** — raw case data, forensic link-analysis graphs, and investigation tools.
@@ -196,8 +197,8 @@ CyberGuard_App/
 │   └── src/
 │       ├── components/        Navbar, Onee Guide, CyberReport, Scanner, Chat
 │       ├── pages/             Dashboard, Community, Admin, Forensics, Settings
-│       ├── services/          API Axios client and Socket listener
-│       └── hooks/             Zustand auth and theme state management
+│       ├── services/           API Axios client and Socket listener
+│       └── hooks/              Zustand auth and theme state management
 │
 ├── mobile-app/                React Native Expo mobile app (⚠ not production-ready)
 │   └── src/                   Native screens and components
