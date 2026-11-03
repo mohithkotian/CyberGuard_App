@@ -1183,8 +1183,7 @@ const CyberReport = () => {
         validationMessage={oneeGuide.validationMessage}
         prefersReducedMotion={oneeGuide.prefersReducedMotion}
         isActive={oneeGuide.isActive}
-        onNext={oneeGuide.nextStep}
-        onPrev={oneeGuide.prevStep}
+        onNext={oneeGuide.onNext}
         onSkip={oneeGuide.stopGuide}
         onStart={oneeGuide.startGuide}
         onOpenDraftHelper={() => setShowTranscribeModal(true)}

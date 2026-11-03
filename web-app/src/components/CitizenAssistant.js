@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import useAuthStore from '../hooks/useAuthStore';
 import Onee from './onee/Onee.jsx';
 import { X, ArrowRight } from 'lucide-react';
 
@@ -9,24 +8,22 @@ import { X, ArrowRight } from 'lucide-react';
  * Friendly digital companion that lives quietly in the corner of citizen pages.
  * 
  * Strict Design Contract:
- * - Default state: idle. Onee is visible and unobtrusive.
+ * - Default state: idle. Onee is visible and unobtrusive on citizen pages.
  * - NO giant assistant panel.
  * - NO chat input or conversation UI.
- * - NO generic launcher dashboard (Report Crime, Track Status, Admin Hub).
  * - On /submit, yields completely to in-page docked OneeCompanion.
- * - Strictly excluded from officer and admin interfaces.
+ * - Strictly excluded from officer and admin interfaces (/admin, /officer, /developer).
  */
 export default function CitizenAssistant() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
 
-  const [isBubbleOpen, setIsBubbleOpen] = useState(false);
+  // On citizen Home page, display welcome balloon by default
+  const [isBubbleOpen, setIsBubbleOpen] = useState(true);
   const [animation, setAnimation] = useState('idle');
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   // Role & Route Safety Check: Strictly exclude from officer and admin interfaces
-  const isOfficerOrAdmin = user?.role === 'officer' || user?.role === 'admin';
   const isOfficerOrAdminRoute = 
     location.pathname.startsWith('/admin') || 
     location.pathname.startsWith('/officer') ||
@@ -42,8 +39,8 @@ export default function CitizenAssistant() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // If officer or admin, render nothing (strict constraint #6)
-  if (isOfficerOrAdmin || isOfficerOrAdminRoute) {
+  // If on officer or admin routes, render nothing (strict constraint #6)
+  if (isOfficerOrAdminRoute) {
     return null;
   }
 
@@ -71,17 +68,17 @@ export default function CitizenAssistant() {
         aria-label="Onee Citizen Guide"
         style={{
           position: 'fixed',
-          bottom: '20px',
-          right: '20px',
+          bottom: '24px',
+          right: '24px',
           zIndex: 9995,
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'row',
           alignItems: 'flex-end',
-          gap: '6px',
+          gap: '12px',
           pointerEvents: 'auto'
         }}
       >
-        {/* Compact Comic Thought Speech Bubble (Optional on click/hover) */}
+        {/* Compact Thought Speech Bubble */}
         {isBubbleOpen && (
           <div
             role="status"
@@ -90,8 +87,8 @@ export default function CitizenAssistant() {
               background: '#0c1017',
               border: '1px solid rgba(61, 245, 192, 0.35)',
               borderRadius: '12px',
-              padding: '10px 12px',
-              maxWidth: '220px',
+              padding: '10px 14px',
+              maxWidth: '240px',
               boxShadow: '0 12px 28px rgba(0, 0, 0, 0.75), 0 0 1px rgba(61, 245, 192, 0.3)',
               color: '#f1f5f9',
               fontFamily: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif",
@@ -104,7 +101,7 @@ export default function CitizenAssistant() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
               <span
                 style={{
-                  fontSize: '10px',
+                  fontSize: '11px',
                   fontFamily: "'IBM Plex Mono', monospace",
                   fontWeight: 600,
                   color: '#3DF5C0',
@@ -116,7 +113,10 @@ export default function CitizenAssistant() {
 
               <button
                 type="button"
-                onClick={() => setIsBubbleOpen(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsBubbleOpen(false);
+                }}
                 aria-label="Close Onee speech bubble"
                 title="Dismiss"
                 style={{
@@ -135,16 +135,16 @@ export default function CitizenAssistant() {
               </button>
             </div>
 
-            {/* 1 Short Sentence */}
+            {/* Intro sentence matching the screenshot */}
             <p
               style={{
                 margin: 0,
                 fontSize: '12px',
-                lineHeight: 1.4,
+                lineHeight: 1.45,
                 color: '#cbd5e1'
               }}
             >
-              I can guide you through reporting a cybercrime.
+              I'm Onee — I'll guide you through each section. Your report helps investigators act faster.
             </p>
 
             {/* Quick Action Button */}
@@ -156,7 +156,7 @@ export default function CitizenAssistant() {
                 color: '#070a0e',
                 border: 'none',
                 borderRadius: '6px',
-                padding: '5px 10px',
+                padding: '6px 12px',
                 fontSize: '11px',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -168,7 +168,7 @@ export default function CitizenAssistant() {
                 marginTop: '2px'
               }}
             >
-              <span>Start guided report</span>
+              <span>Let's Begin</span>
               <ArrowRight size={12} />
             </button>
           </div>
@@ -189,16 +189,14 @@ export default function CitizenAssistant() {
             <div
               aria-hidden="true"
               style={{
+                position: 'absolute',
+                bottom: '-6px',
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '2px',
-                marginBottom: '3px',
+                gap: '3px',
                 pointerEvents: 'none'
               }}
             >
-              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#3DF5C0', opacity: 0.75 }} />
-              <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#3DF5C0', opacity: 0.45 }} />
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#3DF5C0', opacity: 0.85 }} />
             </div>
           )}
 

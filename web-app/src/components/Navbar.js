@@ -41,10 +41,24 @@ export default function Navbar() {
     }
   };
 
+  // Auto-scroll active link into view so navigation never hides or jumps away from the active tab
+  useEffect(() => {
+    if (containerRef.current) {
+      const activeEl = containerRef.current.querySelector('[data-active="true"]');
+      if (activeEl) {
+        activeEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+      }
+    }
+  }, [location.pathname]);
+
   const navLink = (to, label, category) => {
     const isActive = location.pathname === to;
     return (
-      <Link to={to} style={{
+      <Link to={to} data-active={isActive ? 'true' : 'false'} style={{
         color: isActive ? '#f2f0ea' : '#8e8b84',
         textDecoration: 'none', 
         fontSize: 12, 
@@ -183,7 +197,7 @@ export default function Navbar() {
             )}
 
             {/* OFFICER role navigation */}
-            {isOfficer() && (
+            {isOfficer() && !isAdmin() && (
               <>
                 {navLink('/dashboard', t('NAVBAR.COMPLAINTS', 'COMPLAINTS'), t('NAVBAR.CORE', 'CORE'))}
                 {navLink('/submit', t('NAVBAR.REPORT', 'REPORT'), t('NAVBAR.ACTION', 'ACTION'))}

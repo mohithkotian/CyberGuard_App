@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { 
   FileText, ShieldAlert, Download, X, Printer, CheckCircle, Landmark, 
   ShieldCheck, Copy, PhoneCall, AlertTriangle, FileCheck, Mail, Scale, ExternalLink, Building2, Search,
-  Radio, ArrowRight, Plus, DollarSign, Layers
+  Radio, ArrowRight, Plus, DollarSign, Layers, Sparkles
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { complaintsAPI, securityAPI } from '../services/api';
