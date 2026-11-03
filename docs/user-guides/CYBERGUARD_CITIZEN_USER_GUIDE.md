@@ -1,5 +1,11 @@
 # CyberGuard — Citizen User Guide
 
+> **Emergency?** Call immediately — do not wait to file an online report.
+> - **National Cybercrime Helpline (Golden Hour — financial fraud):** `1930`
+> - **National Emergency (Police / Fire / Ambulance):** `112`
+> - **Women Cyber Distress Helpline:** `1091`
+> - **National Childline:** `1098`
+
 Welcome to **CyberGuard**, an advanced cybercrime intelligence and incident management platform designed to help citizens report cybercrimes, preserve digital evidence, and collaborate directly with authorized law enforcement officers and bank nodal authorities across India.
 
 ---
@@ -42,13 +48,13 @@ CyberGuard is a full-stack digital portal that bridges victims of cyber incident
 ## 5. How to Report a Cybercrime
 
 1. Click **Report Incident** in the navigation bar or top banner (`/submit`).
-2. Notice **Onee — CyberGuard Assistant** in the bottom-right corner. Onee provides real-time guidance for every step of the reporting form.
-3. Follow the 5 reporting sections:
-   - **Section 1: Incident Category & Sub-Category**
-   - **Section 2: Incident Details & Date/Time**
-   - **Section 3: Financial Loss & UTR Reference (if money was lost)**
-   - **Section 4: Evidence & Forensic Attachments**
-   - **Section 5: Declaration & Review**
+2. Notice **Onee — CyberGuard Assistant** in the bottom-right corner. Onee guides you through each field step by step.
+3. Fill in each section as Onee highlights it:
+   - **Incident Category & Sub-Category**
+   - **Incident Details & Date/Time**
+   - **Financial Loss & UTR Reference** (if money was lost)
+   - **Evidence & Forensic Attachments**
+   - **Declaration & Review**
 4. Click **Submit Report**.
 5. You will immediately receive a unique **Case ID** (e.g. `CG-2026-XXXX`).
 
