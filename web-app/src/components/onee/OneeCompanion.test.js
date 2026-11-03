@@ -28,7 +28,7 @@ describe('OneeCompanion Interactive Citizen Guide', () => {
     // Verifies Onee mascot and speech bubble
     expect(html).toContain('Onee');
     expect(html).toContain('data-testid="mock-onee"');
-    expect(html).toContain("Let&#x27;s start here");
+    expect(html).toContain("I&#x27;m Onee");
 
     // Strictly verifies wizard UI anti-patterns are ABSENT
     expect(html).not.toContain('STEP 1 OF');

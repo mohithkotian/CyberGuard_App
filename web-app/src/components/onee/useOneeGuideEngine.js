@@ -8,8 +8,12 @@ import { GUIDE_STEPS } from './oneeGuideSteps';
  * Observes real CyberGuard form state, manages target measurement,
  * smooth scrolling, user focus tracking, and seamless progression.
  */
+const DISMISSED_KEY = 'onee-guide-dismissed';
+
 export function useOneeGuideEngine(formState = {}) {
-  const [isActive, setIsActive] = useState(true);
+  const [isActive, setIsActive] = useState(() => {
+    try { return !localStorage.getItem(DISMISSED_KEY); } catch { return true; }
+  });
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -192,8 +196,12 @@ export function useOneeGuideEngine(formState = {}) {
     };
   }, [isCurrentStepCompleted, isActive, currentStep, advanceToNext]);
 
+  // Guaranteed unmount cleanup for the advance timeout (Issue J)
+  useEffect(() => () => clearTimeout(advanceTimeoutRef.current), []);
+
   // Manual actions
   const startGuide = useCallback(() => {
+    try { localStorage.removeItem(DISMISSED_KEY); } catch {}
     setIsActive(true);
     setCurrentStepIndex(0);
     lastCompletedStepRef.current = null;
@@ -202,6 +210,7 @@ export function useOneeGuideEngine(formState = {}) {
   const stopGuide = useCallback(() => {
     setIsActive(false);
     setTargetRect(null);
+    try { localStorage.setItem(DISMISSED_KEY, '1'); } catch {}
   }, []);
 
   const jumpToTarget = useCallback((targetSelector) => {
@@ -211,6 +220,18 @@ export function useOneeGuideEngine(formState = {}) {
       setCurrentStepIndex(idx);
     }
   }, []);
+
+  // Validated Next: block on required incomplete steps, otherwise advance (Issue I)
+  const onNext = useCallback(() => {
+    if (currentStep?.required && !isCurrentStepCompleted) {
+      setIsValidationError(true);
+      setValidationMessage(currentStep.validationMessage || 'Please complete this step before continuing.');
+      return;
+    }
+    setIsValidationError(false);
+    setValidationMessage('');
+    advanceToNext();
+  }, [currentStep, isCurrentStepCompleted, advanceToNext]);
 
   return {
     isActive,
@@ -225,6 +246,7 @@ export function useOneeGuideEngine(formState = {}) {
     startGuide,
     stopGuide,
     advanceToNext,
+    onNext,
     jumpToTarget
   };
 }

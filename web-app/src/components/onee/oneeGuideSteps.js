@@ -9,13 +9,15 @@ export const GUIDE_STEPS = [
   {
     id: 'intro',
     target: '[data-onee-target="form-intro"]',
-    message: "Let's complete this together. Let's start here.",
+    title: 'Welcome',
+    message: "I'm Onee — I'll guide you through each section. Your report helps investigators act faster.",
     animation: 'waking',
     isIntro: true
   },
   {
     id: 'incident-category',
     target: '[data-onee-target="incident-category"]',
+    title: 'Incident Category',
     message: 'Choose what happened.',
     successMessage: "Great. Let's continue.",
     animation: 'curious',
@@ -26,9 +28,11 @@ export const GUIDE_STEPS = [
   {
     id: 'financial-loss',
     target: '[data-onee-target="financial-loss"]',
+    title: 'Financial Loss',
     message: 'Enter the amount you actually lost.',
     successMessage: 'Amount recorded.',
     animation: 'listening',
+    tip: 'Enter the exact amount debited, not including interest or fees.',
     isCompleted: (formState) => {
       if (!formState.lostMoney) return true;
       return Boolean(formState.amountLost && Number(formState.amountLost) > 0);
@@ -39,9 +43,11 @@ export const GUIDE_STEPS = [
   {
     id: 'utr-number',
     target: '[data-onee-target="utr-number"]',
+    title: 'Transaction Reference',
     message: 'Enter the transaction reference number from your bank or UPI details.',
     successMessage: 'Reference saved.',
     animation: 'listening',
+    tip: 'Find the UTR/Reference number in your bank SMS, UPI app history, or bank statement.',
     condition: (formState) => Boolean(formState.lostMoney),
     isCompleted: (formState) => {
       if (!formState.lostMoney) return true;
@@ -52,6 +58,7 @@ export const GUIDE_STEPS = [
   {
     id: 'incident-title',
     target: '[data-onee-target="incident-title"]',
+    title: 'Incident Title',
     message: 'Give a short headline for what happened.',
     successMessage: 'Got it.',
     animation: 'listening',
@@ -62,9 +69,12 @@ export const GUIDE_STEPS = [
   {
     id: 'incident-description',
     target: '[data-onee-target="incident-description"]',
+    title: 'Incident Description',
     message: 'Describe what happened using the facts you know.',
     successMessage: 'Narrative recorded.',
     animation: 'listening',
+    tip: 'Include: when it happened, what platform was used, and what was said or done. Exact amounts, phone numbers, and URLs help investigators most.',
+    hasDraftHelper: true,
     isCompleted: (formState) => Boolean(formState.description && formState.description.trim().length >= 20),
     validationMessage: 'Please write at least 20 characters describing the incident.',
     required: true
@@ -72,7 +82,8 @@ export const GUIDE_STEPS = [
   {
     id: 'contact-info',
     target: '[data-onee-target="contact-info"]',
-    message: 'Enter your email and mobile so investigators can reach you.',
+    title: 'Contact Details',
+    message: 'Confirm the contact details investigators should use to reach you.',
     successMessage: 'Contact saved.',
     animation: 'listening',
     isCompleted: (formState) => Boolean(formState.email && formState.email.includes('@') && formState.mobile && formState.mobile.length >= 10),
@@ -82,16 +93,19 @@ export const GUIDE_STEPS = [
   {
     id: 'evidence-upload',
     target: '[data-onee-target="evidence-upload"]',
-    message: 'Add relevant evidence you have, such as supported transaction screenshots or messages.',
+    title: 'Evidence Upload',
+    message: 'Upload screenshots, PDFs, or chat exports. Max 5 files, 10 MB each. Unedited screenshots work best.',
     successMessage: 'Evidence noted.',
     animation: 'listening',
+    tip: 'Screenshots should be unedited and show timestamps. WhatsApp chats can be exported as .txt files.',
     isCompleted: (formState) => Boolean(formState.filesCount > 0 || formState.hasNationalId || formState.skipEvidence),
     required: false
   },
   {
     id: 'review-declaration',
     target: '[data-onee-target="review-declaration"]',
-    message: 'Take a quick look at everything before submitting.',
+    title: 'Declaration',
+    message: 'Review your details carefully. Check the declaration box when everything is accurate.',
     successMessage: 'Confirmed.',
     animation: 'listening',
     isCompleted: (formState) => Boolean(formState.consentAgreed),
@@ -101,6 +115,7 @@ export const GUIDE_STEPS = [
   {
     id: 'submit-button',
     target: '[data-onee-target="submit-button"]',
+    title: 'Submit',
     message: "Everything looks ready. Submit when you're ready.",
     successMessage: 'Your complaint was submitted successfully.',
     animation: 'excited',

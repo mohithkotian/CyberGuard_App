@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import Onee from './Onee.jsx';
 import OneeGuidePointer from './OneeGuidePointer.jsx';
 import { 
@@ -24,6 +24,8 @@ export default function OneeGuideOverlay({
   totalSteps,
   targetRect,
   isStepCompleted,
+  isValidationError = false,
+  validationMessage = '',
   prefersReducedMotion = false,
   onNext,
   onPrev,
@@ -34,6 +36,9 @@ export default function OneeGuideOverlay({
     width: typeof window !== 'undefined' ? window.innerWidth : 1024,
     height: typeof window !== 'undefined' ? window.innerHeight : 768
   });
+
+  // Unique mask ID to prevent DOM collision if multiple overlays render (Issue L)
+  const maskId = useId().replace(/:/g, '-');
 
   // Track viewport changes
   useEffect(() => {
@@ -145,7 +150,7 @@ export default function OneeGuideOverlay({
           }}
         >
           <defs>
-            <mask id="onee-spotlight-mask">
+            <mask id={maskId}>
               {/* White covers entire screen (opaque) */}
               <rect x="0" y="0" width="100%" height="100%" fill="white" />
               {/* Black cut-out over target element (transparent hole) */}
@@ -167,7 +172,7 @@ export default function OneeGuideOverlay({
             width="100%"
             height="100%"
             fill="rgba(7, 9, 12, 0.72)"
-            mask="url(#onee-spotlight-mask)"
+            mask={`url(#${maskId})`}
           />
         </svg>
       )}
@@ -303,8 +308,11 @@ export default function OneeGuideOverlay({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '4px'
+              borderRadius: '4px',
+              outline: 'none'
             }}
+            onFocus={(e) => { e.currentTarget.style.boxShadow = '0 0 0 2px #3DF5C0'; }}
+            onBlur={(e) => { e.currentTarget.style.boxShadow = 'none'; }}
             className="hover:text-white"
           >
             <X size={16} />
@@ -320,16 +328,20 @@ export default function OneeGuideOverlay({
         {step.tip && (
           <div
             style={{
-              background: 'rgba(61, 245, 192, 0.05)',
-              borderLeft: '3px solid #3DF5C0',
+              background: 'rgba(61, 245, 192, 0.06)',
+              border: '1px solid rgba(61, 245, 192, 0.15)',
               padding: '8px 10px',
-              borderRadius: '0 4px 4px 0',
+              borderRadius: '6px',
               fontSize: '11px',
               color: '#94a3b8',
-              lineHeight: 1.4
+              lineHeight: 1.4,
+              display: 'flex',
+              gap: '6px',
+              alignItems: 'flex-start'
             }}
           >
-            <strong style={{ color: '#3DF5C0' }}>Tip:</strong> {step.tip}
+            <HelpCircle size={12} style={{ color: '#3DF5C0', flexShrink: 0, marginTop: '1px' }} />
+            <span><strong style={{ color: '#3DF5C0', fontWeight: 600 }}>Tip:</strong> {step.tip}</span>
           </div>
         )}
 
@@ -355,6 +367,28 @@ export default function OneeGuideOverlay({
           >
             <Sparkles size={14} /> Help Me Structure Incident Chronology
           </button>
+        )}
+
+        {/* Validation Error Row (Issue K) */}
+        {isValidationError && validationMessage && (
+          <div
+            role="alert"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(245, 158, 11, 0.08)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              borderRadius: '6px',
+              padding: '7px 10px',
+              fontSize: '11px',
+              color: '#fbbf24',
+              lineHeight: 1.4
+            }}
+          >
+            <AlertCircle size={13} style={{ flexShrink: 0 }} />
+            {validationMessage}
+          </div>
         )}
 
         {/* Navigation Buttons Row */}
