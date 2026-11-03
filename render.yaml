@@ -31,6 +31,8 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      - key: ML_INTERNAL_SECRET
+        generateValue: true
 
   # ─────────────────────────────────────────────────────────
   # ML SERVICE (Python Flask + Gunicorn)
@@ -40,12 +42,21 @@ services:
     env: python
     plan: free
     rootDir: ml-service
-    buildCommand: pip install -r requirements.txt && python -c "import nltk; nltk.download('punkt_tab'); nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet')" && python train_model.py
+    buildCommand: pip install -r requirements.txt && python train_model.py
     startCommand: gunicorn -w 1 --threads 2 -b 0.0.0.0:$PORT src.app:app
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.12
+      - key: FLASK_ENV
+        value: production
+      - key: ML_ALLOWED_ORIGINS
+        sync: false
+      - key: ML_INTERNAL_SECRET
+        fromService:
+          type: web
+          name: cybercrime-backend
+          envVarKey: ML_INTERNAL_SECRET
 
   # ─────────────────────────────────────────────────────────
   # FRONTEND WEB APP (React SPA)
