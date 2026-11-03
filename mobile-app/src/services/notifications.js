@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { authAPI } from './api';
 
@@ -12,7 +13,10 @@ Notifications.setNotificationHandler({
 });
 
 export const registerForPushNotifications = async () => {
-  if (!Device.isDevice) return null;
+  if (!Device.isDevice) {
+    console.log('[PUSH] Simulator or web environment detected; push registration bypassed.');
+    return null;
+  }
 
   try {
     const { status: existing } = await Notifications.getPermissionsAsync();
@@ -23,7 +27,10 @@ export const registerForPushNotifications = async () => {
       finalStatus = status;
     }
 
-    if (finalStatus !== 'granted') return null;
+    if (finalStatus !== 'granted') {
+      console.log('[PUSH] Push notification permissions not granted.');
+      return null;
+    }
 
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
@@ -34,16 +41,31 @@ export const registerForPushNotifications = async () => {
       });
     }
 
-    const tokenRes = await Notifications.getExpoPushTokenAsync().catch(() => null);
+    const projectId =
+      Constants.expoConfig?.extra?.eas?.projectId ||
+      Constants.easConfig?.projectId;
+
+    const tokenRes = await Notifications.getExpoPushTokenAsync(
+      projectId ? { projectId } : undefined
+    ).catch((err) => {
+      console.log('[PUSH] Push token retrieval notice:', err.message);
+      return null;
+    });
+
     const token = tokenRes?.data;
 
     if (token) {
-      try { await authAPI.registerPushToken?.(token); } catch {}
+      try {
+        await authAPI.registerPushToken?.(token);
+        console.log('[PUSH] Push token registered with backend successfully.');
+      } catch (backendErr) {
+        console.log('[PUSH] Backend token registration notice:', backendErr.message);
+      }
     }
 
-    return token;
+    return token || null;
   } catch (err) {
-    console.log('Push notification registration bypassed:', err.message);
+    console.log('[PUSH] Push notification registration bypassed:', err.message);
     return null;
   }
 };

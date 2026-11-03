@@ -101,7 +101,8 @@ const useAuthStore = create((set, get) => ({
     set({ user: null, token: null });
   },
 
-  isAdmin: () => ['admin', 'officer'].includes(get().user?.role),
+  isAdmin: () => get().user?.role === 'admin',
+  isAuthorizedPersonnel: () => ['admin', 'officer'].includes(get().user?.role),
   isOfficer: () => get().user?.role === 'officer',
 }));
 

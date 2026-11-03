@@ -203,7 +203,7 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>» BACKEND SERVER CONFIG</Text>
             <Text style={styles.modalDesc}>
-              When using Personal Hotspot or remote networks, enter your Mac IP or Tunnel URL (e.g. http://192.0.0.2:5002/api or https://xxxx.loca.lt/api):
+              Enter custom backend API URL (e.g. https://cybercrime-backend.onrender.com/api or http://192.168.1.X:5002/api):
             </Text>
 
             <TextInput

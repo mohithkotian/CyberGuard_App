@@ -2,6 +2,7 @@
   "expo": {
     "name": "CyberGuard",
     "slug": "cyberguard-app",
+    "scheme": "cyberguard",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,6 +28,11 @@
         "NSPhotoLibraryUsageDescription": "Upload evidence from library"
       }
     },
-    "plugins": ["expo-notifications"]
+    "plugins": ["expo-notifications"],
+    "extra": {
+      "eas": {
+        "projectId": "cyberguard-production"
+      }
+    }
   }
 }
