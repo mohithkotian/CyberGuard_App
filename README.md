@@ -13,9 +13,11 @@
 
 > End-to-end walkthrough — incident intake → PII masking → ML classification → statutory case tracking.
 
-<video src="docs/media/cyberguard-product-film.mp4"
-       autoplay loop muted playsinline width="100%"></video>
-       
+<video controls autoplay loop muted playsinline width="100%">
+  <source src="https://raw.githubusercontent.com/mohithkotian/CyberGuard_App/main/docs/media/cyberguard-product-film.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
 ---
 
 ## Live Deployment
@@ -32,15 +34,15 @@
 
 ## Overview
 
-CyberGuard AI is an AI-powered cybercrime complaint reporting, investigation, and threat intelligence platform. It follows a **zero-trust, role-based privacy architecture**: PII is automatically detected and masked, forensic indicators are extracted from evidence via OCR, incidents are classified using a TF-IDF + Logistic Regression NLP model across 13 attack categories, and real-time intelligence is delivered to citizens, forensic investigators, and law enforcement agencies.
+CyberGuard AI is an AI-powered cybercrime complaint reporting, investigation, and threat intelligence platform. It follows a **zero-trust, role-based privacy architecture**: PII is automatically detected and masked before analysis, while officers retain access to forensic evidence and investigation context.
 
-**Onee**, the built-in interactive AI guide, walks citizens through the complaint form step by step — highlighting each field, validating input in real time, and offering a draft helper for writing incident narratives.
+**Onee**, the built-in interactive AI guide, walks citizens through the complaint form step by step — highlighting each field, validating input in real time, and offering a draft helper for incident narratives.
 
 ---
 
 ## Key Features
 
-- **AI Cybercrime Classification** — automated NLP categorization into 13 attack vectors: Financial Fraud, Phishing, Ransomware, Cyberbullying, Hacking, Identity Theft, Data Breach, Online Fraud, Child Exploitation, Women/Child Safety, DDoS/Network Attacks, Cryptocurrency Scams, and Other. Falls back to a rule-based local classifier if the ML service is unavailable.
+- **AI Cybercrime Classification** — automated NLP categorization into 13 attack vectors: Financial Fraud, Phishing, Ransomware, Cyberbullying, Hacking, Identity Theft, Data Breach, Online Fraud, and more.
 - **Zero-Trust Role-Based Privacy Architecture**
   - **Complaint Owner** — full unmasked access to their own filing.
   - **Officer / Admin** — raw case data, forensic link-analysis graphs, and investigation tools.
