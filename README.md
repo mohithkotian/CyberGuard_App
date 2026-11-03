@@ -11,12 +11,11 @@
 
 ## Product Demo
 
-> End-to-end walkthrough — incident intake → PII masking → ML classification → statutory case tracking.
+End-to-end walkthrough — incident intake → PII masking → ML classification → statutory case tracking.
 
-<video controls autoplay loop muted playsinline width="100%">
-  <source src="https://raw.githubusercontent.com/mohithkotian/CyberGuard_App/main/docs/media/cyberguard-product-film.mp4" type="video/mp4" />
-  Your browser does not support the video tag.
-</video>
+**▶ [Watch the CyberGuard product demo](https://github.com/mohithkotian/CyberGuard_App/blob/main/docs/media/cyberguard-product-film.mp4)** · [Open the MP4 directly](https://raw.githubusercontent.com/mohithkotian/CyberGuard_App/main/docs/media/cyberguard-product-film.mp4)
+
+> GitHub does not render HTML `<video>` embeds in repository README files. Use the demo link above to open and play the MP4.
 
 ---
 
@@ -34,15 +33,15 @@
 
 ## Overview
 
-CyberGuard AI is an AI-powered cybercrime complaint reporting, investigation, and threat intelligence platform. It follows a **zero-trust, role-based privacy architecture**: PII is automatically detected and masked before analysis, while officers retain access to forensic evidence and investigation context.
+CyberGuard AI is an AI-powered cybercrime complaint reporting, investigation, and threat intelligence platform. It follows a **zero-trust, role-based privacy architecture**: PII is automatically d[...]
 
-**Onee**, the built-in interactive AI guide, walks citizens through the complaint form step by step — highlighting each field, validating input in real time, and offering a draft helper for incident narratives.
+**Onee**, the built-in interactive AI guide, walks citizens through the complaint form step by step — highlighting each field, validating input in real time, and offering a draft helper for incident[...]
 
 ---
 
 ## Key Features
 
-- **AI Cybercrime Classification** — automated NLP categorization into 13 attack vectors: Financial Fraud, Phishing, Ransomware, Cyberbullying, Hacking, Identity Theft, Data Breach, Online Fraud, and more.
+- **AI Cybercrime Classification** — automated NLP categorization into 13 attack vectors: Financial Fraud, Phishing, Ransomware, Cyberbullying, Hacking, Identity Theft, Data Breach, Online Fraud, an[...]
 - **Zero-Trust Role-Based Privacy Architecture**
   - **Complaint Owner** — full unmasked access to their own filing.
   - **Officer / Admin** — raw case data, forensic link-analysis graphs, and investigation tools.
@@ -197,8 +196,8 @@ CyberGuard_App/
 │   └── src/
 │       ├── components/        Navbar, Onee Guide, CyberReport, Scanner, Chat
 │       ├── pages/             Dashboard, Community, Admin, Forensics, Settings
-│       ├── services/          API Axios client and Socket listener
-│       └── hooks/             Zustand auth and theme state management
+│       ├── services/           API Axios client and Socket listener
+│       └── hooks/              Zustand auth and theme state management
 │
 ├── mobile-app/                React Native Expo mobile app (⚠ not production-ready)
 │   └── src/                   Native screens and components
