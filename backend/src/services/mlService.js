@@ -4,12 +4,20 @@ const logger = require('../utils/logger');
 const { maskTextForModel } = require('../utils/modelPrivacy');
 
 const ML_BASE_URL = process.env.ML_SERVICE_URL || 'http://127.0.0.1:5003';
-const TIMEOUT = parseInt(process.env.ML_SERVICE_TIMEOUT) || 4000;
+const TIMEOUT = parseInt(process.env.ML_SERVICE_TIMEOUT) || 12000;
 
 const mlClient = axios.create({
   baseURL: ML_BASE_URL,
   timeout: TIMEOUT,
   headers: { 'Content-Type': 'application/json' },
+});
+
+mlClient.interceptors.request.use((config) => {
+  const secret = process.env.ML_INTERNAL_SECRET;
+  if (secret) {
+    config.headers['X-ML-Secret'] = secret;
+  }
+  return config;
 });
 
 // Category canonical mapping

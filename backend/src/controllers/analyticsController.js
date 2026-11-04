@@ -1,6 +1,12 @@
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
 const { AppError } = require('../middleware/errorHandler');
+const { compileSyndicateDocket } = require('../utils/syndicateConsolidator');
+const { compileTelecomRequisition } = require('../utils/telecomRequisition');
+
+// In-memory persistent registries for Master Syndicate Dockets and Telecom Requisitions
+const syndicateDocketsRegistry = [];
+const telecomRequisitionsRegistry = [];
 
 // @desc    Dashboard overview stats
 // @route   GET /api/analytics/overview
@@ -272,50 +278,541 @@ exports.getFinancialAnalysis = async (req, res, next) => {
   }
 };
 
-// @desc    Suspect link analysis (identify serial scammers)
+// @desc    Suspect link analysis & Organized Crime Syndicate Graph
 // @route   GET /api/analytics/link-analysis
 exports.getLinkAnalysis = async (req, res, next) => {
   try {
-    // Link by Extracted Phone Numbers
-    const phoneLinks = await Complaint.aggregate([
-      { $match: { 'ocrData.extracted.phones': { $exists: true, $ne: [] } } },
-      { $unwind: '$ocrData.extracted.phones' },
-      {
-        $group: {
-          _id: '$ocrData.extracted.phones',
-          count: { $sum: 1 },
-          cases: { $push: { id: '$complaintId', category: '$category', severity: '$severity', status: '$status' } }
-        }
-      },
-      { $match: { count: { $gt: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 50 }
-    ]);
+    // 1. Fetch relevant complaints containing suspect details or OCR intelligence
+    const complaints = await Complaint.find({
+      $or: [
+        { 'ocrData.extracted.phones': { $exists: true, $ne: [] } },
+        { 'ocrData.extracted.upis': { $exists: true, $ne: [] } },
+        { 'ocrData.extracted.accounts': { $exists: true, $ne: [] } },
+        { 'suspectInfo.details': { $exists: true, $ne: '' } },
+        { 'suspectInfo.name': { $exists: true, $ne: '' } }
+      ]
+    }).select('complaintId title category severity status amountLost lostMoney suspectInfo ocrData createdAt').lean();
 
-    // Link by Extracted UPI IDs
-    const upiLinks = await Complaint.aggregate([
-      { $match: { 'ocrData.extracted.upis': { $exists: true, $ne: [] } } },
-      { $unwind: '$ocrData.extracted.upis' },
-      {
-        $group: {
-          _id: '$ocrData.extracted.upis',
-          count: { $sum: 1 },
-          cases: { $push: { id: '$complaintId', category: '$category', severity: '$severity', status: '$status' } }
+    // In-memory relational indexer for multi-field cross-referencing
+    const phoneMap = new Map();
+    const upiMap = new Map();
+    const accountMap = new Map();
+
+    const normalizePhone = (num) => {
+      if (!num) return null;
+      const digits = String(num).replace(/\D/g, '');
+      if (digits.length >= 10) return digits.slice(-10);
+      return null;
+    };
+
+    const normalizeUpi = (upi) => {
+      if (!upi || typeof upi !== 'string' || !upi.includes('@')) return null;
+      return upi.trim().toLowerCase();
+    };
+
+    const normalizeAccount = (acc) => {
+      if (!acc) return null;
+      const clean = String(acc).replace(/\s/g, '');
+      if (clean.length >= 8 && /^\d+$/.test(clean)) return clean;
+      return null;
+    };
+
+    complaints.forEach((c) => {
+      const caseMeta = {
+        id: c.complaintId || String(c._id),
+        title: c.title,
+        category: c.category,
+        severity: c.severity,
+        status: c.status,
+        amount: c.amountLost || (c.lostMoney ? 25000 : 0),
+        createdAt: c.createdAt
+      };
+
+      // Index OCR phones
+      (c.ocrData?.extracted?.phones || []).forEach(p => {
+        const norm = normalizePhone(p);
+        if (norm) {
+          if (!phoneMap.has(norm)) phoneMap.set(norm, []);
+          phoneMap.get(norm).push(caseMeta);
         }
-      },
-      { $match: { count: { $gt: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 50 }
-    ]);
+      });
+
+      // Index Suspect details phones (regex extraction)
+      if (c.suspectInfo?.details) {
+        const found = String(c.suspectInfo.details).match(/(\+?\d{1,4}[\s-]?)?\d{10}/g);
+        (found || []).forEach(p => {
+          const norm = normalizePhone(p);
+          if (norm) {
+            if (!phoneMap.has(norm)) phoneMap.set(norm, []);
+            if (!phoneMap.get(norm).some(item => item.id === caseMeta.id)) {
+              phoneMap.get(norm).push(caseMeta);
+            }
+          }
+        });
+      }
+
+      // Index OCR UPIs
+      (c.ocrData?.extracted?.upis || []).forEach(u => {
+        const norm = normalizeUpi(u);
+        if (norm) {
+          if (!upiMap.has(norm)) upiMap.set(norm, []);
+          upiMap.get(norm).push(caseMeta);
+        }
+      });
+
+      // Index OCR bank accounts
+      (c.ocrData?.extracted?.accounts || []).forEach(a => {
+        const norm = normalizeAccount(a);
+        if (norm) {
+          if (!accountMap.has(norm)) accountMap.set(norm, []);
+          accountMap.get(norm).push(caseMeta);
+        }
+      });
+    });
+
+    // Format repeat links
+    const formatLinkList = (map, type) => {
+      const list = [];
+      map.forEach((cases, identifier) => {
+        if (cases.length > 1) {
+          const totalLoss = cases.reduce((sum, cs) => sum + (Number(cs.amount) || 0), 0);
+          list.push({
+            _id: identifier,
+            type,
+            count: cases.length,
+            totalLoss,
+            cases
+          });
+        }
+      });
+      return list.sort((a, b) => b.count - a.count);
+    };
+
+    const linkedPhones = formatLinkList(phoneMap, 'phone');
+    const linkedUpis = formatLinkList(upiMap, 'upi');
+    const linkedAccounts = formatLinkList(accountMap, 'bank');
+
+    // Build Syndicate Graph Nodes & Edges
+    const nodes = [];
+    const edges = [];
+    const nodeSet = new Set();
+
+    const addNode = (id, label, type, meta = {}) => {
+      if (!nodeSet.has(id)) {
+        nodeSet.add(id);
+        nodes.push({ id, label, type, ...meta });
+      }
+    };
+
+    // Add identifier nodes & connected case nodes with 2D spatial graph layout
+    const linksSlice = [...linkedPhones, ...linkedUpis, ...linkedAccounts].slice(0, 30);
+    const totalEntities = Math.max(linksSlice.length, 1);
+    const centerX = 450;
+    const centerY = 275;
+    const baseRadius = 190;
+
+    linksSlice.forEach((link, linkIdx) => {
+      const entityId = `${link.type}:${link._id}`;
+      const angle = (linkIdx / totalEntities) * 2 * Math.PI;
+      const ex = Math.round(centerX + baseRadius * Math.cos(angle));
+      const ey = Math.round(centerY + baseRadius * Math.sin(angle));
+
+      addNode(entityId, link._id, link.type, {
+        frequency: link.count,
+        totalLoss: link.totalLoss,
+        x: ex,
+        y: ey,
+        color: link.type === 'phone' ? '#d96464' : link.type === 'upi' ? '#d8a43a' : '#38bdf8',
+        cases: link.cases
+      });
+
+      const caseCount = link.cases.length;
+      link.cases.forEach((cs, cIdx) => {
+        const caseNodeId = `case:${cs.id}`;
+        const subAngle = angle + ((cIdx - (caseCount - 1) / 2) * 0.35);
+        const subRadius = baseRadius + 65 + (cIdx % 2) * 20;
+        const cx = Math.round(centerX + subRadius * Math.cos(subAngle));
+        const cy = Math.round(centerY + subRadius * Math.sin(subAngle));
+
+        addNode(caseNodeId, cs.id, 'case', {
+          category: cs.category,
+          severity: cs.severity,
+          status: cs.status,
+          amount: cs.amount,
+          x: cx,
+          y: cy,
+          color: '#3DF5C0'
+        });
+
+        edges.push({
+          id: `${caseNodeId}->${entityId}`,
+          source: caseNodeId,
+          target: entityId,
+          label: link.type.toUpperCase()
+        });
+      });
+    });
+
+    // Detect clusters / syndicates
+    const syndicates = [];
+    linkedPhones.forEach((p, idx) => {
+      if (p.count >= 2) {
+        syndicates.push({
+          id: `SYN-${1000 + idx}`,
+          name: `Syndicate Hub ${p._id}`,
+          primaryIdentifier: p._id,
+          type: 'phone',
+          caseCount: p.count,
+          totalExposures: p.totalLoss,
+          cases: p.cases
+        });
+      }
+    });
 
     res.json({
       status: 'success',
       data: {
         links: {
-          phones: phoneLinks,
-          upis: upiLinks
-        }
+          phones: linkedPhones,
+          upis: linkedUpis,
+          accounts: linkedAccounts
+        },
+        syndicateGraph: {
+          nodes,
+          edges,
+          totalClusters: syndicates.length
+        },
+        syndicates: syndicates.slice(0, 10)
       }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Real-time syndicate velocity detection & cross-jurisdiction surge alerts
+// @route   GET /api/analytics/syndicate-surges
+exports.getSyndicateSurgeAlerts = async (req, res, next) => {
+  try {
+    const complaints = await Complaint.find({
+      $or: [
+        { 'ocrData.extracted.phones': { $exists: true, $ne: [] } },
+        { 'ocrData.extracted.upis': { $exists: true, $ne: [] } },
+        { 'ocrData.extracted.accounts': { $exists: true, $ne: [] } },
+        { 'suspectInfo.details': { $exists: true, $ne: '' } },
+        { 'suspectInfo.name': { $exists: true, $ne: '' } }
+      ]
+    }).select('complaintId title category severity status amountLost lostMoney suspectInfo ocrData location createdAt').lean();
+
+    const normalizePhone = (num) => {
+      if (!num) return null;
+      const digits = String(num).replace(/\D/g, '');
+      if (digits.length >= 10) return digits.slice(-10);
+      return null;
+    };
+
+    const normalizeUpi = (upi) => {
+      if (!upi || typeof upi !== 'string' || !upi.includes('@')) return null;
+      return upi.trim().toLowerCase();
+    };
+
+    const normalizeAccount = (acc) => {
+      if (!acc) return null;
+      const clean = String(acc).replace(/\s/g, '');
+      if (clean.length >= 8 && /^\d+$/.test(clean)) return clean;
+      return null;
+    };
+
+    const identifierMap = new Map();
+
+    const addOccurrence = (type, rawVal, c) => {
+      let identifier = null;
+      if (type === 'phone') identifier = normalizePhone(rawVal);
+      else if (type === 'upi') identifier = normalizeUpi(rawVal);
+      else if (type === 'bank') identifier = normalizeAccount(rawVal);
+
+      if (!identifier) return;
+
+      const key = `${type}:${identifier}`;
+      if (!identifierMap.has(key)) {
+        identifierMap.set(key, {
+          type,
+          identifier,
+          cases: []
+        });
+      }
+
+      const entry = identifierMap.get(key);
+      const caseId = c.complaintId || String(c._id);
+      if (!entry.cases.some(item => item.id === caseId)) {
+        const city = c.location?.city || '';
+        const state = c.location?.state || '';
+        const jurisdiction = (city && state) ? `${city}, ${state}` : (city || state || 'Unspecified Jurisdiction');
+
+        entry.cases.push({
+          id: caseId,
+          title: c.title || 'Untitled Case',
+          category: c.category || 'Cyber Fraud',
+          severity: c.severity || 'medium',
+          status: c.status || 'pending',
+          amount: Number(c.amountLost) || (c.lostMoney ? 25000 : 0),
+          jurisdiction,
+          createdAt: c.createdAt ? new Date(c.createdAt) : new Date()
+        });
+      }
+    };
+
+    complaints.forEach((c) => {
+      (c.ocrData?.extracted?.phones || []).forEach(p => addOccurrence('phone', p, c));
+      if (c.suspectInfo?.details) {
+        const found = String(c.suspectInfo.details).match(/(\+?\d{1,4}[\s-]?)?\d{10}/g);
+        (found || []).forEach(p => addOccurrence('phone', p, c));
+      }
+      (c.ocrData?.extracted?.upis || []).forEach(u => addOccurrence('upi', u, c));
+      (c.ocrData?.extracted?.accounts || []).forEach(a => addOccurrence('bank', a, c));
+    });
+
+    const now = new Date();
+    const surgeAlerts = [];
+
+    identifierMap.forEach((data) => {
+      if (data.cases.length >= 2) {
+        data.cases.sort((a, b) => b.createdAt - a.createdAt);
+
+        const totalCases = data.cases.length;
+        const totalLoss = data.cases.reduce((sum, cs) => sum + (Number(cs.amount) || 0), 0);
+
+        const cases24h = data.cases.filter(cs => (now - cs.createdAt) <= 24 * 60 * 60 * 1000).length;
+        const cases48h = data.cases.filter(cs => (now - cs.createdAt) <= 48 * 60 * 60 * 1000).length;
+        const cases7d = data.cases.filter(cs => (now - cs.createdAt) <= 7 * 24 * 60 * 60 * 1000).length;
+
+        const distinctJurisdictions = [...new Set(data.cases.map(cs => cs.jurisdiction).filter(j => j !== 'Unspecified Jurisdiction'))];
+        const isCrossJurisdiction = distinctJurisdictions.length >= 2;
+
+        let severity = 'MONITORED_CLUSTER';
+        let alertScore = 50;
+
+        if (totalCases >= 4 || cases24h >= 2 || (cases48h >= 2 && isCrossJurisdiction) || totalLoss >= 500000) {
+          severity = 'CRITICAL_SURGE';
+          alertScore = 95;
+        } else if (totalCases >= 3 || cases48h >= 1 || cases7d >= 2 || isCrossJurisdiction || totalLoss >= 100000) {
+          severity = 'HIGH_VELOCITY';
+          alertScore = 75;
+        } else {
+          severity = 'EMERGING_CLUSTER';
+          alertScore = 50;
+        }
+
+        let recommendedAction = 'Maintain surveillance on suspect identifier across active investigations.';
+        if (severity === 'CRITICAL_SURGE') {
+          if (data.type === 'bank') {
+            recommendedAction = `Issue urgent Section 106 BNSS Statutory Debit-Freeze notice to Nodal Fraud Desk of bank account ${data.identifier}.`;
+          } else if (data.type === 'upi') {
+            recommendedAction = `Transmit emergency freeze directive to NPCI and PSP liaison for UPI VPA ${data.identifier}.`;
+          } else {
+            const locLabel = distinctJurisdictions.join(' & ') || 'affected stations';
+            recommendedAction = `Coordinate inter-district cyber task force across ${locLabel} and dispatch CDR/CAF request to telco nodal.`;
+          }
+        } else if (severity === 'HIGH_VELOCITY') {
+          recommendedAction = `Consolidate case files across ${distinctJurisdictions.length || 1} jurisdictional zones and verify KYC records.`;
+        }
+
+        surgeAlerts.push({
+          alertId: `SURGE-${data.type.toUpperCase()}-${data.identifier.slice(-4)}`,
+          identifier: data.identifier,
+          identifierType: data.type,
+          caseCount: totalCases,
+          cases24h,
+          cases48h,
+          cases7d,
+          totalLoss,
+          jurisdictions: distinctJurisdictions.length > 0 ? distinctJurisdictions : ['Multi-District (Pending Geolocation)'],
+          isCrossJurisdiction,
+          severity,
+          alertScore,
+          recommendedAction,
+          firstSeen: data.cases[data.cases.length - 1].createdAt,
+          lastSeen: data.cases[0].createdAt,
+          cases: data.cases
+        });
+      }
+    });
+
+    surgeAlerts.sort((a, b) => b.alertScore - a.alertScore || b.caseCount - a.caseCount);
+
+    const summary = {
+      totalActiveSurges: surgeAlerts.length,
+      criticalCount: surgeAlerts.filter(a => a.severity === 'CRITICAL_SURGE').length,
+      highVelocityCount: surgeAlerts.filter(a => a.severity === 'HIGH_VELOCITY').length,
+      crossJurisdictionCount: surgeAlerts.filter(a => a.isCrossJurisdiction).length,
+      totalFinancialRisk: surgeAlerts.reduce((sum, a) => sum + a.totalLoss, 0)
+    };
+
+    res.json({
+      status: 'success',
+      data: {
+        surgeAlerts,
+        summary
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Consolidate multi-victim syndicate complaints into Master Section 111 BNS Docket
+// @route   POST /api/analytics/syndicate/consolidate-docket
+exports.consolidateSyndicateDocket = async (req, res, next) => {
+  try {
+    const { syndicateId, complaintIds, leadAgency, notes } = req.body;
+    if (!complaintIds || !Array.isArray(complaintIds) || complaintIds.length === 0) {
+      return next(new AppError('At least one complaintId is required to compile a syndicate docket.', 400));
+    }
+
+    const validObjectIds = complaintIds.filter(id => typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/));
+
+    const complaints = await Complaint.find({
+      $or: [
+        { complaintId: { $in: complaintIds } },
+        { _id: { $in: validObjectIds } }
+      ]
+    });
+
+    if (!complaints || complaints.length === 0) {
+      return next(new AppError('No matching complaints found for the specified complaint IDs.', 404));
+    }
+
+    const docket = compileSyndicateDocket({
+      syndicateId,
+      leadAgency: leadAgency || 'State Cyber Crime Command / CBI Cyber Crime Division',
+      investigatingOfficer: {
+        name: req.user?.name || 'Superintendent of Police',
+        badge: req.user?.badgeNumber || 'SP-CYBER-HQ'
+      },
+      complaints,
+      notes
+    });
+
+    syndicateDocketsRegistry.unshift(docket);
+
+    // Commit to custody and timeline of constituent complaints
+    const officerId = req.user?._id;
+    const custodyNote = `Consolidated into Inter-Jurisdictional Master Syndicate Docket ${docket.docketId} (Sec 111 BNS 2023) under ${docket.leadAgency}. SHA-256: ${docket.sha256Seal.slice(0, 16)}...`;
+
+    for (const comp of complaints) {
+      if (!comp.chainOfCustody) comp.chainOfCustody = [];
+      comp.chainOfCustody.push({
+        action: 'SYNDICATE_CONSOLIDATED_BNS111',
+        performedBy: officerId,
+        details: custodyNote,
+        timestamp: new Date()
+      });
+
+      if (!comp.timeline) comp.timeline = [];
+      comp.timeline.push({
+        status: comp.status,
+        title: 'Master Syndicate Docket Consolidated (Sec 111 BNS)',
+        description: `Linked into organized crime syndicate docket ${docket.docketId} with ${docket.metrics.victimCount} victims across ${docket.metrics.jurisdictionCount} jurisdictions.`,
+        updatedBy: officerId,
+        timestamp: new Date()
+      });
+
+      await comp.save();
+    }
+
+    res.status(201).json({
+      status: 'success',
+      data: docket
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Retrieve all consolidated Master Syndicate Dockets
+// @route   GET /api/analytics/syndicate/dockets
+exports.getSyndicateDockets = async (req, res, next) => {
+  try {
+    res.json({
+      status: 'success',
+      data: syndicateDocketsRegistry
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Issue Emergency TAFCOP / Sanchar Saathi Telecom Disconnection & CEIR IMEI Barring Directive
+// @route   POST /api/analytics/telecom/requisition-disconnect
+exports.dispatchTelecomRequisition = async (req, res, next) => {
+  try {
+    const { phone, imei, complaintIds = [], carrier, reason, requestedAction } = req.body;
+    if (!phone) {
+      return next(new AppError('Phone number (MSISDN) is required for telecom requisition.', 400));
+    }
+
+    const requisition = compileTelecomRequisition({
+      phone,
+      imei,
+      complaintIds,
+      carrier,
+      reason,
+      requestedAction,
+      officerName: req.user?.name || 'Investigating Officer, Cyber Crime Division',
+      officerBadge: req.user?.badgeNumber || 'CYBER-LEA-NODAL'
+    });
+
+    telecomRequisitionsRegistry.unshift(requisition);
+
+    // If complaintIds supplied, commit to custody and timeline
+    if (complaintIds && complaintIds.length > 0) {
+      const validObjectIds = complaintIds.filter(id => typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/));
+      const complaints = await Complaint.find({
+        $or: [
+          { complaintId: { $in: complaintIds } },
+          { _id: { $in: validObjectIds } }
+        ]
+      });
+
+      const officerId = req.user?._id;
+      for (const comp of complaints) {
+        if (!comp.chainOfCustody) comp.chainOfCustody = [];
+        comp.chainOfCustody.push({
+          action: 'TAFCOP_SIM_REQUISITION_ISSUED',
+          performedBy: officerId,
+          details: `Statutory Section 20 Telecommunications Act 2023 emergency SIM/IMEI disconnection directive ${requisition.requisitionId} dispatched to ${requisition.carrier}.`,
+          timestamp: new Date()
+        });
+
+        if (!comp.timeline) comp.timeline = [];
+        comp.timeline.push({
+          status: comp.status,
+          title: 'TAFCOP / CEIR SIM Disconnection Requisitioned',
+          description: `Dispatched statutory directive ${requisition.requisitionId} to ${requisition.carrier} for MSISDN +91 ${requisition.phone} and CEIR IMEI barring.`,
+          updatedBy: officerId,
+          timestamp: new Date()
+        });
+
+        await comp.save();
+      }
+    }
+
+    res.status(201).json({
+      status: 'success',
+      data: requisition
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Retrieve all active Telecom Requisitions
+// @route   GET /api/analytics/telecom/requisitions
+exports.getTelecomRequisitions = async (req, res, next) => {
+  try {
+    res.json({
+      status: 'success',
+      data: telecomRequisitionsRegistry
     });
   } catch (error) {
     next(error);

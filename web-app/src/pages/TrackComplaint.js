@@ -5,374 +5,512 @@ import { format } from 'date-fns';
 import { complaintsAPI } from '../services/api';
 import useAuthStore from '../hooks/useAuthStore';
 import SecureChat from '../components/SecureChat';
+import { ArrowLeft, Search, Shield, RefreshCw, Cpu, Check, AlertCircle } from 'lucide-react';
 
 const STATUS_COLOR = {
-  pending:'#FFD600', under_review:'#00B4FF', investigating:'#FF6B35',
-  resolved:'#00C896', closed:'#5A6480', rejected:'#FF5252'
+  pending: '#d8a43a',
+  under_review: '#3DF5C0',
+  investigating: '#3DF5C0',
+  resolved: '#10b981',
+  closed: '#8e8b84',
+  rejected: '#d96464'
 };
 
 export default function TrackComplaint() {
   const { complaintId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const [id,          setId]        = useState(complaintId || '');
-  const [complaint,   setComplaint] = useState(null);
-  const [loading,     setLoading]   = useState(false);
-  const [error,       setError]     = useState('');
+  const [id, setId] = useState(complaintId || '');
+  const [complaint, setComplaint] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const track = async (searchId) => {
     const q = (searchId || id).trim();
     if (!q) return;
-    setLoading(true); setError(''); setComplaint(null);
+    setLoading(true);
+    setError('');
+    setComplaint(null);
     try {
       const { data } = await complaintsAPI.track(q);
       setComplaint(data.data.complaint);
     } catch (err) {
-      setError(err.response?.data?.message || 'Complaint not found. Please check the ID.');
-    } finally { setLoading(false); }
+      setError(err.response?.data?.message || 'Complaint not found. Please verify the ID.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { if (complaintId) track(complaintId); }, [complaintId]);
+  useEffect(() => {
+    if (complaintId) track(complaintId);
+  }, [complaintId]);
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: '#02060A', 
-      color: '#fff', 
-      position: 'relative', 
-      overflowX: 'hidden',
-      fontFamily: 'Inter, sans-serif'
-    }}>
-      {/* Liquid Background Accents */}
-      <div style={{ position: 'fixed', top: '-20%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 122, 255, 0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-20%', left: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(168, 85, 247, 0.05) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
+    <main className="page-shell">
+      <div className="report-layout">
+        {/* Subheader / Aside Row */}
+        <aside className="report-aside">
+          <button
+            type="button"
+            className="back-link"
+            onClick={() => navigate(-1)}
+            aria-label="Go back to previous page"
+          >
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span>Back</span>
+          </button>
+          <div className="aside-copy">
+            <p className="eyebrow">CASE STATUS TRACKING</p>
+            <h1>INCIDENT VERIFICATION</h1>
+            <p>Enter your tracking identifier to inspect evidentiary custody and real-time status.</p>
+          </div>
+          <div className="help-note">
+            <p>Secure Portal</p>
+            <span>TLS 1.3 encrypted query · Authenticated owners only.</span>
+          </div>
+        </aside>
 
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '80px 24px', position: 'relative', zIndex: 1 }}>
-        
-        {/* Navigation & Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 64 }}>
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              <button 
-                onClick={() => navigate('/')}
-                style={{ 
-                  width: 50, height: 50, borderRadius: '50%', 
-                  background: 'rgba(255,255,255,0.05)', 
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.1)', 
-                  color: '#00B4FF', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                  transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-                }}
-                onMouseOver={e => {
-                  e.currentTarget.style.transform = 'scale(1.1)';
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-              </button>
+        {/* Main Card Container */}
+        <div className="form-workspace">
+          <div className="report-form" style={{ padding: 0 }}>
+            {/* Intro Header */}
+            <div className="form-intro">
               <div>
-                <h1 style={{ 
-                  fontSize: '2.4rem', 
-                  margin: 0, 
-                  fontWeight: 800,
-                  background: 'linear-gradient(to bottom, #fff, rgba(255,255,255,0.6))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  letterSpacing: '-1px'
-                }}>Track Status</h1>
-                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', letterSpacing: '2px', fontWeight: 700, textTransform: 'uppercase' }}>Encrypted Verification Node</span>
+                <p className="step-label">REFERENCE CREDENTIALS</p>
+                <h2>Tracking Reference Key</h2>
+              </div>
+              <p className="required-note">
+                <span aria-hidden="true">*</span> Required lookup hash
+              </p>
+            </div>
+
+            {/* Input & Action Strip */}
+            <div style={{ padding: '36px 48px', borderBottom: '1px solid #292927' }}>
+              <div style={{ maxWidth: 640 }}>
+                <p style={{
+                  color: '#a6a39b',
+                  fontSize: '14px',
+                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  margin: '0 0 16px',
+                  letterSpacing: '0.02em'
+                }}>
+                  Enter the unique incident tracking code provided during your submission.
+                </p>
+
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative', flex: '1 1 320px' }}>
+                    <Search
+                      size={18}
+                      style={{
+                        position: 'absolute',
+                        left: 16,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: '#8E8B85',
+                        pointerEvents: 'none'
+                      }}
+                    />
+                    <input
+                      id="tracking-reference"
+                      type="text"
+                      style={{
+                        width: '100%',
+                        height: '52px',
+                        padding: '0 16px 0 46px',
+                        background: '#141414',
+                        border: '1px solid #3b3b38',
+                        borderRadius: '8px',
+                        color: '#f2f0ea',
+                        fontSize: '15px',
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: '1px',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      placeholder="e.g. CC-2026-XXXXXX"
+                      value={id}
+                      onChange={(e) => setId(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && track()}
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => track()}
+                    disabled={loading}
+                    className="primary-button"
+                    style={{
+                      height: '52px',
+                      padding: '0 28px',
+                      cursor: loading ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {loading ? 'LOOKING UP...' : 'PULL STATUS'}
+                  </button>
+                </div>
+
+                {error && (
+                  <div style={{
+                    marginTop: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    color: '#d96464',
+                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontSize: '13px',
+                    fontWeight: 600
+                  }}>
+                    <AlertCircle size={15} />
+                    <span>{error}</span>
+                  </div>
+                )}
               </div>
             </div>
-          </motion.div>
-          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ fontSize: '12px', color: '#00FFD1', fontWeight: 800, letterSpacing: '1px' }}>TLS 1.3 SECURE</div>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)' }}>IDENTITY PROTECTED</div>
+
+            {/* If no complaint loaded yet: 3 Security Architecture Pillars */}
+            {!complaint && !loading && (
+              <div style={{
+                padding: '40px 48px',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                gap: '24px'
+              }}>
+                {[
+                  {
+                    t: 'ZERO-KNOWLEDGE QUERY',
+                    d: 'Incident reports are encrypted end-to-end. Only authenticated owners can retrieve investigative data.',
+                    icon: <Shield size={24} style={{ color: '#f2f0ea' }} />
+                  },
+                  {
+                    t: 'IMMUTABLE TIMELINE',
+                    d: 'Investigative milestones and officer dispatches are committed directly to the audit log.',
+                    icon: <RefreshCw size={24} style={{ color: '#EFEDE8' }} />
+                  },
+                  {
+                    t: 'FORENSIC VERIFICATION',
+                    d: 'Evidence hashes and metadata are verified for legal chain-of-custody compliance.',
+                    icon: <Cpu size={24} style={{ color: '#f2f0ea' }} />
+                  }
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      padding: '24px',
+                      background: '#111111',
+                      border: '1px solid #242421',
+                      borderRadius: '16px'
+                    }}
+                  >
+                    <div style={{ marginBottom: '14px' }}>{item.icon}</div>
+                    <h4 style={{
+                      margin: '0 0 6px',
+                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontSize: '14px',
+                      fontWeight: 700,
+                      color: '#ffffff',
+                      letterSpacing: '0.08em'
+                    }}>
+                      {item.t}
+                    </h4>
+                    <p style={{
+                      margin: 0,
+                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontSize: '13px',
+                      lineHeight: 1.55,
+                      color: '#8e8b84'
+                    }}>
+                      {item.d}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* When complaint data is retrieved */}
+            {complaint && (
+              <div>
+                {/* Case Header Details Banner */}
+                <div style={{
+                  padding: '36px 48px',
+                  borderBottom: '1px solid #292927',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  flexWrap: 'wrap',
+                  gap: '24px'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                      <span style={{
+                        padding: '4px 10px',
+                        background: '#1c1c1a',
+                        border: '1px solid #3b3b38',
+                        borderRadius: '4px',
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: '#f2f0ea'
+                      }}>
+                        #{complaint.complaintId}
+                      </span>
+                      <span style={{
+                        fontFamily: "'IBM Plex Sans', sans-serif",
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: '#8E8B85',
+                        letterSpacing: '0.12em',
+                        textTransform: 'uppercase'
+                      }}>
+                        OFFICIAL RECORD
+                      </span>
+                    </div>
+
+                    <h3 style={{
+                      margin: '0 0 10px',
+                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontSize: '26px',
+                      fontWeight: 700,
+                      color: '#ffffff'
+                    }}>
+                      {complaint.title}
+                    </h3>
+
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '16px',
+                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontSize: '13px',
+                      color: '#8e8b84'
+                    }}>
+                      <span>Category: <strong style={{ color: '#d8d5ce' }}>{complaint.category}</strong></span>
+                      <span>Filed: <strong style={{ color: '#d8d5ce' }}>{format(new Date(complaint.createdAt), 'dd MMM yyyy • HH:mm')}</strong></span>
+                      <span>Criticality: <strong style={{ color: complaint.severity === 'high' ? '#d96464' : '#d8a43a' }}>{complaint.severity?.toUpperCase() || 'STANDARD'}</strong></span>
+                    </div>
+                  </div>
+
+                  {/* Status Badge */}
+                  <div style={{
+                    padding: '8px 18px',
+                    borderRadius: '8px',
+                    border: `1px solid ${STATUS_COLOR[complaint.status] || '#f2f0ea'}44`,
+                    background: `${STATUS_COLOR[complaint.status] || '#f2f0ea'}18`,
+                    color: STATUS_COLOR[complaint.status] || '#f2f0ea',
+                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase'
+                  }}>
+                    {complaint.status?.replace(/_/g, ' ')}
+                  </div>
+                </div>
+
+                
+                {/* Multi-Stage Investigation Milestone Tracker */}
+                {(() => {
+                  const backendStage = complaint.milestone?.stage ? (complaint.milestone.stage - 1) : 0;
+                  const currentStage = Math.max(0, Math.min(4, backendStage));
+
+                  const stages = [
+                    { title: 'Intake Sealed', desc: 'Complaint registered & encrypted with custody record.' },
+                    { title: 'Sec 65B Audit', desc: 'Evidence checksums hashed and verified.' },
+                    { title: 'Lien Dispatch', desc: 'Statutory bank notification & recall alerts.' },
+                    { title: 'Officer Inquiry', desc: 'Active investigation & suspect correlation.' },
+                    { title: 'Case Resolution', desc: 'Restitution report & final legal disposition.' }
+                  ];
+
+                  return (
+                    <div style={{ padding: '32px 48px', borderBottom: '1px solid #292927', background: '#0a0a0a' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', color: '#8e8b84', textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace" }}>
+                          INVESTIGATION MILESTONE PHASES
+                        </span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#3DF5C0', fontFamily: "'IBM Plex Mono', monospace" }}>
+                          PHASE {currentStage + 1} OF 5: {stages[currentStage].title.toUpperCase()}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                        {stages.map((st, idx) => {
+                          const isPast = idx < currentStage;
+                          const isCurrent = idx === currentStage;
+                          return (
+                            <div key={idx} style={{
+                              background: isCurrent ? '#141414' : '#0e0e0e',
+                              border: `1px solid ${isCurrent ? '#3DF5C0' : isPast ? '#292927' : '#1e1e1d'}`,
+                              borderRadius: 8,
+                              padding: '14px 16px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: 6,
+                              position: 'relative'
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <span style={{
+                                  width: 22, height: 22, borderRadius: '50%',
+                                  background: isPast ? '#3DF5C0' : isCurrent ? '#3DF5C0' : '#1e1e1d',
+                                  color: '#070707', display: 'grid', placeItems: 'center', fontSize: '11px', fontWeight: 800
+                                }}>
+                                  {isPast ? '✓' : idx + 1}
+                                </span>
+                                <span style={{
+                                  fontSize: '10px',
+                                  fontFamily: "'IBM Plex Mono', monospace",
+                                  color: isPast ? '#3DF5C0' : isCurrent ? '#3DF5C0' : '#8e8b84',
+                                  fontWeight: 700
+                                }}>
+                                  {isPast ? 'COMPLETED' : isCurrent ? 'ACTIVE' : 'PENDING'}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '13px', fontWeight: 700, color: isCurrent || isPast ? '#f2f0ea' : '#777' }}>
+                                {st.title}
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#8e8b84', lineHeight: 1.4 }}>
+                                {st.desc}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Chain of Custody Timeline */}
+                <div style={{ padding: '36px 48px', borderBottom: '1px solid #292927' }}>
+                  <div className="section-heading" style={{ marginBottom: 24 }}>
+                    <p className="step-label" style={{
+                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      letterSpacing: '0.14em',
+                      color: '#8e8b84',
+                      textTransform: 'uppercase',
+                      margin: '0 0 6px'
+                    }}>
+                      AUDIT TRAIL
+                    </p>
+                    <h3 style={{
+                      margin: 0,
+                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontSize: '22px',
+                      fontWeight: 700,
+                      color: '#ffffff'
+                    }}>
+                      Chain of Custody Timeline
+                    </h3>
+                  </div>
+
+                  <div style={{ position: 'relative', paddingLeft: '32px' }}>
+                    {/* Continuous vertical line */}
+                    <div style={{
+                      position: 'absolute',
+                      left: 10,
+                      top: 12,
+                      bottom: 12,
+                      width: 2,
+                      background: '#262522'
+                    }} />
+
+                    {(complaint.timeline || []).map((t, i) => {
+                      const isLatest = i === complaint.timeline.length - 1;
+                      return (
+                        <div
+                          key={i}
+                          style={{
+                            display: 'flex',
+                            gap: '20px',
+                            marginBottom: '28px',
+                            position: 'relative'
+                          }}
+                        >
+                          {/* Dot / Checkpoint badge */}
+                          <div style={{
+                            position: 'absolute',
+                            left: -32,
+                            top: 2,
+                            width: 22,
+                            height: 22,
+                            display: 'grid',
+                            placeItems: 'center',
+                            background: isLatest ? '#f2f0ea' : '#141414',
+                            color: isLatest ? '#070707' : '#8e8b84',
+                            border: `1px solid ${isLatest ? '#f2f0ea' : '#3b3b38'}`,
+                            borderRadius: '0',
+                            fontFamily: "'IBM Plex Sans', sans-serif",
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            zIndex: 2
+                          }}>
+                            {isLatest ? <Check size={12} strokeWidth={3} /> : `0${i + 1}`}
+                          </div>
+
+                          <div>
+                            <p style={{
+                              margin: '0 0 4px',
+                              fontFamily: "'IBM Plex Sans', sans-serif",
+                              fontSize: '16px',
+                              fontWeight: 700,
+                              color: isLatest ? '#ffffff' : '#d8d5ce'
+                            }}>
+                              {t.message}
+                            </p>
+                            <span style={{
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: '12px',
+                              color: '#8E8B85'
+                            }}>
+                              {format(new Date(t.timestamp), 'dd MMM yyyy • HH:mm:ss')}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Secure Direct Comms Channel */}
+                {user && (
+                  <div style={{ padding: '36px 48px' }}>
+                    <div className="section-heading" style={{ marginBottom: 20 }}>
+                      <p className="step-label" style={{
+                        fontFamily: "'IBM Plex Sans', sans-serif",
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        letterSpacing: '0.14em',
+                        color: '#8e8b84',
+                        textTransform: 'uppercase',
+                        margin: '0 0 6px'
+                      }}>
+                        ENCRYPTED MESSAGING
+                      </p>
+                      <h3 style={{
+                        margin: 0,
+                        fontFamily: "'IBM Plex Sans', sans-serif",
+                        fontSize: '22px',
+                        fontWeight: 700,
+                        color: '#ffffff'
+                      }}>
+                        Direct Investigator Comms
+                      </h3>
+                    </div>
+
+                    <div style={{
+                      background: '#111111',
+                      border: '1px solid #292927',
+                      borderRadius: '16px',
+                      overflow: 'hidden'
+                    }}>
+                      <SecureChat complaintId={complaint._id} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Search Section - Liquid Glass Card */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          style={{ 
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(40px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '32px',
-            padding: '50px',
-            marginBottom: 48,
-            boxShadow: '0 30px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
-            textAlign: 'center'
-          }}
-        >
-          <div style={{ maxWidth: 540, margin: '0 auto' }}>
-            <h3 style={{ fontSize: '1.2rem', color: '#fff', marginBottom: '12px', fontWeight: 700 }}>Reference Credentials</h3>
-            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.5)', marginBottom: '32px', lineHeight: '1.6' }}>Enter the unique tracking hash provided during your encrypted report submission.</p>
-            
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              <div style={{ position: 'relative', flex: '1 1 300px' }}>
-                <svg style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00B4FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input 
-                  style={{ 
-                    width: '100%',
-                    padding: '18px 24px 18px 56px',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '18px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    fontFamily: 'monospace',
-                    letterSpacing: '2px',
-                    outline: 'none',
-                    transition: '0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
-                  }}
-                  className="liquid-input"
-                  placeholder="CC-XXXX-XXXXXX"
-                  value={id} 
-                  onChange={e => setId(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && track()}
-                />
-              </div>
-              <button 
-                onClick={() => track()} 
-                disabled={loading}
-                style={{ 
-                  flex: '0 0 160px',
-                  background: 'linear-gradient(135deg, #007AFF 0%, #00B4FF 100%)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '18px',
-                  height: '58px',
-                  fontSize: '15px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                  boxShadow: '0 10px 25px rgba(0, 122, 255, 0.3)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-                onMouseOver={e => {
-                  if (!loading) {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(0, 122, 255, 0.5)';
-                  }
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 122, 255, 0.3)';
-                }}
-              >
-                {loading ? 'SYNCING...' : 'PULL DATA'}
-              </button>
-            </div>
-            {error && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: '#FF3B30', marginTop: '20px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                {error}
-              </motion.div>
-            )}
-          </div>
-        </motion.div>
-
-        {!complaint && !loading && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
-            {[
-              { 
-                t: 'Zero Knowledge', 
-                d: 'Case details are encrypted. Only authenticated owners can track status.', 
-                i: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00B4FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> 
-              },
-              { 
-                t: 'Liquid Sync', 
-                d: 'Investigative updates are pushed instantly via secure WebSocket streams.', 
-                i: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00FFD1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> 
-              },
-              { 
-                t: 'Neural Scan', 
-                d: 'AI signatures are cross-referenced across global darknet threat feeds.', 
-                i: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg> 
-              }
-            ].map((item, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + (i * 0.1) }}
-                style={{ 
-                  padding: '30px', 
-                  background: 'rgba(255,255,255,0.02)', 
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.05)', 
-                  borderRadius: '24px', 
-                  textAlign: 'center',
-                  transition: '0.4s'
-                }}
-                onMouseOver={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                  e.currentTarget.style.transform = 'translateY(-5px)';
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', opacity: 0.8 }}>{item.i}</div>
-                <h4 style={{ fontSize: '14px', color: '#fff', marginBottom: '10px', fontWeight: 700 }}>{item.t}</h4>
-                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.6 }}>{item.d}</p>
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* Result Container */}
-        {complaint && (
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
-            {/* Case Header Card */}
-            <div style={{ 
-              background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(40px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '32px',
-              padding: '40px',
-              marginBottom: '32px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px' }}>
-                <div style={{ flex: '1 1 400px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                    <div style={{ 
-                      background: 'rgba(0, 180, 255, 0.1)', 
-                      padding: '6px 14px', 
-                      borderRadius: '10px', 
-                      fontSize: '11px', 
-                      color: '#00B4FF', 
-                      fontWeight: 800,
-                      letterSpacing: '1px',
-                      fontFamily: 'monospace' 
-                    }}>
-                      {complaint.complaintId}
-                    </div>
-                    <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>OFFICIAL RECORD</span>
-                  </div>
-                  <h2 style={{ fontSize: '2.2rem', color: '#fff', margin: '0 0 16px 0', fontWeight: 800, letterSpacing: '-0.5px' }}>{complaint.title}</h2>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>
-                    <span>▦ {format(new Date(complaint.createdAt), 'dd MMM yyyy')}</span>
-                    <span>▤ {complaint.category}</span>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
-                  <div style={{ 
-                    background: (STATUS_COLOR[complaint.status] || '#00B4FF') + '15',
-                    color: STATUS_COLOR[complaint.status] || '#00B4FF',
-                    padding: '8px 20px',
-                    borderRadius: '14px',
-                    fontSize: '12px',
-                    fontWeight: 800,
-                    border: `1px solid ${STATUS_COLOR[complaint.status]}33`,
-                    boxShadow: `0 0 20px ${STATUS_COLOR[complaint.status]}11`
-                  }}>
-                    {complaint.status.replace(/_/g,' ').toUpperCase()}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    Criticality: <span style={{ color: complaint.severity === 'high' ? '#FF3B30' : '#FFD600' }}>{complaint.severity.toUpperCase()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Timeline - Liquid Style */}
-            <div style={{ 
-              background: 'rgba(255, 255, 255, 0.02)',
-              backdropFilter: 'blur(40px)',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              borderRadius: '32px',
-              padding: '40px',
-              marginBottom: '48px'
-            }}>
-              <h3 style={{ fontSize: '12px', color: '#fff', marginBottom: '40px', fontWeight: 800, letterSpacing: '2px', textAlign: 'center' }}>
-                IMMUTABLE CHAIN OF CUSTODY
-              </h3>
-              <div style={{ position: 'relative', maxWidth: 600, margin: '0 auto' }}>
-                <div style={{ position: 'absolute', left: 24, top: 0, bottom: 0, width: '2px', background: 'linear-gradient(to bottom, rgba(0,180,255,0.5), rgba(0,180,255,0.05))' }} />
-                {(complaint.timeline || []).map((t, i) => {
-                  const isLast = i === (complaint.timeline.length - 1);
-                  return (
-                    <motion.div key={i} initial={{ opacity: 0, x: -15 }}
-                      animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
-                      style={{ display: 'flex', gap: '30px', marginBottom: '32px', position: 'relative' }}>
-                      <div style={{
-                        width: 50, height: 50, borderRadius: '50%', flexShrink: 0, zIndex: 1,
-                        background: isLast ? (STATUS_COLOR[t.status] || '#00B4FF') : 'rgba(255,255,255,0.05)',
-                        border: `2px solid ${isLast ? '#fff' : (STATUS_COLOR[t.status] || '#00B4FF')}`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: isLast ? `0 0 25px ${STATUS_COLOR[t.status] || '#00B4FF'}88` : 'none',
-                        backdropFilter: 'blur(10px)'
-                      }}>
-                        {t.status === 'resolved' ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isLast ? "#fff" : "#00C896"} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        ) : (
-                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: isLast ? '#fff' : (STATUS_COLOR[t.status] || '#00B4FF') }} />
-                        )}
-                      </div>
-                      <div style={{ paddingTop: '8px' }}>
-                        <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
-                          {t.message}
-                        </div>
-                        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
-                          {format(new Date(t.timestamp), 'dd MMM yyyy • HH:mm')}
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Secure Chat */}
-            {user && (
-              <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00FFD1', boxShadow: '0 0 10px #00FFD1' }} />
-                  <h3 style={{ fontSize: '12px', color: '#fff', fontWeight: 800, letterSpacing: '2px' }}>
-                    DIRECT AGENT COMMUNICATION
-                  </h3>
-                </div>
-                <div style={{ 
-                  background: 'rgba(0,0,0,0.3)', 
-                  borderRadius: '32px', 
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  overflow: 'hidden',
-                  backdropFilter: 'blur(40px)'
-                }}>
-                  <SecureChat complaintId={complaint._id} />
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
       </div>
-
-      <style>
-        {`
-          .liquid-input:focus {
-            background: rgba(255,255,255,0.06) !important;
-            border-color: rgba(0, 122, 255, 0.5) !important;
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15), inset 0 2px 4px rgba(0,0,0,0.2) !important;
-          }
-        `}
-      </style>
-    </div>
+    </main>
   );
 }

@@ -14,7 +14,7 @@ const FaceIdIcon = ({ status }) => {
         }}
         transition={{ repeat: status === 'scanning' ? Infinity : 0, duration: 1.5 }}
       >
-        <rect x="4" y="4" width="72" height="72" rx="20" fill="none" stroke={status === 'success' ? '#00FF88' : status === 'failed' ? '#FF5252' : '#00B4FF'} strokeWidth="4" />
+        <rect x="4" y="4" width="72" height="72" rx="20" fill="none" stroke={status === 'success' ? '#3DF5C0' : status === 'failed' ? '#D96464' : '#2C2B28'} strokeWidth="2" />
         
         <AnimatePresence mode="wait">
           {(status === 'scanning' || status === 'idle') && (
@@ -23,7 +23,7 @@ const FaceIdIcon = ({ status }) => {
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.5 }}
-              stroke="#00B4FF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"
+              stroke="#EFEDE8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"
             >
               {/* Eyes */}
               <path d="M 28 32 L 28 34" />
@@ -40,7 +40,7 @@ const FaceIdIcon = ({ status }) => {
               key="check"
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              stroke="#00FF88" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none"
+              stroke="#3DF5C0" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none"
             >
               <motion.path 
                 initial={{ pathLength: 0 }}
@@ -185,13 +185,13 @@ export default function DeveloperAccessScanner({ onClose, onVerified }) {
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
         background: 'rgba(3, 10, 15, 0.95)', zIndex: 99999,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        backdropFilter: 'blur(20px)',
+        backdropFilter: 'none',
         userSelect: 'none'
       }}
     >
       <div style={{
         position: 'absolute', top: 40, right: 40, color: '#FF5252', cursor: 'pointer',
-        fontFamily: 'Orbitron, monospace', fontWeight: 'bold', letterSpacing: '2px',
+        fontFamily: 'Inter, sans-serif', fontWeight: 'bold', letterSpacing: '2px',
         padding: '10px 20px', border: '1px solid rgba(255,82,82,0.4)', borderRadius: '8px',
         background: 'rgba(255,82,82,0.1)',
       }} onClick={handleAbort}>
@@ -200,7 +200,7 @@ export default function DeveloperAccessScanner({ onClose, onVerified }) {
 
       <FaceIdIcon status={faceIdStatus} />
 
-      <div style={{ position: 'relative', width: 300, height: 300, borderRadius: '20px', overflow: 'hidden', border: `4px solid ${faceIdStatus === 'success' ? '#00FF88' : faceIdStatus === 'failed' ? '#FF5252' : '#00B4FF'}`, boxShadow: faceIdStatus === 'success' ? '0 0 40px rgba(0, 255, 136, 0.4)' : faceIdStatus === 'failed' ? '0 0 40px rgba(255, 82, 82, 0.4)' : '0 0 40px rgba(0, 180, 255, 0.2)' }}>
+      <div style={{ position: 'relative', width: 300, height: 300, borderRadius: '20px', overflow: 'hidden', border: `1px solid ${faceIdStatus === 'success' ? '#3DF5C0' : faceIdStatus === 'failed' ? '#D96464' : '#2C2B28'}`, boxShadow: 'none' }}>
         <video 
           ref={videoRef} 
           autoPlay 
@@ -211,12 +211,12 @@ export default function DeveloperAccessScanner({ onClose, onVerified }) {
         
         {faceIdStatus === 'scanning' && (
           <motion.div 
-            animate={{ top: ['-20%', '120%', '-20%'] }}
+            initial={{ y: 0 }} animate={{ y: [0, 280, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
             style={{
-              position: 'absolute', left: 0, right: 0, height: '8px', 
-              background: '#00B4FF',
-              boxShadow: '0 0 30px 10px #00B4FF',
+              position: 'absolute', top: 0, left: 0, right: 0, height: '8px', 
+              background: '#3DF5C0',
+              boxShadow: 'none',
               opacity: 0.9
             }}
           />
@@ -226,35 +226,35 @@ export default function DeveloperAccessScanner({ onClose, onVerified }) {
       <div style={{ marginTop: 40, width: 350 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <span style={{ 
-            color: faceIdStatus === 'success' ? '#00FF88' : faceIdStatus === 'failed' ? '#FF5252' : '#00B4FF', 
-            fontFamily: 'Orbitron, monospace', fontSize: '16px', letterSpacing: '1px',
+            color: faceIdStatus === 'success' ? '#3DF5C0' : faceIdStatus === 'failed' ? '#D96464' : '#8E8B85', 
+            fontFamily: 'Inter, sans-serif', fontSize: '16px', letterSpacing: '1px',
             transition: 'color 0.3s', fontWeight: 'bold'
           }}>
             {status}
           </span>
           <span style={{ 
-            color: faceIdStatus === 'success' ? '#00FF88' : faceIdStatus === 'failed' ? '#FF5252' : '#00B4FF', 
-            fontFamily: 'Orbitron, monospace', fontSize: '14px',
+            color: faceIdStatus === 'success' ? '#3DF5C0' : faceIdStatus === 'failed' ? '#FF5252' : '#EFEDE8', 
+            fontFamily: 'Inter, sans-serif', fontSize: '14px',
             transition: 'color 0.3s'
           }}>
             {progress}%
           </span>
         </div>
-        <div style={{ width: '100%', height: '6px', background: 'rgba(0,180,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: '6px', background: '#1C1C1A', borderRadius: '3px', overflow: 'hidden' }}>
           <div style={{ 
             width: `${progress}%`, height: '100%', 
-            background: faceIdStatus === 'success' ? '#00FF88' : faceIdStatus === 'failed' ? '#FF5252' : '#00B4FF', 
-            boxShadow: faceIdStatus === 'success' ? '0 0 15px #00FF88' : faceIdStatus === 'failed' ? '0 0 15px #FF5252' : '0 0 15px #00B4FF', 
-            transition: 'width 0.2s ease-out, background 0.3s, box-shadow 0.3s' 
+            background: faceIdStatus === 'success' ? '#3DF5C0' : faceIdStatus === 'failed' ? '#FF5252' : '#EFEDE8', 
+            boxShadow: 'none', 
+            transition: 'background-color 0.3s' 
           }} />
         </div>
       </div>      <div style={{ marginTop: 60, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', opacity: 0.6 }}>
-        <div style={{ color: faceIdStatus === 'success' ? '#00FF88' : faceIdStatus === 'failed' ? '#FF5252' : '#00B4FF', fontSize: '12px', fontFamily: 'monospace', transition: 'color 0.3s' }}>
+        <div style={{ color: faceIdStatus === 'success' ? '#3DF5C0' : faceIdStatus === 'failed' ? '#FF5252' : '#EFEDE8', fontSize: '12px', fontFamily: 'monospace', transition: 'color 0.3s' }}>
           <div>[SYS] BIOMETRIC HASH: {faceIdStatus === 'success' ? 'VERIFIED' : 'AWAITING'}</div>
           <div>[SYS] NEURAL NET: {faceIdStatus === 'failed' ? 'HALTED' : 'ACTIVE'}</div>
           <div>[SYS] CLEARANCE: LEVEL 9</div>
         </div>
-        <div style={{ color: faceIdStatus === 'success' ? '#00FF88' : faceIdStatus === 'failed' ? '#FF5252' : '#00B4FF', fontSize: '12px', fontFamily: 'monospace', transition: 'color 0.3s' }}>
+        <div style={{ color: faceIdStatus === 'success' ? '#3DF5C0' : faceIdStatus === 'failed' ? '#FF5252' : '#EFEDE8', fontSize: '12px', fontFamily: 'monospace', transition: 'color 0.3s' }}>
           <div>[NET] SECURE TUNNEL ESTABLISHED</div>
           <div>[NET] ENCRYPTION: AES-256-GCM</div>
           <div>[NET] HANDSHAKE: {faceIdStatus === 'failed' ? 'FAILED' : faceIdStatus === 'success' ? 'SUCCESS' : 'PENDING'}</div>
@@ -263,3 +263,4 @@ export default function DeveloperAccessScanner({ onClose, onVerified }) {
     </motion.div>
   );
 }
+

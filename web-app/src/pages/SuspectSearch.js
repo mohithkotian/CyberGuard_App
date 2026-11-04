@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { format } from 'date-fns';
 import { complaintsAPI } from '../services/api';
 import { lookupThreatClient } from '../data/threatIntel';
+import { ArrowLeft, RotateCw, ShieldCheck, AlertTriangle, Check } from 'lucide-react';
 
 const searchCategories = [
   { id: 'mobile', label: 'Mobile', icon: 'mobile-phone.png', warning: 'Enter 10-digit Mobile number (e.g., 9800000001 or 555-0100)', sampleScam: '9800000001', sampleSafe: '9876543210' },
@@ -25,9 +26,10 @@ const generateCaptchaCode = () => {
   return code;
 };
 
-const CAPTCHA_COLORS = ['#00FFD1', '#00B4FF', '#38EF7D', '#FFD166', '#FF6B8B', '#A78BFA'];
+const CAPTCHA_COLORS = ['#f2f0ea', '#d8d5ce', '#3DF5C0', '#FFB800', '#FF6B8B', '#A78BFA'];
 
 export default function SuspectSearch() {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState(searchCategories[0]);
   const [inputValue, setInputValue] = useState('');
   const [captchaCode, setCaptchaCode] = useState('');
@@ -48,11 +50,11 @@ export default function SuspectSearch() {
     setRotationDegrees(prev => prev + 360);
 
     const styles = newCode.split('').map(() => ({
-      rotate: Math.floor(Math.random() * 26) - 13,
-      translateY: Math.floor(Math.random() * 6) - 3,
+      rotate: Math.floor(Math.random() * 20) - 10,
+      translateY: Math.floor(Math.random() * 4) - 2,
       color: CAPTCHA_COLORS[Math.floor(Math.random() * CAPTCHA_COLORS.length)],
-      fontWeight: Math.random() > 0.5 ? '700' : '900',
-      fontSize: `${Math.floor(Math.random() * 4) + 19}px`
+      fontWeight: '700',
+      fontSize: `${Math.floor(Math.random() * 4) + 18}px`
     }));
     setCharStyles(styles);
   }, [captchaCode]);
@@ -98,7 +100,6 @@ export default function SuspectSearch() {
         console.warn('API search warning, running local threat intelligence engine:', apiErr);
       }
 
-      // If backend gave 0 results or was offline, cross-check client threat intel
       if (finalResults.length === 0) {
         const localMatches = lookupThreatClient(cleanInput);
         finalResults = localMatches;
@@ -108,7 +109,7 @@ export default function SuspectSearch() {
       setSearched(true);
 
       if (finalResults.length > 0) {
-        toast.error(`Alert: Match found! Flagged as SCAM / Suspect in ${finalResults.length} record(s).`);
+        toast.error(`Alert: Match found! Flagged as SCAM in ${finalResults.length} record(s).`);
       } else {
         toast.success('Verified Safe: No suspect records found.');
       }
@@ -123,272 +124,293 @@ export default function SuspectSearch() {
   };
 
   return (
-    <div style={{ 
-      background: '#02060A', 
-      minHeight: '100vh', 
-      fontFamily: 'Inter, sans-serif',
-      color: '#fff',
-      position: 'relative',
-      overflowX: 'hidden'
-    }}>
-      {/* Liquid Atmospheric Accents */}
-      <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 122, 255, 0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 255, 170, 0.05) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
-
+    <div className="page-shell">
       <Navbar />
-
-      <main style={{ maxWidth: '1100px', margin: '50px auto', padding: '0 20px', position: 'relative', zIndex: 1 }}>
-        
-        {/* Title Banner */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: 'center', marginBottom: 36 }}
-        >
-          <div style={{ display: 'inline-block', padding: '6px 16px', borderRadius: '30px', background: 'rgba(0, 180, 255, 0.1)', border: '1px solid rgba(0, 180, 255, 0.3)', color: '#00B4FF', fontSize: '12px', fontWeight: 800, letterSpacing: '1.5px', marginBottom: '14px' }}>
-            I4C CYBERCRIME INTELLIGENCE REGISTRY
+      
+      <main className="report-layout">
+        {/* Subheader / Aside Row */}
+        <aside className="report-aside">
+          <button
+            type="button"
+            className="back-link"
+            onClick={() => navigate(-1)}
+            aria-label="Go back to previous page"
+          >
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span>Back</span>
+          </button>
+          <div className="aside-copy">
+            <p className="eyebrow">INTELLIGENCE REGISTRY</p>
+            <h1>SUSPECT CREDENTIAL SEARCH</h1>
+            <p>National Cybercrime Registry intelligence search engine for public safety and suspect credential verification.</p>
           </div>
-          <h1 style={{ 
-            fontSize: '3rem', 
-            fontWeight: 800,
-            fontFamily: 'Orbitron, monospace',
-            background: 'linear-gradient(to bottom, #fff, rgba(255,255,255,0.5))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            margin: '0 0 14px 0',
-            letterSpacing: '-1px'
-          }}>
-            Suspect <span style={{ color: '#00B4FF' }}>Search</span>
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '15px', maxWidth: '680px', margin: '0 auto' }}>
-            National Cybercrime Registry intelligence search engine for public safety and suspect credential verification.
-          </p>
-        </motion.div>
-
-        {/* Main Card */}
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{ 
-            background: 'rgba(255, 255, 255, 0.02)', 
-            backdropFilter: 'blur(40px) saturate(180%)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '24px', 
-            boxShadow: '0 30px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
-            padding: '36px'
-          }}
-        >
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', fontWeight: '500', marginBottom: '24px' }}>
-            This repository of suspect identifiers has been created on the basis of multiple complaints filed by citizens for cybercrimes on this portal.
-          </p>
-
-          {/* Category Selector */}
-          <div style={{ display: 'flex', gap: '14px', overflowX: 'auto', padding: '12px 0 10px', marginBottom: '24px', scrollbarWidth: 'none' }}>
-            {searchCategories.map(cat => {
-              const isActive = activeCategory.id === cat.id;
-              return (
-                <div 
-                  key={cat.id}
-                  onClick={() => {
-                    setActiveCategory(cat);
-                    setInputValue('');
-                    setSearched(false);
-                    setResults([]);
-                  }}
-                  style={{
-                    position: 'relative',
-                    flex: '0 0 auto',
-                    width: '120px',
-                    height: '120px',
-                    boxSizing: 'border-box',
-                    padding: '16px 8px 10px',
-                    overflow: 'visible',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: isActive ? '1px solid rgba(0, 180, 255, 0.6)' : '1px solid rgba(255, 255, 255, 0.05)',
-                    borderRadius: '16px',
-                    cursor: 'pointer',
-                    background: isActive ? 'rgba(0, 180, 255, 0.12)' : 'rgba(255, 255, 255, 0.02)',
-                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                    boxShadow: isActive ? '0 10px 20px rgba(0, 180, 255, 0.15)' : 'none'
-                  }}
-                  onMouseEnter={e => !isActive && (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-                  onMouseLeave={e => !isActive && (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
-                >
-                  {isActive && (
-                    <div style={{ 
-                      position: 'absolute', top: '8px', left: '50%', transform: 'translateX(-50%)',
-                      background: '#00B4FF', color: '#fff', borderRadius: '50%',
-                      width: '18px', height: '18px', display: 'flex', 
-                      alignItems: 'center', justifyContent: 'center', fontSize: '10px',
-                      fontWeight: 'bold', zIndex: 1, boxShadow: '0 0 10px rgba(0, 180, 255, 0.5)'
-                    }}>
-                      v
-                    </div>
-                  )}
-          <img src={`/icons/cyberguard/${cat.icon}`} alt="" style={{ width: 42, height: 42, objectFit: 'contain', marginBottom: '8px' }} />
-                  <div style={{ fontSize: '12px', color: isActive ? '#fff' : 'rgba(255,255,255,0.5)', textAlign: 'center', fontWeight: isActive ? 'bold' : 'normal', padding: '0 5px' }}>
-                    {cat.label}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="help-note">
+            <p>Authenticated Query</p>
+            <span>Verified across active citizen complaint dossiers and investigative indexes.</span>
           </div>
+        </aside>
 
-          {/* Quick Demo Test Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '20px', padding: '10px 16px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>Quick Test:</span>
-            <button
-              type="button"
-              onClick={() => { setInputValue(activeCategory.sampleScam); setCaptchaValue(captchaCode); }}
-              style={{ background: 'rgba(255,59,48,0.15)', border: '1px solid rgba(255,59,48,0.4)', borderRadius: '8px', padding: '4px 10px', color: '#FF3B30', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}
-            >
-              Fill Sample Scam ({activeCategory.sampleScam})
-            </button>
-            <button
-              type="button"
-              onClick={() => { setInputValue(activeCategory.sampleSafe); setCaptchaValue(captchaCode); }}
-              style={{ background: 'rgba(0,255,170,0.1)', border: '1px solid rgba(0,255,170,0.3)', borderRadius: '8px', padding: '4px 10px', color: '#00FFAA', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
-            >
-              Fill Sample Safe ({activeCategory.sampleSafe})
-            </button>
-          </div>
-
-          {/* Input Form */}
-          <form onSubmit={handleSearch} style={{ marginBottom: '32px' }}>
-            <div style={{ color: '#FF3B30', fontSize: '13px', marginBottom: '15px', fontWeight: '600', letterSpacing: '0.5px' }}>
-              {activeCategory.warning}
+        {/* Content Workspace */}
+        <div className="form-workspace">
+          <div className="report-form" style={{ padding: 0 }}>
+            {/* Form Intro Header */}
+            <div className="form-intro">
+              <div>
+                <p className="step-label">VECTOR INVESTIGATION</p>
+                <h2>Suspect Identity & Account Lookup</h2>
+              </div>
+              <p className="required-note">
+                Captcha Protected
+              </p>
             </div>
 
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-              <div style={{ flex: 1, minWidth: '220px' }}>
-                <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '8px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                  {activeCategory.label} <span style={{ color: '#FF3B30' }}>*</span>
-                </label>
-                <input 
-                  type="text" 
-                  placeholder={`Enter ${activeCategory.label}...`}
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  style={{ 
-                    width: '100%', padding: '12px 16px', 
-                    background: 'rgba(255, 255, 255, 0.03)', 
-                    border: '1px solid rgba(255, 255, 255, 0.12)', 
-                    borderRadius: '12px', fontSize: '14px', color: '#fff',
-                    outline: 'none', boxSizing: 'border-box', transition: 'all 0.3s'
-                  }}
-                  onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.background = 'rgba(255,255,255,0.06)'; }}
-                  onBlur={(e) => { e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)'; e.target.style.background = 'rgba(255, 255, 255, 0.03)'; }}
-                />
+            <div style={{ padding: '36px 40px' }}>
+              <p style={{ color: '#b8b8b0', fontSize: '14px', marginBottom: '24px', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                This repository of suspect identifiers has been curated from multiple verified cybercrime reports lodged nationwide. Select a channel vector below to inspect:
+              </p>
+
+              {/* Category Selector Chips */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', 
+                gap: '12px', 
+                marginBottom: '24px' 
+              }}>
+                {searchCategories.map(cat => {
+                  const isActive = activeCategory.id === cat.id;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveCategory(cat);
+                        setInputValue('');
+                        setSearched(false);
+                        setResults([]);
+                      }}
+                      style={{
+                        position: 'relative',
+                        padding: '16px 12px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: isActive ? '#1c1c1a' : '#141414',
+                        border: isActive ? '1px solid #f2f0ea' : '1px solid #30302d',
+                        borderRadius: '16px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        outline: 'none'
+                      }}
+                      onMouseEnter={e => !isActive && (e.currentTarget.style.borderColor = '#444440')}
+                      onMouseLeave={e => !isActive && (e.currentTarget.style.borderColor = '#30302d')}
+                    >
+                      {isActive && (
+                        <div style={{ 
+                          position: 'absolute', 
+                          top: '8px', 
+                          right: '8px',
+                          background: '#f2f0ea', 
+                          color: '#070707', 
+                          borderRadius: '50%',
+                          width: '16px', 
+                          height: '16px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center'
+                        }}>
+                          <Check size={10} strokeWidth={3} />
+                        </div>
+                      )}
+                      <img 
+                        src={`/icons/cyberguard/${cat.icon}`} 
+                        alt="" 
+                        style={{ width: 36, height: 36, objectFit: 'contain', marginBottom: '8px' }} 
+                      />
+                      <div style={{ 
+                        fontSize: '13px', 
+                        color: isActive ? '#f2f0ea' : '#888880', 
+                        fontFamily: "'IBM Plex Sans', sans-serif",
+                        fontWeight: 700, 
+                        letterSpacing: '0.5px' 
+                      }}>
+                        {cat.label}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', flex: 2, minWidth: '380px' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '8px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                    Captcha <span style={{ color: '#FF3B30' }}>*</span>
-                  </label>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    
-                    {/* Dynamic High-Tech Captcha Box */}
-                    <div 
-                      title="Security Captcha Verification"
-                      style={{ 
-                        background: 'linear-gradient(135deg, rgba(0, 10, 20, 0.9) 0%, rgba(5, 20, 35, 0.95) 100%)', 
-                        border: '1px solid rgba(0, 180, 255, 0.3)', 
-                        padding: '4px 14px', 
-                        fontFamily: 'monospace', 
-                        borderRadius: '10px', 
-                        height: '44px', 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '4px',
-                        userSelect: 'none',
-                        minWidth: '130px',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        boxShadow: 'inset 0 0 15px rgba(0, 180, 255, 0.15), 0 4px 12px rgba(0,0,0,0.5)',
-                        backgroundImage: 'radial-gradient(rgba(0, 180, 255, 0.15) 1px, transparent 1px), linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px)',
-                        backgroundSize: '12px 12px, 8px 8px'
-                      }}
-                    >
-                      <div style={{
-                        position: 'absolute',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 180, 255, 0.08) 2px, rgba(0, 180, 255, 0.08) 4px)',
-                        pointerEvents: 'none'
-                      }} />
+              {/* Quick Demo Test Buttons */}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '10px', 
+                flexWrap: 'wrap', 
+                marginBottom: '24px', 
+                padding: '12px 18px', 
+                background: '#101010', 
+                borderRadius: '12px', 
+                border: '1px solid #242422' 
+              }}>
+                <span style={{ fontSize: '11px', color: '#888880', fontFamily: "'IBM Plex Mono', monospace", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  Quick Test:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setInputValue(activeCategory.sampleScam); setCaptchaValue(captchaCode); }}
+                  style={{ 
+                    background: '#1f1313', 
+                    border: '1px solid #4a1f1f', 
+                    borderRadius: '8px', 
+                    padding: '4px 12px', 
+                    color: '#d96464', 
+                    fontSize: '11px', 
+                    fontWeight: 700, 
+                    cursor: 'pointer',
+                    fontFamily: "'IBM Plex Mono', monospace"
+                  }}
+                >
+                  Fill Sample Scam ({activeCategory.sampleScam})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setInputValue(activeCategory.sampleSafe); setCaptchaValue(captchaCode); }}
+                  style={{ 
+                    background: '#0d1a14', 
+                    border: '1px solid #1a382a', 
+                    borderRadius: '8px', 
+                    padding: '4px 12px', 
+                    color: '#3DF5C0', 
+                    fontSize: '11px', 
+                    fontWeight: 700, 
+                    cursor: 'pointer',
+                    fontFamily: "'IBM Plex Mono', monospace"
+                  }}
+                >
+                  Fill Sample Safe ({activeCategory.sampleSafe})
+                </button>
+              </div>
 
-                      {captchaCode.split('').map((char, index) => {
-                        const style = charStyles[index] || {};
-                        return (
-                          <span 
-                            key={index}
-                            style={{
-                              display: 'inline-block',
-                              transform: `rotate(${style.rotate || 0}deg) translateY(${style.translateY || 0}px)`,
-                              color: style.color || '#00FFD1',
-                              fontWeight: style.fontWeight || '800',
-                              fontSize: style.fontSize || '20px',
-                              letterSpacing: '2px',
-                              textShadow: `0 0 8px ${style.color || '#00FFD1'}66`
-                            }}
-                          >
-                            {char}
-                          </span>
-                        );
-                      })}
-                    </div>
+              {/* Input Form */}
+              <form onSubmit={handleSearch} style={{ marginBottom: '32px' }}>
+                <div style={{ color: '#d96464', fontSize: '12px', marginBottom: '16px', fontWeight: 600, fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                  {activeCategory.warning}
+                </div>
 
-                    {/* Turn Arrow / Refresh Button */}
-                    <motion.button
-                      type="button"
-                      onClick={refreshCaptcha}
-                      title="Generate new Captcha"
-                      whileHover={{ scale: 1.12 }}
-                      whileTap={{ scale: 0.9 }}
-                      animate={{ rotate: rotationDegrees }}
-                      transition={{ duration: 0.5, ease: 'easeInOut' }}
-                      style={{ 
-                        background: 'rgba(0, 180, 255, 0.1)', 
-                        border: '1px solid rgba(0, 180, 255, 0.3)',
-                        borderRadius: '10px',
-                        width: '44px',
-                        height: '44px',
-                        fontSize: '20px', 
-                        cursor: 'pointer', 
-                        color: '#00B4FF', 
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: 0,
-                        flexShrink: 0,
-                        outline: 'none',
-                        boxShadow: '0 4px 10px rgba(0, 180, 255, 0.15)'
-                      }}
-                    >
-                      ↻
-                    </motion.button>
-
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', alignItems: 'flex-end', marginBottom: '24px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#888880', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                      {activeCategory.label} Identifier <span style={{ color: '#d96464' }}>*</span>
+                    </label>
                     <input 
                       type="text" 
-                      placeholder="Enter Captcha"
-                      value={captchaValue}
-                      onChange={(e) => setCaptchaValue(e.target.value)}
+                      placeholder={`Enter ${activeCategory.label}...`}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
                       style={{ 
-                        flex: 1, padding: '12px 14px', 
-                        background: 'rgba(255, 255, 255, 0.03)', 
-                        border: '1px solid rgba(255, 255, 255, 0.12)', 
-                        borderRadius: '12px', fontSize: '14px', color: '#fff',
-                        height: '44px', outline: 'none', boxSizing: 'border-box', transition: 'all 0.3s',
-                        letterSpacing: '1px'
+                        width: '100%', 
+                        padding: '13px 18px', 
+                        background: '#141414', 
+                        border: '1px solid #30302d', 
+                        borderRadius: '12px', 
+                        fontSize: '14px', 
+                        color: '#f2f0ea',
+                        outline: 'none', 
+                        boxSizing: 'border-box',
+                        fontFamily: "'IBM Plex Sans', sans-serif"
                       }}
-                      onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.background = 'rgba(255,255,255,0.06)'; }}
-                      onBlur={(e) => { e.target.style.borderColor = 'rgba(255, 255, 255, 0.12)'; e.target.style.background = 'rgba(255, 255, 255, 0.03)'; }}
+                      onFocus={e => e.currentTarget.style.borderColor = '#f2f0ea'}
+                      onBlur={e => e.currentTarget.style.borderColor = '#30302d'}
                     />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#888880', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                      Security Captcha <span style={{ color: '#d96464' }}>*</span>
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <div 
+                        title="Security Captcha Verification"
+                        style={{ 
+                          background: '#101010',
+                          border: '1px solid #30302d', 
+                          padding: '0 16px', 
+                          borderRadius: '12px', 
+                          height: '46px', 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          userSelect: 'none',
+                          minWidth: '120px'
+                        }}
+                      >
+                        {captchaCode.split('').map((char, index) => {
+                          const style = charStyles[index] || {};
+                          return (
+                            <span 
+                              key={index}
+                              style={{
+                                display: 'inline-block',
+                                transform: `rotate(${style.rotate || 0}deg) translateY(${style.translateY || 0}px)`,
+                                color: style.color || '#f2f0ea',
+                                fontWeight: '700',
+                                fontSize: style.fontSize || '18px',
+                                fontFamily: "'IBM Plex Mono', monospace"
+                              }}
+                            >
+                              {char}
+                            </span>
+                          );
+                        })}
+                      </div>
+
+                      <motion.button
+                        type="button"
+                        onClick={refreshCaptcha}
+                        title="Generate new Captcha"
+                        animate={{ rotate: rotationDegrees }}
+                        transition={{ duration: 0.4 }}
+                        style={{ 
+                          background: '#141414', 
+                          border: '1px solid #30302d',
+                          borderRadius: '12px',
+                          width: '46px',
+                          height: '46px',
+                          cursor: 'pointer', 
+                          color: '#b8b8b0', 
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}
+                      >
+                        <RotateCw size={16} />
+                      </motion.button>
+
+                      <input 
+                        type="text" 
+                        placeholder="Enter Code"
+                        value={captchaValue}
+                        onChange={(e) => setCaptchaValue(e.target.value)}
+                        style={{ 
+                          flex: 1, 
+                          padding: '13px 16px', 
+                          background: '#141414', 
+                          border: '1px solid #30302d', 
+                          borderRadius: '12px', 
+                          fontSize: '14px', 
+                          color: '#f2f0ea',
+                          height: '46px', 
+                          outline: 'none', 
+                          boxSizing: 'border-box',
+                          fontFamily: "'IBM Plex Mono', monospace"
+                        }}
+                        onFocus={e => e.currentTarget.style.borderColor = '#f2f0ea'}
+                        onBlur={e => e.currentTarget.style.borderColor = '#30302d'}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -396,201 +418,197 @@ export default function SuspectSearch() {
                   type="submit"
                   disabled={loading}
                   style={{ 
-                    background: 'linear-gradient(135deg, #007AFF 0%, #00B4FF 100%)', 
-                    color: '#fff', border: 'none', 
-                    padding: '0 28px', height: '44px', borderRadius: '12px', 
-                    fontSize: '13px', fontWeight: '800', cursor: loading ? 'not-allowed' : 'pointer',
-                    letterSpacing: '1px', transition: 'all 0.3s',
-                    boxShadow: '0 10px 20px rgba(0, 180, 255, 0.25)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                    background: '#f2f0ea',
+                    color: '#070707',
+                    border: 'none',
+                    padding: '0 40px', 
+                    height: '50px', 
+                    borderRadius: '999px', 
+                    fontSize: '14px', 
+                    fontWeight: 800, 
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    letterSpacing: '1px',
+                    fontFamily: "'IBM Plex Sans', sans-serif"
                   }}
-                  onMouseOver={e => !loading && (e.currentTarget.style.transform = 'translateY(-2px)')}
-                  onMouseOut={e => !loading && (e.currentTarget.style.transform = 'translateY(0)')}
                 >
-                  {loading ? 'SEARCHING...' : 'SEARCH'}
+                  {loading ? 'SEARCHING...' : 'VERIFY SUSPECT RECORD'}
                 </button>
-              </div>
-            </div>
-          </form>
+              </form>
 
-          {/* Search Query Results Display */}
-          <AnimatePresence>
-            {searched && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                style={{ marginBottom: '32px', textAlign: 'left' }}
-              >
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  marginBottom: '16px',
-                  padding: '0 4px',
-                  flexWrap: 'wrap',
-                  gap: '8px'
-                }}>
-                  <h3 style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', margin: 0, fontWeight: 800, letterSpacing: '1px' }}>
-                    SUSPECT REPOSITORY MATCHES ({results.length})
-                  </h3>
-                  {results.length > 0 ? (
-                    <span style={{ 
-                      color: '#FF3B30', 
-                      fontSize: '12px', 
-                      fontWeight: 800, 
-                      letterSpacing: '1px',
-                      background: 'rgba(255, 59, 48, 0.15)',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 59, 48, 0.4)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
+              {/* Results View */}
+              <AnimatePresence>
+                {searched && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ marginBottom: '32px', textAlign: 'left' }}
+                  >
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      marginBottom: '16px',
+                      flexWrap: 'wrap',
+                      gap: '8px'
                     }}>
-                      <img src="/icons/cyberguard/critical-threat.png" alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} /> <strong>SCAM DETECTED:</strong> SUSPECT RECORD CONFIRMED IN DATABASE
-                    </span>
-                  ) : (
-                    <span style={{ 
-                      color: '#00FFAA', 
-                      fontSize: '12px', 
-                      fontWeight: 800, 
-                      letterSpacing: '1px',
-                      background: 'rgba(0, 255, 170, 0.12)',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(0, 255, 170, 0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}>
-                      <img src="/icons/cyberguard/verified-safe.png" alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} /> <strong>SAFE:</strong> NO SUSPECT RECORD FOUND (CLEAN)
-                    </span>
-                  )}
-                </div>
-
-                {results.length === 0 ? (
-                  <div style={{ 
-                    background: 'rgba(0, 255, 170, 0.04)', 
-                    backdropFilter: 'blur(30px)',
-                    border: '1px solid rgba(0, 255, 170, 0.2)', 
-                    borderRadius: '18px', 
-                    padding: '36px 24px',
-                    textAlign: 'center'
-                  }}>
-                    <img src="/icons/cyberguard/verified-safe.png" alt="Clean verification" style={{ width: 52, height: 52, objectFit: 'contain', marginBottom: '12px' }} />
-                    <h4 style={{ color: '#00FFAA', fontSize: '20px', fontWeight: 800, margin: '0 0 8px 0' }}>Clean Verification Record</h4>
-                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: '0 auto 12px', maxWidth: 600, lineHeight: 1.6 }}>
-                      No reported cybercrime complaints, fraudulent vishing records, or scam flags currently match &quot;<strong style={{ color: '#fff' }}>{inputValue}</strong>&quot;.
-                    </p>
-                    <div style={{ display: 'inline-block', background: 'rgba(0, 255, 170, 0.1)', padding: '4px 14px', borderRadius: '16px', color: '#00FFAA', fontSize: '11px', fontWeight: 700 }}>
-                      Safety Status: Verified Untainted
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ display: 'grid', gap: '14px' }}>
-                    {results.map((r, i) => (
-                      <motion.div
-                        key={r.complaintId || i}
-                        initial={{ opacity: 0, x: -15 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        style={{
-                          background: 'rgba(255, 59, 48, 0.04)',
-                          backdropFilter: 'blur(30px)',
-                          border: '1px solid rgba(255, 59, 48, 0.25)',
-                          borderRadius: '16px',
-                          padding: '20px 24px',
+                      <h3 style={{ fontSize: '12px', color: '#888880', margin: 0, fontWeight: 700, letterSpacing: '1px', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase' }}>
+                        SUSPECT REPOSITORY MATCHES ({results.length})
+                      </h3>
+                      {results.length > 0 ? (
+                        <span style={{ 
+                          color: '#d96464', 
+                          fontSize: '12px', 
+                          fontWeight: 700, 
+                          background: '#1f1313',
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          border: '1px solid #4a1f1f',
                           display: 'flex',
-                          justifyContent: 'space-between',
                           alignItems: 'center',
-                          flexWrap: 'wrap',
-                          gap: '12px'
-                        }}
-                      >
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                            <span style={{ fontSize: '11px', color: '#FF3B30', fontWeight: 800, letterSpacing: '1.5px', fontFamily: 'Orbitron, monospace' }}>
-                              {r.complaintId}
-                            </span>
-                            <span style={{ fontSize: '10px', background: 'rgba(255,59,48,0.2)', color: '#FF3B30', padding: '2px 8px', borderRadius: '4px', fontWeight: 800 }}>
-                              SCAM CONFIRMED
-                            </span>
-                          </div>
-                          <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
-                            {r.category}
-                          </div>
-                          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>
-                            {r.details || `Logged on cybercrime suspect database.`}
-                          </div>
-                          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
-                            Identifier: <span style={{ color: '#00B4FF', fontWeight: 600 }}>{r.identifier || inputValue}</span>
-                          </div>
-                        </div>
+                          gap: '6px',
+                          fontFamily: "'IBM Plex Sans', sans-serif"
+                        }}>
+                          <AlertTriangle size={14} /> SCAM CONFIRMED IN DATABASE
+                        </span>
+                      ) : (
+                        <span style={{ 
+                          color: '#3DF5C0', 
+                          fontSize: '12px', 
+                          fontWeight: 700, 
+                          background: '#0d1a14',
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          border: '1px solid #1a382a',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontFamily: "'IBM Plex Sans', sans-serif"
+                        }}>
+                          <ShieldCheck size={14} /> NO SUSPECT RECORD FOUND (CLEAN)
+                        </span>
+                      )}
+                    </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ 
-                            fontSize: '11px', 
-                            padding: '6px 12px', 
-                            borderRadius: '8px',
-                            background: 'rgba(255,59,48,0.15)',
-                            color: '#FF3B30',
-                            fontWeight: 800,
-                            border: '1px solid rgba(255,59,48,0.4)',
-                            letterSpacing: '1px',
-                            textTransform: 'uppercase'
-                          }}>
-                            {(r.riskLevel || r.severity || 'HIGH').toUpperCase()} RISK
-                          </span>
-                          <span style={{ 
-                            fontSize: '11px', 
-                            padding: '6px 12px', 
-                            borderRadius: '8px',
-                            background: 'rgba(255,255,255,0.06)',
-                            color: 'rgba(255,255,255,0.8)',
-                            fontWeight: 700,
-                            letterSpacing: '1px',
-                            textTransform: 'uppercase'
-                          }}>
-                            {r.status || 'FLAGGED'}
-                          </span>
-                          <a 
-                            href={r.complaintId.startsWith('CC-') ? `/track/${r.complaintId}` : '/forensics'} 
-                            style={{ 
-                              fontSize: '12px', 
-                              color: '#00B4FF', 
-                              textDecoration: 'none',
-                              fontWeight: 700,
+                    {results.length === 0 ? (
+                      <div style={{ 
+                        background: '#141414', 
+                        border: '1px solid #30302d', 
+                        borderRadius: '24px', 
+                        padding: '40px 24px',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{
+                          width: '56px',
+                          height: '56px',
+                          borderRadius: '999px',
+                          background: '#0d1a14',
+                          color: '#3DF5C0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          margin: '0 auto 16px'
+                        }}>
+                          <ShieldCheck size={28} />
+                        </div>
+                        <h4 style={{ color: '#f2f0ea', fontSize: '20px', fontWeight: 700, margin: '0 0 8px 0', fontFamily: "'IBM Plex Sans', sans-serif" }}>Clean Verification Record</h4>
+                        <p style={{ color: '#b8b8b0', fontSize: '14px', margin: '0 auto 12px', maxWidth: 600, lineHeight: 1.6, fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                          No reported cybercrime complaints, fraudulent vishing records, or scam flags currently match &quot;<strong style={{ color: '#f2f0ea' }}>{inputValue}</strong>&quot;.
+                        </p>
+                        <div style={{ display: 'inline-block', background: '#0d1a14', border: '1px solid #1a382a', padding: '4px 14px', borderRadius: '8px', color: '#3DF5C0', fontSize: '11px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                          STATUS: VERIFIED UNTAINTED
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'grid', gap: '14px' }}>
+                        {results.map((r, i) => (
+                          <div
+                            key={r.complaintId || i}
+                            style={{
+                              background: '#141414',
+                              border: '1px solid #30302d',
+                              borderRadius: '20px',
+                              padding: '24px 28px',
                               display: 'flex',
+                              justifyContent: 'space-between',
                               alignItems: 'center',
-                              gap: '4px'
+                              flexWrap: 'wrap',
+                              gap: '12px'
                             }}
                           >
-                            DOSSIER →
-                          </a>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                <span style={{ fontSize: '12px', color: '#d96464', fontWeight: 700, letterSpacing: '1px', fontFamily: "'IBM Plex Mono', monospace" }}>
+                                  {r.complaintId}
+                                </span>
+                                <span style={{ fontSize: '10px', background: '#261212', color: '#d96464', padding: '2px 8px', borderRadius: '4px', fontWeight: 800, fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                                  SCAM CONFIRMED
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '17px', fontWeight: 700, color: '#f2f0ea', marginBottom: '4px', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                                {r.category}
+                              </div>
+                              <div style={{ fontSize: '13px', color: '#b8b8b0', marginBottom: '4px', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                                {r.details || `Logged on cybercrime suspect database.`}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#777', fontFamily: "'IBM Plex Mono', monospace" }}>
+                                Identifier: <span style={{ color: '#f2f0ea', fontWeight: 600 }}>{r.identifier || inputValue}</span>
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <span style={{ 
+                                fontSize: '11px', 
+                                padding: '4px 12px', 
+                                borderRadius: '8px',
+                                background: '#261212',
+                                color: '#d96464',
+                                fontWeight: 800,
+                                border: '1px solid #4a1f1f',
+                                letterSpacing: '1px',
+                                fontFamily: "'IBM Plex Sans', sans-serif"
+                              }}>
+                                {(r.riskLevel || r.severity || 'HIGH').toUpperCase()} RISK
+                              </span>
+                              <a 
+                                href={r.complaintId && r.complaintId.startsWith('CC-') ? `/track/${r.complaintId}` : '/forensics'} 
+                                style={{ 
+                                  fontSize: '13px', 
+                                  color: '#f2f0ea', 
+                                  textDecoration: 'none',
+                                  fontWeight: 700,
+                                  fontFamily: "'IBM Plex Sans', sans-serif",
+                                  letterSpacing: '0.5px'
+                                }}
+                              >
+                                DOSSIER →
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
                 )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+              </AnimatePresence>
 
-          {/* Disclaimer */}
-          <div style={{ 
-            background: 'rgba(255, 59, 48, 0.05)', 
-            border: '1px solid rgba(255, 59, 48, 0.2)', 
-            borderRadius: '12px',
-            padding: '20px 24px'
-          }}>
-            <h4 style={{ color: '#FF3B30', margin: '0 0 8px 0', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>Disclaimer *</h4>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', lineHeight: '1.7', margin: 0, textAlign: 'justify' }}>
-              This search database is created on the basis of cybercrime complaints received from the public and verified intelligence feeds. Indian Cybercrime Coordination Centre (I4C) does not certify the authenticity of complaints which are a matter of active investigation with law enforcement authorities.
-            </p>
+              {/* Disclaimer */}
+              <div style={{ 
+                background: '#101010', 
+                border: '1px solid #242422', 
+                borderRadius: '16px',
+                padding: '20px 24px'
+              }}>
+                <h4 style={{ color: '#b8b8b0', margin: '0 0 8px 0', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                  Regulatory Disclaimer *
+                </h4>
+                <p style={{ color: '#888880', fontSize: '12px', lineHeight: '1.7', margin: 0, fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                  This search database is generated from citizen complaints and intelligence feeds. The Indian Cybercrime Coordination Centre (I4C) aggregates evidentiary data to protect users; formal determinations remain subject to active police investigation.
+                </p>
+              </div>
+
+            </div>
           </div>
-
-        </motion.div>
+        </div>
       </main>
     </div>
   );

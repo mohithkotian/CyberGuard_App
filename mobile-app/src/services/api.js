@@ -3,27 +3,34 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
+export const PRODUCTION_API_URL = 'https://cybercrime-backend.onrender.com/api';
+
 // Helper to determine the best backend URL automatically
 export function getDefaultBaseUrl() {
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
   }
 
-  // 1. Detect Expo Host IP (only if it's a valid local IP, NOT a tunnel hostname)
-  const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoClient?.hostUri || Constants.manifest?.debuggerHost;
-  if (hostUri) {
-    const hostIp = hostUri.split(':')[0];
-    const isTunnel = hostIp.includes('exp.direct') || hostIp.includes('ngrok') || hostIp.includes('expo.dev');
-    if (hostIp && hostIp !== 'localhost' && hostIp !== '127.0.0.1' && !isTunnel) {
-      return `http://${hostIp}:5002/api`;
+  // 1. In local development mode, detect Expo Host IP or local emulators
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+    const hostUri = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoClient?.hostUri || Constants.manifest?.debuggerHost;
+    if (hostUri) {
+      const hostIp = hostUri.split(':')[0];
+      const isTunnel = hostIp.includes('exp.direct') || hostIp.includes('ngrok') || hostIp.includes('expo.dev');
+      if (hostIp && hostIp !== 'localhost' && hostIp !== '127.0.0.1' && !isTunnel) {
+        return `http://${hostIp}:5002/api`;
+      }
     }
+
+    // Android emulator vs iOS simulator vs localhost
+    if (Platform.OS === 'android') {
+      return 'http://10.0.2.2:5002/api';
+    }
+    return 'http://localhost:5002/api';
   }
 
-  // 2. Android emulator vs iOS simulator vs localhost
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:5002/api';
-  }
-  return 'http://localhost:5002/api';
+  // 2. Production standalone release default
+  return PRODUCTION_API_URL;
 }
 
 export let BASE_URL = getDefaultBaseUrl();
@@ -114,25 +121,81 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+// Mutex lock and queue for concurrent token refreshes
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const original = err.config;
-    if (err.response?.status === 401 && !original._retry) {
+    
+    // Avoid refresh loops on auth endpoints or retry requests
+    if (
+      err.response?.status === 401 &&
+      original &&
+      !original._retry &&
+      !original.url?.includes('/auth/login') &&
+      !original.url?.includes('/auth/register') &&
+      !original.url?.includes('/auth/refresh')
+    ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            original.headers.Authorization = `Bearer ${token}`;
+            return api(original);
+          })
+          .catch((queueErr) => Promise.reject(queueErr));
+      }
+
       original._retry = true;
+      isRefreshing = true;
+
       try {
         const refresh = await AsyncStorage.getItem('refreshToken');
-        if (refresh) {
-          const { data } = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refreshToken: refresh });
-          await AsyncStorage.setItem('accessToken',  data.data.accessToken);
-          await AsyncStorage.setItem('refreshToken', data.data.refreshToken);
-          original.headers.Authorization = `Bearer ${data.data.accessToken}`;
-          return api(original);
+        if (!refresh) {
+          throw new Error('No refresh token available');
         }
+
+        const { data } = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {
+          refreshToken: refresh,
+        });
+
+        const newAccessToken = data.data.accessToken;
+        const newRefreshToken = data.data.refreshToken;
+
+        await AsyncStorage.setItem('accessToken', newAccessToken);
+        if (newRefreshToken) {
+          await AsyncStorage.setItem('refreshToken', newRefreshToken);
+        }
+
+        api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
+        original.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        processQueue(null, newAccessToken);
+        return api(original);
       } catch (refreshErr) {
-        await AsyncStorage.multiRemove(['accessToken','refreshToken','user']);
+        processQueue(refreshErr, null);
+        await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
+        return Promise.reject(refreshErr);
+      } finally {
+        isRefreshing = false;
       }
     }
+
     return Promise.reject(err);
   }
 );
@@ -152,6 +215,7 @@ export const complaintsAPI = {
   getOne:        (id)   => api.get(`/complaints/${id}`),
   track:         (id)   => api.get(`/complaints/track/${id}`),
   updateStatus:  (id, d)=> api.patch(`/complaints/${id}/status`, d),
+  updatePriority:(id, d)=> api.patch(`/complaints/${id}/status`, d),
   publicSearch:  (q)    => api.get('/complaints/public/search', { params: { query: q } }),
   delete:        (id)   => api.delete(`/complaints/${id}`),
 };

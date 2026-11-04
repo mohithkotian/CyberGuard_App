@@ -29,6 +29,7 @@ const adminRoutes = require('./routes/admin');
 const userRoutes = require('./routes/users');
 const chatRoutes = require('./routes/chats');
 const jarvisRoutes = require('./routes/jarvis');
+const securityRoutes = require('./routes/security');
 
 // ─────────────────────────────────────────────────────────
 // PROCESS ERROR RESILIENCE (PREVENT UNHANDLED CRASHES)
@@ -124,14 +125,7 @@ const authLimiter = rateLimit({
     return `${req.ip}:${email}`;
   },
   skipSuccessfulRequests: true, // Only count failed logins
-  message: { status: 'fail', message: 'Too many login attempts, please try again later' },
-  skip: (req, res) => {
-    const whitelistedEmails = ['pruthvishetty04@gmail.com', 'admin@cybercrime.gov'];
-    if (req.body && req.body.email && whitelistedEmails.includes(req.body.email.toLowerCase())) {
-      return true;
-    }
-    return false;
-  }
+  message: { status: 'fail', message: 'Too many login attempts, please try again later' }
 });
 
 app.use('/api/auth', authLimiter, authRoutes);
@@ -141,6 +135,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/jarvis', jarvisRoutes);
+app.use('/api/security', securityRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
@@ -295,6 +290,7 @@ io.on('connection', (socket) => {
 // ─────────────────────────────────────────────────────────
 // START SERVER & LIFECYCLE MANAGEMENT
 // ─────────────────────────────────────────────────────────
+// CyberGuard Port configuration (auto-restarted)
 const PORT = process.env.PORT || 5002;
 
 server.on('error', (error) => {

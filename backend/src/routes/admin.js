@@ -390,6 +390,14 @@ const path = require('path');
 
 router.get('/codebase', async (req, res, next) => {
   try {
+    const isDev = process.env.NODE_ENV === 'development' || process.env.ENABLE_CODEBASE_INSPECTOR === 'true';
+    if (!isDev) {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'Source code inspection endpoint is disabled in production environments for security.'
+      });
+    }
+
     const rootPath = path.resolve(__dirname, '../../../');
     const ignoreDirs = ['node_modules', '.git', 'build', 'dist', 'uploads', '.DS_Store', 'scratch', '.env'];
 

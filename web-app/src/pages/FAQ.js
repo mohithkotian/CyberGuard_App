@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Plus, Minus } from 'lucide-react';
 
 const faqData = [
   { question: "What is the purpose of National Cyber Crime Reporting Portal?", answer: "This portal is an initiative of the Government of India to facilitate victims/complainants to report cyber crime complaints online. This portal caters to complaints pertaining to cyber crimes only with special focus on cyber crimes against women and children." },
@@ -23,6 +25,7 @@ const faqData = [
 ];
 
 export default function FAQ() {
+  const navigate = useNavigate();
   const [openIndex, setOpenIndex] = useState(null);
 
   const toggleFAQ = (index) => {
@@ -30,124 +33,132 @@ export default function FAQ() {
   };
 
   return (
-    <div style={{
-      background: '#02060A',
-      color: '#fff',
-      minHeight: '100vh',
-      fontFamily: 'Inter, sans-serif',
-      position: 'relative',
-      overflowX: 'hidden'
-    }}>
-      {/* Liquid Atmospheric Accents */}
-      <div style={{ position: 'fixed', top: '-10%', left: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 122, 255, 0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-10%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 255, 170, 0.05) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
-
+    <div className="page-shell">
       <Navbar />
       
-      <main style={{ 
-        maxWidth: '1000px', 
-        margin: '60px auto', 
-        padding: '0 20px',
-        position: 'relative', 
-        zIndex: 1 
-      }}>
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: 'center', marginBottom: 40 }}
-        >
-          <h1 style={{ 
-            fontSize: '2.5rem', 
-            fontWeight: 800,
-            fontFamily: 'Orbitron, monospace',
-            background: 'linear-gradient(to bottom, #fff, rgba(255,255,255,0.5))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            margin: '0 0 16px 0',
-            letterSpacing: '-1px'
-          }}>
-            FREQUENTLY ASKED <span style={{ color: '#00B4FF' }}>QUESTIONS</span>
-          </h1>
-        </motion.div>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {faqData.map((faq, index) => {
-            const isOpen = openIndex === index;
-            return (
-              <motion.div 
-                key={index} 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                style={{
-                  background: isOpen ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.02)',
-                  backdropFilter: 'blur(20px)',
-                  border: isOpen ? '1px solid rgba(0, 180, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.05)',
-                  borderRadius: '16px',
-                  boxShadow: isOpen ? '0 10px 30px rgba(0, 180, 255, 0.05)' : 'none',
-                  overflow: 'hidden',
-                  transition: 'all 0.3s'
-                }}
-              >
-                <div 
-                  onClick={() => toggleFAQ(index)}
-                  style={{
-                    padding: '24px 30px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    userSelect: 'none'
-                  }}
-                  onMouseEnter={(e) => !isOpen && (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
-                  onMouseLeave={(e) => !isOpen && (e.currentTarget.style.background = 'transparent')}
-                >
-                  <span style={{ 
-                    fontSize: '15px', 
-                    color: isOpen ? '#00B4FF' : '#fff', 
-                    fontWeight: 500,
-                    letterSpacing: '0.5px',
-                    lineHeight: '1.5'
-                  }}>
-                    {faq.question}
-                  </span>
-                  <span style={{ 
-                    color: isOpen ? '#00B4FF' : 'rgba(255,255,255,0.3)', 
-                    fontSize: '28px',
-                    fontWeight: 300,
-                    transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-                    transition: 'all 0.3s ease',
-                    marginLeft: '20px'
-                  }}>
-                    +
-                  </span>
-                </div>
-                
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ overflow: 'hidden' }}
+      <main className="report-layout">
+        {/* Subheader / Aside Row */}
+        <aside className="report-aside">
+          <button
+            type="button"
+            className="back-link"
+            onClick={() => navigate(-1)}
+            aria-label="Go back to previous page"
+          >
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span>Back</span>
+          </button>
+          <div className="aside-copy">
+            <p className="eyebrow">SUPPORT & KNOWLEDGE BASE</p>
+            <h1>FREQUENTLY ASKED QUESTIONS</h1>
+            <p>Official procedural guidance regarding complaint submission, evidence handling, and legal workflows.</p>
+          </div>
+          <div className="help-note">
+            <p>Need urgent help?</p>
+            <span>Dial 1930 for the National Cyber Crime Citizen Helpline.</span>
+          </div>
+        </aside>
+
+        {/* Content Workspace */}
+        <div className="form-workspace">
+          <div className="report-form" style={{ padding: 0 }}>
+            {/* Form Intro Header */}
+            <div className="form-intro">
+              <div>
+                <p className="step-label">OFFICIAL DIRECTORY</p>
+                <h2>Incident Resolution & Procedural Inquiries</h2>
+              </div>
+              <p className="required-note">
+                {faqData.length} Verified Solutions
+              </p>
+            </div>
+
+            {/* Accordion Questions List */}
+            <div style={{ padding: '36px 40px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {faqData.map((faq, index) => {
+                const isOpen = openIndex === index;
+                return (
+                  <div 
+                    key={index} 
+                    style={{
+                      background: isOpen ? '#141414' : '#0d0d0d',
+                      border: isOpen ? '1px solid #f2f0ea' : '1px solid #30302d',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleFAQ(index)}
+                      style={{
+                        width: '100%',
+                        padding: '22px 28px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        outline: 'none'
+                      }}
                     >
-                      <div style={{ 
-                        padding: '0 30px 30px 30px', 
-                        color: 'rgba(255,255,255,0.6)',
-                        fontSize: '14px',
-                        lineHeight: '1.8'
+                      <span style={{ 
+                        fontFamily: "'IBM Plex Sans', sans-serif",
+                        fontSize: '17px', 
+                        color: isOpen ? '#f2f0ea' : '#b8b8b0', 
+                        fontWeight: 700,
+                        letterSpacing: '0.5px',
+                        lineHeight: '1.4',
+                        paddingRight: '16px'
                       }}>
-                        <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', marginBottom: '24px' }} />
-                        {faq.answer}
+                        {faq.question}
+                      </span>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        background: isOpen ? '#f2f0ea' : '#1a1a18',
+                        color: isOpen ? '#070707' : '#888880',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        transition: 'all 0.2s ease'
+                      }}>
+                        {isOpen ? <Minus size={16} /> : <Plus size={16} />}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
+                    </button>
+                    
+                    <AnimatePresence>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                          style={{ overflow: 'hidden' }}
+                        >
+                          <div style={{ 
+                            padding: '0 28px 24px 28px', 
+                            color: '#b8b8b0',
+                            fontSize: '14px',
+                            lineHeight: '1.7',
+                            fontFamily: "'IBM Plex Sans', sans-serif",
+                            borderTop: '1px solid #222220',
+                            paddingTop: '18px'
+                          }}>
+                            {faq.answer}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </main>
     </div>

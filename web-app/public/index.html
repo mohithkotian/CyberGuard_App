@@ -3,17 +3,35 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0A0F1E" />
+    <meta name="theme-color" content="#071018" />
     <meta name="description" content="AI-based Cybercrime Reporting and Complaint Management System" />
     <link rel="icon" type="image/png" href="/icons/cyberguard/cyberguard-app-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>CyberGuard — AI Cybercrime Reporting</title>
     <style>
-      body { margin: 0; background: #0A0F1E; }
+      body { margin: 0; background: #071018; font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
       #root { min-height: 100vh; }
     </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+
+    <!-- Hidden Google Translate Element for Whole-Site Indian Language Localization -->
+    <div id="google_translate_element" style="display: none; position: absolute; left: -9999px; top: -9999px;"></div>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        if (window.google && window.google.translate) {
+          new window.google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'en,hi,kn,ta,te',
+            autoDisplay: false
+          }, 'google_translate_element');
+        }
+      }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   </body>
 </html>

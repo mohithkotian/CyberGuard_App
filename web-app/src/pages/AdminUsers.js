@@ -423,18 +423,14 @@ export default function AdminUsers() {
   }, [users]);
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#02060A',
-      color: '#fff',
+    <div className="page-shell" style={{
+      minHeight: '100dvh',
+      background: '#070707',
+      color: '#f2f0ea',
       position: 'relative',
       overflowX: 'hidden',
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      fontFamily: "'IBM Plex Sans', sans-serif"
     }}>
-      {/* Background Liquid Gradients */}
-      <div style={{ position: 'fixed', top: '-15%', right: '-15%', width: '65%', height: '65%', background: 'radial-gradient(circle, rgba(0, 180, 255, 0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-15%', left: '-15%', width: '65%', height: '65%', background: 'radial-gradient(circle, rgba(0, 255, 170, 0.06) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '36px 36px', pointerEvents: 'none', zIndex: 0 }} />
 
       <Navbar />
 
@@ -456,24 +452,25 @@ export default function AdminUsers() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{
-              background: 'rgba(0, 180, 255, 0.12)',
-              border: '1px solid rgba(0, 180, 255, 0.3)',
-              color: '#00B4FF',
+              background: '#141414',
+              border: '1px solid #30302d',
+              color: '#EFEDE8',
               padding: '6px 14px',
-              borderRadius: '20px',
+              borderRadius: '8px',
               fontSize: '11px',
-              fontWeight: 800,
-              letterSpacing: '1.5px',
+              fontWeight: 700,
+              letterSpacing: '0.08em',
               textTransform: 'uppercase',
+              fontFamily: "'IBM Plex Sans', sans-serif",
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '8px'
             }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00B4FF', boxShadow: '0 0 10px #00B4FF', display: 'inline-block' }} />
-              LEVEL 4 ADMIN DIRECTORY
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#3DF5C0', display: 'inline-block' }} />
+              GOVERNANCE DIRECTORY
             </span>
-            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', fontWeight: 600 }}>
-              • CENTRAL SURVEILLANCE & CREDENTIAL MANAGEMENT
+            <span style={{ color: '#8e8b84', fontSize: '12px', fontWeight: 600, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.04em' }}>
+              CENTRAL PERSONNEL & CREDENTIAL MANAGEMENT
             </span>
           </div>
 
@@ -482,11 +479,12 @@ export default function AdminUsers() {
             <button
               onClick={() => { fetchUsers(); fetchStats(); toast.success('Directory refreshed'); }}
               style={{
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                padding: '10px 16px',
-                borderRadius: '14px',
+                background: '#141414',
+                border: '1px solid #30302d',
+                color: '#f2f0ea',
+                padding: '8px 18px',
+                borderRadius: '8px',
+                fontFamily: "'IBM Plex Sans', sans-serif",
                 fontSize: '12px',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -496,17 +494,18 @@ export default function AdminUsers() {
                 transition: '0.2s'
               }}
             >
-              ↻ REFRESH
+              â†» REFRESH
             </button>
 
             <button
               onClick={exportToCSV}
               style={{
-                background: 'rgba(0, 255, 170, 0.08)',
-                border: '1px solid rgba(0, 255, 170, 0.25)',
-                color: '#00FF88',
-                padding: '10px 16px',
-                borderRadius: '14px',
+                background: '#141414',
+                border: '1px solid #30302d',
+                color: '#EFEDE8',
+                padding: '8px 18px',
+                borderRadius: '8px',
+                fontFamily: "'IBM Plex Sans', sans-serif",
                 fontSize: '12px',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -515,7 +514,7 @@ export default function AdminUsers() {
                 gap: '8px'
               }}
             >
-              ⇩ CSV EXPORT
+              â‡© CSV EXPORT
             </button>
 
             <button
@@ -534,13 +533,13 @@ export default function AdminUsers() {
                 gap: '8px'
               }}
             >
-              ▤ JSON
+              â–¤ JSON
             </button>
 
             <button
               onClick={() => setCreateModalOpen(true)}
               style={{
-                background: 'linear-gradient(135deg, #007AFF 0%, #00B4FF 100%)',
+                color: 'var(--primary)',
                 border: 'none',
                 color: '#fff',
                 padding: '10px 20px',
@@ -548,11 +547,17 @@ export default function AdminUsers() {
                 fontSize: '12px',
                 fontWeight: 800,
                 cursor: 'pointer',
-                boxShadow: '0 8px 20px rgba(0, 180, 255, 0.35)',
+                background: '#f2f0ea',
+                color: '#070707',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 20px',
+                fontFamily: "'IBM Plex Sans', sans-serif",
+                fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                letterSpacing: '0.5px'
+                letterSpacing: '0.04em'
               }}
             >
               <span>+</span> ENROLL NEW PERSONNEL
@@ -569,12 +574,7 @@ export default function AdminUsers() {
             margin: '0 0 10px 0',
             lineHeight: 1.15
           }}>
-            USER & PERSONNEL <span style={{
-              background: 'linear-gradient(90deg, #00B4FF, #00FF88)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 30px rgba(0,180,255,0.4)'
-            }}>INTELLIGENCE INFO</span>
+            USER & PERSONNEL INTELLIGENCE DIRECTORY
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '15px', maxWidth: 800, lineHeight: 1.6, margin: 0 }}>
             Comprehensive directory of registered citizens, field officers, and system administrators. Full authorization override to inspect dossiers, update personal profiles, modify mobile numbers, reset security passwords, and toggle clearance levels.
@@ -594,16 +594,16 @@ export default function AdminUsers() {
               value: stats ? stats.total : total,
               sub: 'Across all clearance levels',
               icon: <img src="/icons/cyberguard/admin/admin-personnel-directory.svg" alt="" style={{ width: 22, height: 22, objectFit: "contain", verticalAlign: "middle" }} />,
-              color: '#00B4FF',
+              color: '#EFEDE8',
               bg: 'rgba(0, 180, 255, 0.05)',
               border: 'rgba(0, 180, 255, 0.2)'
             },
             {
               title: 'ACTIVE CITIZENS',
               value: stats ? stats.citizens : users.filter(u => u.role === 'user').length,
-              sub: `${stats ? stats.active : '—'} active in network`,
-              icon: '◈',
-              color: '#00FF88',
+              sub: `${stats ? stats.active : 'â€”'} active in network`,
+              icon: 'â—ˆ',
+              color: '#EFEDE8',
               bg: 'rgba(0, 255, 136, 0.05)',
               border: 'rgba(0, 255, 136, 0.2)'
             },
@@ -611,7 +611,7 @@ export default function AdminUsers() {
               title: 'FIELD OFFICERS',
               value: stats ? stats.officers : users.filter(u => u.role === 'officer').length,
               sub: 'Law enforcement agents',
-              icon: '◆',
+              icon: 'â—†',
               color: '#FFB800',
               bg: 'rgba(255, 184, 0, 0.05)',
               border: 'rgba(255, 184, 0, 0.2)'
@@ -620,7 +620,7 @@ export default function AdminUsers() {
               title: 'ADMINISTRATORS',
               value: stats ? stats.admins : users.filter(u => u.role === 'admin').length,
               sub: 'Command level access',
-              icon: '»',
+              icon: 'Â»',
               color: '#AF52DE',
               bg: 'rgba(175, 82, 222, 0.05)',
               border: 'rgba(175, 82, 222, 0.2)'
@@ -629,7 +629,7 @@ export default function AdminUsers() {
               title: '2FA SHIELDED',
               value: stats ? stats.twoFactor : users.filter(u => u.isTwoFactorEnabled).length,
               sub: 'Multi-factor protected',
-              icon: '◇',
+              icon: 'â—‡',
               color: '#FF2D55',
               bg: 'rgba(255, 45, 85, 0.05)',
               border: 'rgba(255, 45, 85, 0.2)'
@@ -642,7 +642,7 @@ export default function AdminUsers() {
               transition={{ delay: i * 0.06 }}
               style={{
                 background: card.bg,
-                backdropFilter: 'blur(30px)',
+                backdropFilter: 'none',
                 border: `1px solid ${card.border}`,
                 borderRadius: '24px',
                 padding: '22px 24px',
@@ -674,7 +674,7 @@ export default function AdminUsers() {
         {/* Filter & Tactical Control Bar */}
         <div style={{
           background: 'rgba(255, 255, 255, 0.03)',
-          backdropFilter: 'blur(30px)',
+          backdropFilter: 'none',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '24px',
           padding: '16px 20px',
@@ -688,7 +688,7 @@ export default function AdminUsers() {
           {/* Search bar */}
           <div style={{ flex: '1 1 320px', position: 'relative' }}>
             <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>
-              ⌕
+              âŒ•
             </span>
             <input
               placeholder="Search by name, email, mobile phone, city, state..."
@@ -767,7 +767,7 @@ export default function AdminUsers() {
                 style={{
                   background: viewMode === 'table' ? 'rgba(0, 180, 255, 0.2)' : 'transparent',
                   border: viewMode === 'table' ? '1px solid rgba(0, 180, 255, 0.4)' : 'none',
-                  color: viewMode === 'table' ? '#00B4FF' : 'rgba(255,255,255,0.4)',
+                  color: viewMode === 'table' ? '#EFEDE8' : 'rgba(255,255,255,0.4)',
                   padding: '8px 14px',
                   borderRadius: '12px',
                   fontSize: '12px',
@@ -775,14 +775,14 @@ export default function AdminUsers() {
                   cursor: 'pointer'
                 }}
               >
-                ▤ TABLE
+                â–¤ TABLE
               </button>
               <button
                 onClick={() => setViewMode('cards')}
                 style={{
                   background: viewMode === 'cards' ? 'rgba(0, 180, 255, 0.2)' : 'transparent',
                   border: viewMode === 'cards' ? '1px solid rgba(0, 180, 255, 0.4)' : 'none',
-                  color: viewMode === 'cards' ? '#00B4FF' : 'rgba(255,255,255,0.4)',
+                  color: viewMode === 'cards' ? '#EFEDE8' : 'rgba(255,255,255,0.4)',
                   padding: '8px 14px',
                   borderRadius: '12px',
                   fontSize: '12px',
@@ -790,7 +790,7 @@ export default function AdminUsers() {
                   cursor: 'pointer'
                 }}
               >
-                ▤ CARDS
+                â–¤ CARDS
               </button>
             </div>
           </div>
@@ -802,11 +802,11 @@ export default function AdminUsers() {
             padding: '100px 20px',
             textAlign: 'center',
             background: 'rgba(255, 255, 255, 0.02)',
-            borderRadius: '32px',
+            borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.06)'
           }}>
-            <div style={{ fontSize: '32px', marginBottom: '16px' }}>…</div>
-            <div style={{ color: '#00B4FF', fontSize: '15px', fontWeight: 800, letterSpacing: '2px' }}>
+            <div style={{ fontSize: '32px', marginBottom: '16px' }}>â€¦</div>
+            <div style={{ color: '#EFEDE8', fontSize: '15px', fontWeight: 800, letterSpacing: '2px' }}>
               QUERYING PERSONNEL SURVEILLANCE DATABASE...
             </div>
           </div>
@@ -815,10 +815,10 @@ export default function AdminUsers() {
             padding: '80px 20px',
             textAlign: 'center',
             background: 'rgba(255, 255, 255, 0.02)',
-            borderRadius: '32px',
+            borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.06)'
           }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>⌕</div>
+            <div style={{ fontSize: '40px', marginBottom: '12px' }}>âŒ•</div>
             <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 8px 0' }}>No Personnel Records Found</h3>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', margin: 0 }}>
               No matches found for "{search}". Try adjusting your search query or clearance filter.
@@ -828,10 +828,10 @@ export default function AdminUsers() {
           /* TABLE VIEW */
           <div style={{
             background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
+            backdropFilter: 'none',
+            WebkitBackdropFilter: 'none',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '32px',
+            borderRadius: '16px',
             overflow: 'hidden',
             boxShadow: '0 30px 60px rgba(0,0,0,0.5)'
           }}>
@@ -874,12 +874,12 @@ export default function AdminUsers() {
                               height: 44,
                               borderRadius: '14px',
                               background: isOwner
-                                ? 'linear-gradient(135deg, #00B4FF, #00FF88)'
+                                ? '#1C1C1A'
                                 : u.role === 'admin'
-                                ? 'linear-gradient(135deg, #007AFF, #AF52DE)'
+                                ? '#242422'
                                 : u.role === 'officer'
-                                ? 'linear-gradient(135deg, #FF9500, #FFCC00)'
-                                : 'linear-gradient(135deg, #00B4FF, #00FF88)',
+                                ? '#1E1E1C'
+                                : '#1C1C1A',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
@@ -914,7 +914,7 @@ export default function AdminUsers() {
                                 {isOwner && (
                                   <span style={{
                                     fontSize: '10px',
-                                    background: 'linear-gradient(90deg, #00B4FF, #00FF88)',
+                                    color: 'var(--primary)',
                                     color: '#000',
                                     fontWeight: 900,
                                     padding: '2px 6px',
@@ -926,7 +926,7 @@ export default function AdminUsers() {
                                 )}
                               </div>
                               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '3px' }}>
-                                ID: {u._id?.substring(0, 10)}... • Joined {format(new Date(u.createdAt), 'dd MMM yyyy')}
+                                ID: {u._id?.substring(0, 10)}... â€¢ Joined {format(new Date(u.createdAt), 'dd MMM yyyy')}
                               </div>
                             </div>
                           </div>
@@ -938,8 +938,8 @@ export default function AdminUsers() {
                             {u.email}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                            <span style={{ fontSize: '12px', color: u.phone ? '#00B4FF' : 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
-                              ⌕ {u.phone || 'No Mobile Registered'}
+                            <span style={{ fontSize: '12px', color: u.phone ? '#EFEDE8' : 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
+                              âŒ• {u.phone || 'No Mobile Registered'}
                             </span>
                             {u.phone && (
                               <button
@@ -954,7 +954,7 @@ export default function AdminUsers() {
                                 }}
                                 title="Copy Phone"
                               >
-                                ⧉
+                                â§‰
                               </button>
                             )}
                           </div>
@@ -965,8 +965,8 @@ export default function AdminUsers() {
                           {isOwner ? (
                             <span style={{
                               background: 'rgba(0,180,255,0.15)',
-                              border: '1px solid #00B4FF',
-                              color: '#00B4FF',
+                              border: '1px solid #242422',
+                              color: '#EFEDE8',
                               borderRadius: '10px',
                               padding: '6px 12px',
                               fontSize: '11px',
@@ -983,7 +983,7 @@ export default function AdminUsers() {
                               style={{
                                 background: 'rgba(255,255,255,0.05)',
                                 border: '1px solid rgba(255,255,255,0.15)',
-                                color: u.role === 'admin' ? '#00B4FF' : u.role === 'officer' ? '#FFB800' : '#fff',
+                                color: u.role === 'admin' ? '#EFEDE8' : u.role === 'officer' ? '#FFB800' : '#fff',
                                 borderRadius: '12px',
                                 padding: '8px 12px',
                                 fontSize: '12px',
@@ -994,7 +994,7 @@ export default function AdminUsers() {
                             >
                               <option value="user" style={{ background: '#090D14', color: '#fff' }}>CITIZEN (USER)</option>
                               <option value="officer" style={{ background: '#090D14', color: '#FFB800' }}>FIELD OFFICER</option>
-                              <option value="admin" style={{ background: '#090D14', color: '#00B4FF' }}>ADMINISTRATOR</option>
+                              <option value="admin" style={{ background: '#090D14', color: '#EFEDE8' }}>ADMINISTRATOR</option>
                               <option value="education" style={{ background: '#090D14', color: '#AF52DE' }}>EDUCATION</option>
                             </select>
                           )}
@@ -1010,7 +1010,7 @@ export default function AdminUsers() {
                                 fontSize: '10px',
                                 fontWeight: 800,
                                 background: u.isActive ? 'rgba(0, 255, 170, 0.12)' : 'rgba(255, 59, 48, 0.12)',
-                                color: u.isActive ? '#00FF88' : '#FF3B30',
+                                color: u.isActive ? '#3DF5C0' : '#FF3B30',
                                 border: `1px solid ${u.isActive ? 'rgba(0, 255, 170, 0.3)' : 'rgba(255, 59, 48, 0.3)'}`,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.5px'
@@ -1025,7 +1025,7 @@ export default function AdminUsers() {
                                   fontSize: '10px',
                                   fontWeight: 800,
                                   background: 'rgba(0, 180, 255, 0.12)',
-                                  color: '#00B4FF',
+                                  color: '#EFEDE8',
                                   border: '1px solid rgba(0, 180, 255, 0.3)',
                                 }}>
                                   v VERIFIED
@@ -1035,7 +1035,7 @@ export default function AdminUsers() {
 
                             {u.isTwoFactorEnabled && (
                               <span style={{ fontSize: '10px', color: '#FF2D55', fontWeight: 700 }}>
-                                ◇ 2FA Protected
+                                â—‡ 2FA Protected
                               </span>
                             )}
                           </div>
@@ -1072,7 +1072,7 @@ export default function AdminUsers() {
                                 transition: '0.2s'
                               }}
                             >
-                              ◉
+                              â—‰
                             </button>
 
                             {/* Edit Profile */}
@@ -1082,7 +1082,7 @@ export default function AdminUsers() {
                               style={{
                                 background: 'rgba(0, 180, 255, 0.1)',
                                 border: '1px solid rgba(0, 180, 255, 0.3)',
-                                color: '#00B4FF',
+                                color: '#EFEDE8',
                                 borderRadius: '10px',
                                 padding: '7px 11px',
                                 fontSize: '12px',
@@ -1110,7 +1110,7 @@ export default function AdminUsers() {
                                 transition: '0.2s'
                               }}
                             >
-                              ◇
+                              â—‡
                             </button>
 
                             {/* Terminate / Restore Status */}
@@ -1121,7 +1121,7 @@ export default function AdminUsers() {
                                 style={{
                                   background: u.isActive ? 'rgba(255, 59, 48, 0.1)' : 'rgba(0, 255, 170, 0.1)',
                                   border: `1px solid ${u.isActive ? 'rgba(255, 59, 48, 0.3)' : 'rgba(0, 255, 170, 0.3)'}`,
-                                  color: u.isActive ? '#FF3B30' : '#00FF88',
+                                  color: u.isActive ? '#FF3B30' : '#3DF5C0',
                                   borderRadius: '10px',
                                   padding: '7px 11px',
                                   fontSize: '11px',
@@ -1151,7 +1151,7 @@ export default function AdminUsers() {
                                   transition: '0.2s'
                                 }}
                               >
-                                ⌫
+                                âŒ«
                               </button>
                             )}
                           </div>
@@ -1180,7 +1180,7 @@ export default function AdminUsers() {
                   transition={{ delay: idx * 0.03 }}
                   style={{
                     background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(40px)',
+                    backdropFilter: 'none',
                     border: isOwner
                       ? '1px solid rgba(0, 180, 255, 0.4)'
                       : '1px solid rgba(255, 255, 255, 0.08)',
@@ -1204,12 +1204,12 @@ export default function AdminUsers() {
                           height: 48,
                           borderRadius: '16px',
                           background: isOwner
-                            ? 'linear-gradient(135deg, #00B4FF, #00FF88)'
+                            ? '#1C1C1A'
                             : u.role === 'admin'
-                            ? 'linear-gradient(135deg, #007AFF, #AF52DE)'
+                            ? '#242422'
                             : u.role === 'officer'
-                            ? 'linear-gradient(135deg, #FF9500, #FFCC00)'
-                            : 'linear-gradient(135deg, #00B4FF, #00FF88)',
+                            ? '#1E1E1C'
+                            : '#1C1C1A',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -1236,7 +1236,7 @@ export default function AdminUsers() {
                               {u.name}
                             </h3>
                             {isOwner && (
-                              <span style={{ fontSize: '9px', background: '#00B4FF', color: '#000', fontWeight: 900, padding: '1px 5px', borderRadius: '4px' }}>
+                              <span style={{ fontSize: '9px', background: '#EFEDE8', color: '#000', fontWeight: 900, padding: '1px 5px', borderRadius: '4px' }}>
                                 OWNER
                               </span>
                             )}
@@ -1244,7 +1244,7 @@ export default function AdminUsers() {
                           <span style={{
                             fontSize: '11px',
                             fontWeight: 800,
-                            color: u.role === 'admin' ? '#00B4FF' : u.role === 'officer' ? '#FFB800' : '#00FF88',
+                            color: u.role === 'admin' ? '#EFEDE8' : u.role === 'officer' ? '#FFB800' : '#8E8B85',
                             letterSpacing: '0.5px'
                           }}>
                             {u.role.toUpperCase()}
@@ -1258,7 +1258,7 @@ export default function AdminUsers() {
                         fontSize: '10px',
                         fontWeight: 800,
                         background: u.isActive ? 'rgba(0, 255, 170, 0.12)' : 'rgba(255, 59, 48, 0.12)',
-                        color: u.isActive ? '#00FF88' : '#FF3B30',
+                        color: u.isActive ? '#3DF5C0' : '#FF3B30',
                         border: `1px solid ${u.isActive ? 'rgba(0, 255, 170, 0.3)' : 'rgba(255, 59, 48, 0.3)'}`,
                       }}>
                         {u.isActive ? 'ACTIVE' : 'SUSPENDED'}
@@ -1283,7 +1283,7 @@ export default function AdminUsers() {
 
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ color: 'rgba(255,255,255,0.4)' }}>Mobile:</span>
-                        <span style={{ color: u.phone ? '#00B4FF' : 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+                        <span style={{ color: u.phone ? '#EFEDE8' : 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
                           {u.phone || 'Not Configured'}
                         </span>
                       </div>
@@ -1297,8 +1297,8 @@ export default function AdminUsers() {
 
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'rgba(255,255,255,0.4)' }}>Security:</span>
-                        <span style={{ color: u.isTwoFactorEnabled ? '#FF2D55' : '#00FF88', fontWeight: 600 }}>
-                          {u.isTwoFactorEnabled ? '2FA Enabled' : 'Standard Auth'} {u.isVerified && '• Verified'}
+                        <span style={{ color: u.isTwoFactorEnabled ? '#FF2D55' : '#3DF5C0', fontWeight: 600 }}>
+                          {u.isTwoFactorEnabled ? '2FA Enabled' : 'Standard Auth'} {u.isVerified && 'â€¢ Verified'}
                         </span>
                       </div>
                     </div>
@@ -1311,7 +1311,7 @@ export default function AdminUsers() {
                       style={{
                         background: 'rgba(0, 180, 255, 0.1)',
                         border: '1px solid rgba(0, 180, 255, 0.3)',
-                        color: '#00B4FF',
+                        color: '#EFEDE8',
                         borderRadius: '12px',
                         padding: '10px',
                         fontSize: '12px',
@@ -1335,7 +1335,7 @@ export default function AdminUsers() {
                         cursor: 'pointer'
                       }}
                     >
-                      ◇ PASSWORD
+                      â—‡ PASSWORD
                     </button>
 
                     <button
@@ -1351,7 +1351,7 @@ export default function AdminUsers() {
                         cursor: 'pointer'
                       }}
                     >
-                      ◉ DOSSIER
+                      â—‰ DOSSIER
                     </button>
 
                     {!isOwner ? (
@@ -1360,7 +1360,7 @@ export default function AdminUsers() {
                         style={{
                           background: u.isActive ? 'rgba(255, 59, 48, 0.1)' : 'rgba(0, 255, 170, 0.1)',
                           border: `1px solid ${u.isActive ? 'rgba(255, 59, 48, 0.3)' : 'rgba(0, 255, 170, 0.3)'}`,
-                          color: u.isActive ? '#FF3B30' : '#00FF88',
+                          color: u.isActive ? '#FF3B30' : '#3DF5C0',
                           borderRadius: '12px',
                           padding: '10px',
                           fontSize: '12px',
@@ -1377,7 +1377,7 @@ export default function AdminUsers() {
                         justifyContent: 'center',
                         background: 'rgba(0, 255, 170, 0.05)',
                         borderRadius: '12px',
-                        color: '#00FF88',
+                        color: '#EFEDE8',
                         fontSize: '11px',
                         fontWeight: 800
                       }}>
@@ -1392,14 +1392,14 @@ export default function AdminUsers() {
         )}
       </div>
 
-      {/* ──────────────── MODAL 1: EDIT USER INFO ──────────────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 1: EDIT USER INFO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <AnimatePresence>
         {editModalOpen && selectedUser && (
           <div style={{
             position: 'fixed',
             inset: 0,
             background: 'rgba(0,0,0,0.85)',
-            backdropFilter: 'blur(20px)',
+            backdropFilter: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -1417,7 +1417,7 @@ export default function AdminUsers() {
                 overflowY: 'auto',
                 background: '#070C14',
                 border: '1px solid rgba(0, 180, 255, 0.3)',
-                borderRadius: '32px',
+                borderRadius: '16px',
                 padding: '36px',
                 boxShadow: '0 30px 80px rgba(0, 180, 255, 0.25)',
                 color: '#fff'
@@ -1426,7 +1426,7 @@ export default function AdminUsers() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#fff' }}>
-                    MODIFY USER <span style={{ color: '#00B4FF' }}>DOSSIER</span>
+                    MODIFY USER <span style={{ color: '#EFEDE8' }}>DOSSIER</span>
                   </h2>
                   <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
                     Target Account: {selectedUser.name} ({selectedUser.email})
@@ -1501,7 +1501,7 @@ export default function AdminUsers() {
                         style={{
                           background: 'rgba(0, 180, 255, 0.12)',
                           border: '1px solid rgba(0, 180, 255, 0.4)',
-                          color: '#00B4FF',
+                          color: '#EFEDE8',
                           padding: '8px 16px',
                           borderRadius: '12px',
                           fontSize: '13px',
@@ -1591,7 +1591,7 @@ export default function AdminUsers() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#00B4FF', marginBottom: '8px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#EFEDE8', marginBottom: '8px' }}>
                       MOBILE / PHONE NUMBER
                     </label>
                     <input
@@ -1758,7 +1758,7 @@ export default function AdminUsers() {
                       onChange={e => setEditFormData({ ...editFormData, isActive: e.target.checked })}
                       disabled={selectedUser.email === 'pruthvishetty04@gmail.com'}
                     />
-                    <span style={{ color: editFormData.isActive ? '#00FF88' : '#FF3B30' }}>Active Account</span>
+                    <span style={{ color: editFormData.isActive ? '#3DF5C0' : '#FF3B30' }}>Active Account</span>
                   </label>
 
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
@@ -1767,7 +1767,7 @@ export default function AdminUsers() {
                       checked={editFormData.isVerified}
                       onChange={e => setEditFormData({ ...editFormData, isVerified: e.target.checked })}
                     />
-                    <span style={{ color: '#00B4FF' }}>Identity Verified</span>
+                    <span style={{ color: '#EFEDE8' }}>Identity Verified</span>
                   </label>
 
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
@@ -1803,7 +1803,7 @@ export default function AdminUsers() {
                     type="submit"
                     disabled={actionLoading}
                     style={{
-                      background: 'linear-gradient(135deg, #007AFF 0%, #00B4FF 100%)',
+                      color: 'var(--primary)',
                       border: 'none',
                       color: '#fff',
                       padding: '12px 28px',
@@ -1823,14 +1823,14 @@ export default function AdminUsers() {
         )}
       </AnimatePresence>
 
-      {/* ──────────────── MODAL 2: PASSWORD OVERRIDE ──────────────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 2: PASSWORD OVERRIDE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <AnimatePresence>
         {passwordModalOpen && selectedUser && (
           <div style={{
             position: 'fixed',
             inset: 0,
             background: 'rgba(0,0,0,0.85)',
-            backdropFilter: 'blur(20px)',
+            backdropFilter: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -1846,7 +1846,7 @@ export default function AdminUsers() {
                 maxWidth: 520,
                 background: '#070C14',
                 border: '1px solid rgba(255, 184, 0, 0.4)',
-                borderRadius: '32px',
+                borderRadius: '16px',
                 padding: '36px',
                 boxShadow: '0 30px 80px rgba(255, 184, 0, 0.25)',
                 color: '#fff'
@@ -1855,7 +1855,7 @@ export default function AdminUsers() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#FFB800' }}>
-                    ◇ PASSWORD OVERRIDE
+                    â—‡ PASSWORD OVERRIDE
                   </h2>
                   <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
                     Target: {selectedUser.name} ({selectedUser.email})
@@ -1908,7 +1908,7 @@ export default function AdminUsers() {
                         fontSize: '14px'
                       }}
                     >
-                      {showPassword ? '◉' : '◉'}
+                      {showPassword ? 'â—‰' : 'â—‰'}
                     </button>
                   </div>
                 </div>
@@ -1929,7 +1929,7 @@ export default function AdminUsers() {
                       cursor: 'pointer'
                     }}
                   >
-                    » GENERATE SECURE
+                    Â» GENERATE SECURE
                   </button>
 
                   {newPassword && (
@@ -1939,7 +1939,7 @@ export default function AdminUsers() {
                       style={{
                         background: 'rgba(0, 180, 255, 0.1)',
                         border: '1px solid rgba(0, 180, 255, 0.3)',
-                        color: '#00B4FF',
+                        color: '#EFEDE8',
                         padding: '10px 16px',
                         borderRadius: '12px',
                         fontSize: '12px',
@@ -1947,7 +1947,7 @@ export default function AdminUsers() {
                         cursor: 'pointer'
                       }}
                     >
-                      ⧉ COPY
+                      â§‰ COPY
                     </button>
                   )}
                 </div>
@@ -1974,7 +1974,7 @@ export default function AdminUsers() {
                     type="submit"
                     disabled={actionLoading}
                     style={{
-                      background: 'linear-gradient(135deg, #FFB800 0%, #FF8F00 100%)',
+                      color: 'var(--primary)',
                       border: 'none',
                       color: '#000',
                       padding: '12px 28px',
@@ -1994,14 +1994,14 @@ export default function AdminUsers() {
         )}
       </AnimatePresence>
 
-      {/* ──────────────── MODAL 3: USER DOSSIER & COMPLAINTS ──────────────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 3: USER DOSSIER & COMPLAINTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <AnimatePresence>
         {dossierModalOpen && selectedUser && (
           <div style={{
             position: 'fixed',
             inset: 0,
             background: 'rgba(0,0,0,0.85)',
-            backdropFilter: 'blur(20px)',
+            backdropFilter: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -2019,7 +2019,7 @@ export default function AdminUsers() {
                 overflowY: 'auto',
                 background: '#070C14',
                 border: '1px solid rgba(0, 255, 170, 0.3)',
-                borderRadius: '32px',
+                borderRadius: '16px',
                 padding: '36px',
                 boxShadow: '0 30px 80px rgba(0, 255, 170, 0.2)',
                 color: '#fff'
@@ -2056,8 +2056,8 @@ export default function AdminUsers() {
                     <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800 }}>
                       {selectedUser.name}
                     </h2>
-                    <span style={{ fontSize: '12px', color: '#00FF88', fontWeight: 700 }}>
-                      CLEARANCE: {selectedUser.role?.toUpperCase()} • {selectedUser.isActive ? 'ACTIVE' : 'SUSPENDED'}
+                    <span style={{ fontSize: '12px', color: '#EFEDE8', fontWeight: 700 }}>
+                      CLEARANCE: {selectedUser.role?.toUpperCase()} â€¢ {selectedUser.isActive ? 'ACTIVE' : 'SUSPENDED'}
                     </span>
                   </div>
                 </div>
@@ -2071,7 +2071,7 @@ export default function AdminUsers() {
               </div>
 
               {dossierLoading ? (
-                <div style={{ padding: '60px', textAlign: 'center', color: '#00FF88' }}>
+                <div style={{ padding: '60px', textAlign: 'center', color: '#8E8B85' }}>
                   RETRIEVING ENCRYPTED CITIZEN DOSSIER...
                 </div>
               ) : (
@@ -2094,7 +2094,7 @@ export default function AdminUsers() {
 
                     <div>
                       <span style={{ color: 'rgba(255,255,255,0.4)', display: 'block', fontSize: '11px', fontWeight: 700 }}>MOBILE PHONE NUMBER</span>
-                      <span style={{ fontWeight: 600, color: selectedUser.phone ? '#00B4FF' : 'rgba(255,255,255,0.4)' }}>
+                      <span style={{ fontWeight: 600, color: selectedUser.phone ? '#EFEDE8' : 'rgba(255,255,255,0.4)' }}>
                         {selectedUser.phone || 'Not Configured'}
                       </span>
                     </div>
@@ -2116,7 +2116,7 @@ export default function AdminUsers() {
                   {/* Incident Complaints History */}
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                      <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#00B4FF', letterSpacing: '0.5px' }}>
+                      <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: '#EFEDE8', letterSpacing: '0.5px' }}>
                         FILED INCIDENT REPORTS ({dossierData?.complaintsCount || 0})
                       </h3>
                     </div>
@@ -2141,7 +2141,7 @@ export default function AdminUsers() {
                                 {c.title || c.category}
                               </div>
                               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '3px' }}>
-                                ID: {c.complaintId || c._id} • {format(new Date(c.createdAt), 'dd MMM yyyy')} • Loss: ₹{c.estimatedLoss || 0}
+                                ID: {c.complaintId || c._id} â€¢ {format(new Date(c.createdAt), 'dd MMM yyyy')} â€¢ Loss: â‚¹{c.estimatedLoss || 0}
                               </div>
                             </div>
 
@@ -2151,7 +2151,7 @@ export default function AdminUsers() {
                               fontSize: '11px',
                               fontWeight: 800,
                               background: 'rgba(0, 180, 255, 0.1)',
-                              color: '#00B4FF',
+                              color: '#EFEDE8',
                               border: '1px solid rgba(0, 180, 255, 0.25)',
                               textTransform: 'uppercase'
                             }}>
@@ -2180,7 +2180,7 @@ export default function AdminUsers() {
                       style={{
                         background: 'rgba(0, 180, 255, 0.1)',
                         border: '1px solid rgba(0, 180, 255, 0.3)',
-                        color: '#00B4FF',
+                        color: '#EFEDE8',
                         padding: '10px 20px',
                         borderRadius: '12px',
                         fontSize: '13px',
@@ -2213,14 +2213,14 @@ export default function AdminUsers() {
         )}
       </AnimatePresence>
 
-      {/* ──────────────── MODAL 4: ENROLL NEW PERSONNEL ──────────────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 4: ENROLL NEW PERSONNEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <AnimatePresence>
         {createModalOpen && (
           <div style={{
             position: 'fixed',
             inset: 0,
             background: 'rgba(0,0,0,0.85)',
-            backdropFilter: 'blur(20px)',
+            backdropFilter: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -2238,7 +2238,7 @@ export default function AdminUsers() {
                 overflowY: 'auto',
                 background: '#070C14',
                 border: '1px solid rgba(0, 180, 255, 0.4)',
-                borderRadius: '32px',
+                borderRadius: '16px',
                 padding: '36px',
                 boxShadow: '0 30px 80px rgba(0, 180, 255, 0.25)',
                 color: '#fff'
@@ -2247,7 +2247,7 @@ export default function AdminUsers() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
                   <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 800, color: '#fff' }}>
-                    ENROLL NEW <span style={{ color: '#00B4FF' }}>PERSONNEL</span>
+                    ENROLL NEW <span style={{ color: '#EFEDE8' }}>PERSONNEL</span>
                   </h2>
                   <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
                     Direct onboarding into the CyberGuard security registry
@@ -2313,7 +2313,7 @@ export default function AdminUsers() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#00B4FF', marginBottom: '8px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#EFEDE8', marginBottom: '8px' }}>
                       MOBILE / PHONE NUMBER
                     </label>
                     <input
@@ -2375,9 +2375,9 @@ export default function AdminUsers() {
                         setCreateFormData({ ...createFormData, password: p });
                         toast.success('Generated random password');
                       }}
-                      style={{ background: 'transparent', border: 'none', color: '#00B4FF', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                      style={{ background: 'transparent', border: 'none', color: '#EFEDE8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
                     >
-                      » AUTO GENERATE
+                      Â» AUTO GENERATE
                     </button>
                   </div>
                   <input
@@ -2482,7 +2482,7 @@ export default function AdminUsers() {
                     type="submit"
                     disabled={actionLoading}
                     style={{
-                      background: 'linear-gradient(135deg, #007AFF 0%, #00B4FF 100%)',
+                      color: 'var(--primary)',
                       border: 'none',
                       color: '#fff',
                       padding: '12px 28px',
@@ -2502,14 +2502,14 @@ export default function AdminUsers() {
         )}
       </AnimatePresence>
 
-      {/* ──────────────── MODAL 5: DELETE CONFIRMATION ──────────────── */}
+      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 5: DELETE CONFIRMATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <AnimatePresence>
         {deleteConfirmUser && (
           <div style={{
             position: 'fixed',
             inset: 0,
             background: 'rgba(0,0,0,0.85)',
-            backdropFilter: 'blur(20px)',
+            backdropFilter: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -2525,7 +2525,7 @@ export default function AdminUsers() {
                 maxWidth: 480,
                 background: '#070C14',
                 border: '1px solid rgba(255, 45, 85, 0.4)',
-                borderRadius: '32px',
+                borderRadius: '16px',
                 padding: '36px',
                 boxShadow: '0 30px 80px rgba(255, 45, 85, 0.25)',
                 color: '#fff',
@@ -2584,3 +2584,4 @@ export default function AdminUsers() {
     </div>
   );
 }
+

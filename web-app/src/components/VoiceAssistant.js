@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { IconButton } from './Button';
 
 const VoiceAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +19,7 @@ const VoiceAssistant = () => {
     
     rec.onstart = () => {
       setIsListening(true);
-      toast('Neural Voice Engine Active', { icon: '◉' });
+      toast('Voice input is active');
     };
     
     rec.onresult = (event) => {
@@ -40,17 +41,17 @@ const VoiceAssistant = () => {
 
   const processCommand = (command) => {
     if (command.includes('status')) {
-      speak('System status is operational. Accuracy at ninety-seven point four percent.');
+      speak('System status is operational.');
     } else if (command.includes('report') || command.includes('incident')) {
-      speak('Initializing incident report module.');
+      speak('Opening the incident report.');
       setTimeout(() => window.location.href = '/submit', 2000);
     } else if (command.includes('dashboard')) {
-      speak('Navigating to secure dashboard.');
+      speak('Opening the dashboard.');
       setTimeout(() => window.location.href = '/dashboard', 2000);
     } else if (command.includes('hello') || command.includes('hi')) {
-      speak('Hello agent. I am CyberGuard Voice Assistant. How can I help you today?');
+      speak('Hello. How can I help you today?');
     } else {
-      speak(`I heard ${command}. I am still learning neural commands.`);
+      speak(`I heard ${command}. I can help with reports, status, and the dashboard.`);
     }
   };
 
@@ -63,25 +64,18 @@ const VoiceAssistant = () => {
 
   return (
     <div style={{ position: 'relative' }}>
-      <motion.div
-        whileHover={{ scale: 1.1, boxShadow: isListening ? '0 0 30px rgba(255, 82, 82, 0.6)' : '0 0 25px rgba(0, 255, 170, 0.4)' }}
-        whileTap={{ scale: 0.9 }}
+      <IconButton
+        label="Voice report"
+        size="md"
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: '12px',
-          background: isListening ? 'rgba(255, 82, 82, 0.15)' : 'rgba(0, 255, 170, 0.05)',
-          border: isListening ? '2px solid #FF5252' : '2px solid rgba(0, 255, 170, 0.4)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          boxShadow: isListening ? '0 0 20px rgba(255, 82, 82, 0.4)' : '0 0 15px rgba(0, 255, 170, 0.2)',
-          transition: 'all 0.3s ease'
+          background: isListening ? 'rgba(217, 100, 100, 0.12)' : 'var(--cg-surface)',
+          borderColor: isListening ? 'var(--danger)' : 'var(--cg-border)',
+          color: isListening ? '#FF5252' : 'var(--cg-accent)',
         }}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isListening ? "#FF5252" : "#00ffaa"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
           <line x1="12" y1="19" x2="12" y2="23"/>
@@ -89,19 +83,17 @@ const VoiceAssistant = () => {
         </svg>
 
         {isListening && (
-          <motion.div
-            animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+          <span
             style={{
               position: 'absolute',
-              inset: -6,
+              inset: -4,
               border: '2px solid #FF5252',
-              borderRadius: '14px',
+              borderRadius: 'var(--radius-control)',
               pointerEvents: 'none'
             }}
           />
         )}
-      </motion.div>
+      </IconButton>
 
       <AnimatePresence>
         {isOpen && (
@@ -114,17 +106,17 @@ const VoiceAssistant = () => {
               bottom: '100%',
               right: 0,
               marginBottom: 15,
-              background: 'rgba(3, 10, 15, 0.95)',
+              background: 'var(--bg-popover)',
               padding: '16px',
-              borderRadius: '16px',
-              border: '1px solid rgba(0, 255, 170, 0.3)',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+              borderRadius: '14px',
+              border: '1px solid var(--border-strong)',
+              boxShadow: 'var(--shadow)',
               minWidth: '200px',
               zIndex: 100
             }}
           >
-            <div style={{ color: '#00ffaa', fontFamily: 'Orbitron, monospace', fontSize: 14, marginBottom: 16, textAlign: 'center', fontWeight: 'bold', letterSpacing: '1px' }}>
-              VOICE LINK
+            <div style={{ color: 'var(--text)', fontFamily: 'Inter, sans-serif', fontSize: 14, marginBottom: 16, textAlign: 'center', fontWeight: 700 }}>
+              Voice input
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button 
@@ -137,10 +129,10 @@ const VoiceAssistant = () => {
                 }}
                 style={{ 
                   flex: 1, padding: '10px', 
-                  background: isListening ? 'rgba(0, 255, 170, 0.2)' : 'rgba(255, 255, 255, 0.05)', 
-                  border: isListening ? '1px solid #00ffaa' : '1px solid rgba(255, 255, 255, 0.1)',
-                  color: isListening ? '#00ffaa' : '#fff',
-                  borderRadius: '8px', cursor: 'pointer', fontFamily: 'Orbitron, monospace', fontSize: 12, fontWeight: 'bold'
+                  background: isListening ? 'rgba(46, 191, 143, 0.14)' : 'var(--bg-card)', 
+                  border: isListening ? '1px solid var(--accent)' : '1px solid var(--border)',
+                  color: isListening ? 'var(--accent)' : 'var(--text)',
+                  borderRadius: '8px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 700
                 }}
               >
                 ON
@@ -151,10 +143,10 @@ const VoiceAssistant = () => {
                 }}
                 style={{ 
                   flex: 1, padding: '10px', 
-                  background: !isListening ? 'rgba(255, 82, 82, 0.2)' : 'rgba(255, 255, 255, 0.05)', 
-                  border: !isListening ? '1px solid #FF5252' : '1px solid rgba(255, 255, 255, 0.1)',
-                  color: !isListening ? '#FF5252' : '#fff',
-                  borderRadius: '8px', cursor: 'pointer', fontFamily: 'Orbitron, monospace', fontSize: 12, fontWeight: 'bold'
+                  background: !isListening ? 'rgba(217, 100, 100, 0.12)' : 'var(--bg-card)', 
+                  border: !isListening ? '1px solid var(--danger)' : '1px solid var(--border)',
+                  color: !isListening ? 'var(--danger)' : 'var(--text)',
+                  borderRadius: '8px', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 700
                 }}
               >
                 OFF
@@ -173,3 +165,4 @@ const VoiceAssistant = () => {
 };
 
 export default VoiceAssistant;
+

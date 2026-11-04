@@ -36,15 +36,15 @@ export const getAvatarFallback = (name, isOwner = false) => {
 };
 
 export const getAvatarGradient = (role, isOwner = false) => {
-  if (isOwner) return 'linear-gradient(135deg, #00B4FF, #00FF88)';
+  if (isOwner) return '#1C1C1A';
   switch (role) {
     case 'admin':
-      return 'linear-gradient(135deg, #007AFF, #AF52DE)';
+      return '#242422';
     case 'officer':
-      return 'linear-gradient(135deg, #FF9500, #FFCC00)';
+      return '#1E1E1C';
     case 'education':
-      return 'linear-gradient(135deg, #AF52DE, #FF2D55)';
+      return '#222220';
     default:
-      return 'linear-gradient(135deg, #00B4FF, #00FF88)';
+      return '#1C1C1A';
   }
 };

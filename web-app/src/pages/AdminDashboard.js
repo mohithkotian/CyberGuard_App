@@ -13,7 +13,7 @@ import { onNewComplaint, offNewComplaint } from '../services/socket';
 import useAuthStore from '../hooks/useAuthStore';
 import toast from 'react-hot-toast';
 
-const COLORS = ['#007AFF', '#00FFD1', '#FF2D55', '#FF9500', '#AF52DE', '#34C759', '#FF3B30', '#5856D6', '#FFCC00', '#E91E63', '#8E8E93'];
+const COLORS = ['#3DF5C0', '#d8a43a', '#10b981', '#f2f0ea', '#8e8b84', '#d96464', '#55544f'];
 
 /* ─────────────────────────────────────────────────────────────
    COMPONENT: COUNTER (Smooth Number Transitions)
@@ -58,7 +58,7 @@ function StatCard({ label, value, sub, color, icon, trend, decimals, suffix }) {
         backdropFilter: 'blur(40px) saturate(180%)',
         WebkitBackdropFilter: 'blur(40px) saturate(180%)',
         border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '32px',
+        borderRadius: '16px',
         padding: '32px',
         position: 'relative',
         overflow: 'hidden',
@@ -175,7 +175,7 @@ export default function AdminDashboard() {
     const healthPoll = setInterval(fetchHealth, 10000);
     const handler = (c) => {
       toast.success(`New Case: ${c.category || 'Incident'} reported`, {
-        style: { border: '1px solid rgba(0,122,255,0.2)', background: 'rgba(10,20,40,0.8)', backdropFilter: 'blur(20px)', color: '#fff' }
+        style: { border: '1px solid #30302d', background: '#0d0d0d', color: '#f2f0ea' }
       });
       setRecentIncidents(prev => [c, ...prev].slice(0, 5));
       fetchAll();
@@ -197,149 +197,160 @@ export default function AdminDashboard() {
   };
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#02060A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ fontSize: '14px', fontWeight: 800, color: 'rgba(255,255,255,0.2)', letterSpacing: '2px' }}>INITIALIZING NEURAL LINK...</div>
+    <div style={{ minHeight: '100dvh', background: '#070707', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+      <div style={{ fontSize: '13px', fontWeight: 700, color: '#8e8b84', letterSpacing: '0.12em', textTransform: 'uppercase' }}>INITIALIZING COMMAND INTERFACE...</div>
     </div>
   );
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: '#02060A', 
-      color: '#fff',
+    <div className="page-shell" style={{ 
+      minHeight: '100dvh', 
+      background: '#070707', 
+      color: '#f2f0ea',
       position: 'relative',
       overflowX: 'hidden',
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: "'IBM Plex Sans', sans-serif"
     }}>
-      {/* Liquid Atmospheric Accents */}
-      <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 122, 255, 0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(160, 32, 240, 0.05) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
-
       <Navbar />
 
-      <main style={{ maxWidth: 1440, margin: '0 auto', padding: '80px 40px', position: 'relative', zIndex: 1 }}>
+      <main className="report-layout" style={{ maxWidth: 1360, margin: '0 auto', padding: '44px 32px 100px', position: 'relative', zIndex: 1 }}>
         
         {/* Header Section */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 60 }}>
+        <aside className="report-aside" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 36, flexWrap: 'wrap', gap: 24 }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-              <span style={{ padding: '6px 16px', background: 'rgba(0,122,255,0.1)', color: '#007AFF', border: '1px solid rgba(0,122,255,0.2)', borderRadius: 20, fontSize: 10, fontWeight: 900, letterSpacing: 2 }}>SYSTEM LEVEL 4</span>
-              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', fontWeight: 600 }}>Last sync: {new Date().toLocaleTimeString()}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+              <span style={{ padding: '4px 12px', background: '#141414', color: '#EFEDE8', border: '1px solid #30302d', borderRadius: '8px', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                COMMAND PROTOCOL
+              </span>
+              <span style={{ color: '#8e8b84', fontSize: '12px', fontFamily: "'IBM Plex Mono', monospace" }}>
+                SYNC: {new Date().toLocaleTimeString()}
+              </span>
             </div>
             <h1 style={{ 
-              fontSize: '3.5rem', 
-              fontWeight: 900, 
-              background: 'linear-gradient(to bottom, #fff, rgba(255,255,255,0.5))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-2px',
+              fontSize: 'clamp(2.2rem, 3.2vw, 3rem)', 
+              fontWeight: 800, 
+              color: '#f2f0ea',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              fontFamily: "'IBM Plex Sans', sans-serif",
               margin: 0 
-            }}>Command <span style={{ color: '#007AFF' }}>Center</span></h1>
+            }}>
+              Operations Command Center
+            </h1>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 24px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#34C759', boxShadow: '0 0 10px #34C759' }} />
-            <span style={{ fontSize: '12px', fontWeight: 800, color: '#fff', letterSpacing: '1px' }}>ENCRYPTION ACTIVE</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', background: '#0d0d0d', borderRadius: '8px', border: '1px solid #30302d' }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3DF5C0' }} />
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#f2f0ea', letterSpacing: '0.08em', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+              GOVERNANCE NETWORK ACTIVE
+            </span>
           </div>
-        </div>
+        </aside>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 40 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 32 }}>
           
           {/* Main Dashboard Area */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
             
             {/* Real-time Stats Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
-              <StatCard label="Live Cases" value={overview?.totalComplaints} sub="Total incidents" icon="live-cases" trend={5.2} />
-              <StatCard label="Critical" value={overview?.criticalComplaints} color="#FF3B30" sub="Urgent action" icon="critical-action" trend={-2.1} />
-              <StatCard label="Uptime" value={liveStats.uptime} color="#34C759" sub="Nodes operational" icon="operational-nodes" decimals={1} suffix="%" />
-              <StatCard label="Neural Engine" value={liveStats.accuracy} color="#AF52DE" sub="AI accuracy" icon="neural-accuracy" decimals={1} suffix="%" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+              <StatCard label="Live Cases" value={overview?.totalComplaints} sub="Total incidents filed" icon="live-cases" trend={5.2} />
+              <StatCard label="Critical" value={overview?.criticalComplaints} color="#d96464" sub="Immediate response required" icon="critical-action" trend={-2.1} />
+              <StatCard label="System Uptime" value={liveStats.uptime} color="#3DF5C0" sub="All cluster nodes active" icon="operational-nodes" decimals={1} suffix="%" />
+              <StatCard label="Neural Engine" value={liveStats.accuracy} color="#3DF5C0" sub="Model inference accuracy" icon="neural-accuracy" decimals={1} suffix="%" />
             </div>
 
             {/* Charts Section */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 32 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 24 }}>
               
               {/* Incident Velocity Card */}
               <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
                 style={{ 
-                  padding: 32, 
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  backdropFilter: 'blur(40px)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '32px',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+                  padding: 28, 
+                  background: '#0d0d0d',
+                  border: '1px solid #30302d',
+                  borderRadius: '16px',
+                  boxShadow: '0 24px 70px rgba(0,0,0,0.4)'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
                   <div>
-                    <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#007AFF', margin: 0, letterSpacing: '1.5px', textTransform: 'uppercase' }}>Incident Velocity</h3>
-                    <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', marginTop: 4, fontWeight: 500 }}>Temporal distribution analysis</p>
+                    <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#8e8b84', margin: 0, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                      Incident Temporal Velocity
+                    </h3>
+                    <p style={{ fontSize: '13px', color: '#a6a39b', marginTop: 4, marginBottom: 0 }}>
+                      Intake vs resolution telemetry
+                    </p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#fff' }}>+{trends[trends.length-1]?.total || 0}</div>
-                    <div style={{ fontSize: '10px', fontWeight: 800, color: '#34C759', textTransform: 'uppercase' }}>Current Month</div>
+                    <div style={{ fontSize: '18px', fontWeight: 800, color: '#f2f0ea', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                      +{trends[trends.length-1]?.total || 0}
+                    </div>
+                    <div style={{ fontSize: '10px', fontWeight: 700, color: '#8E8B85', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                      Current Cycle
+                    </div>
                   </div>
                 </div>
                 
-                <ResponsiveContainer width="100%" height={260}>
+                <ResponsiveContainer width="100%" height={240}>
                   <AreaChart data={trends}>
                     <defs>
-                      <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#007AFF" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#007AFF" stopOpacity={0}/>
+                      <linearGradient id="colorTotalDark" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f2f0ea" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#f2f0ea" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 700 }} />
-                    <Tooltip contentStyle={{ background: 'rgba(10,20,40,0.8)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', color: '#fff' }} />
-                    <Area type="monotone" dataKey="total" stroke="#007AFF" fill="url(#colorTotal)" strokeWidth={4} />
-                    <Area type="monotone" dataKey="resolved" stroke="#34C759" fill="transparent" strokeWidth={3} strokeDasharray="6 6" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#222220" vertical={false} />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#8e8b84', fontSize: 11, fontFamily: "'IBM Plex Sans', sans-serif" }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#8e8b84', fontSize: 11, fontFamily: "'IBM Plex Mono', monospace" }} />
+                    <Tooltip contentStyle={{ background: '#141414', border: '1px solid #3b3b38', borderRadius: '12px', color: '#f2f0ea' }} />
+                    <Area type="monotone" dataKey="total" stroke="#f2f0ea" fill="url(#colorTotalDark)" strokeWidth={2.5} />
+                    <Area type="monotone" dataKey="resolved" stroke="#3DF5C0" fill="transparent" strokeWidth={2} strokeDasharray="4 4" />
                   </AreaChart>
                 </ResponsiveContainer>
               </motion.div>
 
               {/* Status Allocation Card */}
               <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
                 style={{ 
-                  padding: 32, 
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  backdropFilter: 'blur(40px)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '32px',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+                  padding: 28, 
+                  background: '#0d0d0d',
+                  border: '1px solid #30302d',
+                  borderRadius: '16px',
+                  boxShadow: '0 24px 70px rgba(0,0,0,0.4)'
                 }}
               >
-                <h3 style={{ fontSize: '12px', fontWeight: 800, color: '#007AFF', marginBottom: 32, letterSpacing: '1.5px', textTransform: 'uppercase' }}>Status Allocation</h3>
+                <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#8e8b84', marginBottom: 24, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                  Status Allocation
+                </h3>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                  <div style={{ position: 'relative', height: 180 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <div style={{ position: 'relative', height: 160 }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={statusDist} dataKey="value" innerRadius={60} outerRadius={80} paddingAngle={8}>
+                        <Pie data={statusDist} dataKey="value" innerRadius={55} outerRadius={75} paddingAngle={6}>
                           {statusDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="none" />)}
                         </Pie>
                       </PieChart>
                     </ResponsiveContainer>
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{ fontSize: '24px', fontWeight: 900, color: '#fff' }}>{overview?.totalComplaints || 0}</div>
-                      <div style={{ fontSize: '9px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', letterSpacing: '1px' }}>TOTAL</div>
+                      <div style={{ fontSize: '20px', fontWeight: 800, color: '#f2f0ea', fontFamily: "'IBM Plex Mono', monospace" }}>{overview?.totalComplaints || 0}</div>
+                      <div style={{ fontSize: '9px', fontWeight: 700, color: '#8e8b84', letterSpacing: '0.08em', fontFamily: "'IBM Plex Sans', sans-serif" }}>TOTAL CASES</div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                     {statusDist.slice(0, 4).map((d, i) => (
-                      <div key={i} style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <div key={i} style={{ padding: '10px 14px', background: '#141414', borderRadius: '12px', border: '1px solid #262522' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                           <div style={{ width: 6, height: 6, borderRadius: '50%', background: COLORS[i % COLORS.length] }} />
-                          <span style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase' }}>{d.name}</span>
+                          <span style={{ fontSize: '10px', fontWeight: 700, color: '#8e8b84', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>{d.name}</span>
                         </div>
-                        <div style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>{d.value}</div>
+                        <div style={{ fontSize: '15px', fontWeight: 700, color: '#f2f0ea', fontFamily: "'IBM Plex Mono', monospace" }}>{d.value}</div>
                       </div>
                     ))}
                   </div>
@@ -349,76 +360,77 @@ export default function AdminDashboard() {
 
             {/* Forensic Intelligence */}
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               style={{ 
-                padding: '40px', 
-                background: 'rgba(255, 255, 255, 0.03)', 
-                backdropFilter: 'blur(50px)',
-                borderRadius: '32px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 30px 60px rgba(0,0,0,0.5)'
+                padding: '36px', 
+                background: '#0d0d0d', 
+                borderRadius: '16px',
+                border: '1px solid #30302d',
+                boxShadow: '0 24px 70px rgba(0,0,0,0.4)'
               }}
             >
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
                  <div>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#007AFF', boxShadow: '0 0 10px #007AFF' }} />
-                     <span style={{ fontSize: '10px', fontWeight: 900, color: '#007AFF', letterSpacing: '2px', textTransform: 'uppercase' }}>Neural Synthesis</span>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3DF5C0' }} />
+                     <span style={{ fontSize: '11px', fontWeight: 700, color: '#EFEDE8', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                       Neural Synthesis
+                     </span>
                    </div>
-                   <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', letterSpacing: '-1px' }}>Forensic Intelligence</h3>
+                   <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#f2f0ea', letterSpacing: '0.02em', fontFamily: "'IBM Plex Sans', sans-serif", margin: 0 }}>
+                     Forensic Vector Intelligence
+                   </h3>
                  </div>
-                 <div style={{ display: 'flex', gap: 32 }}>
+                 <div style={{ display: 'flex', gap: 24 }}>
                    <div style={{ textAlign: 'right' }}>
-                     <div style={{ fontSize: '24px', fontWeight: 900, color: '#fff' }}>{categories.length}</div>
-                     <div style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>Threat Vectors</div>
+                     <div style={{ fontSize: '20px', fontWeight: 800, color: '#f2f0ea', fontFamily: "'IBM Plex Sans', sans-serif" }}>{categories.length}</div>
+                     <div style={{ fontSize: '10px', fontWeight: 700, color: '#8e8b84', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>Vectors</div>
                    </div>
                    <div style={{ textAlign: 'right' }}>
-                     <div style={{ fontSize: '24px', fontWeight: 900, color: '#34C759' }}>
+                     <div style={{ fontSize: '20px', fontWeight: 800, color: '#EFEDE8', fontFamily: "'IBM Plex Mono', monospace" }}>
                        {Math.round(categories.reduce((acc, c) => acc + c.resolveRate, 0) / (categories.length || 1))}%
                      </div>
-                     <div style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>Efficiency</div>
+                     <div style={{ fontSize: '10px', fontWeight: 700, color: '#8e8b84', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>Resolution Rate</div>
                    </div>
                  </div>
                </div>
 
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 48 }}>
-                 <div style={{ height: 320 }}>
+               <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 36 }}>
+                 <div style={{ height: 300 }}>
                    <ResponsiveContainer width="100%" height="100%">
                      <ComposedChart data={categories}>
-                        <defs>
-                          <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#007AFF" />
-                            <stop offset="100%" stopColor="#007AFF" stopOpacity={0.2} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700 }} interval={0} angle={-15} textAnchor="end" />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10, fontWeight: 700 }} />
-                        <Tooltip contentStyle={{ background: 'rgba(10,20,40,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px' }} />
-                        <Bar dataKey="count" fill="url(#barGrad)" radius={[10, 10, 0, 0]} barSize={32} />
-                        <Line type="monotone" dataKey="resolveRate" stroke="#FFCC00" strokeWidth={4} dot={{ r: 6, fill: '#FFCC00', strokeWidth: 0 }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#222220" vertical={false} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#8e8b84', fontSize: 10, fontFamily: "'IBM Plex Sans', sans-serif" }} interval={0} angle={-15} textAnchor="end" />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#8e8b84', fontSize: 10, fontFamily: "'IBM Plex Mono', monospace" }} />
+                        <Tooltip contentStyle={{ background: '#141414', border: '1px solid #3b3b38', borderRadius: '12px', color: '#f2f0ea' }} />
+                        <Bar dataKey="count" fill="#30302d" radius={[8, 8, 0, 0]} barSize={28} />
+                        <Line type="monotone" dataKey="resolveRate" stroke="#3DF5C0" strokeWidth={3} dot={{ r: 4, fill: '#3DF5C0', strokeWidth: 0 }} />
                      </ComposedChart>
                    </ResponsiveContainer>
                  </div>
 
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                    <div style={{ padding: '24px', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.08)' }}>
-                      <div style={{ fontSize: '10px', fontWeight: 900, color: '#FF3B30', letterSpacing: '1px', marginBottom: 12 }}>CRITICAL ANOMALY</div>
-                      <div style={{ fontSize: '18px', fontWeight: 900, color: '#fff', marginBottom: 16 }}>{categories[0]?.name || 'Analyzing...'}</div>
-                      <div style={{ height: 8, background: 'rgba(255,255,255,0.05)', borderRadius: 10, overflow: 'hidden' }}>
-                        <motion.div initial={{ width: 0 }} animate={{ width: '85%' }} style={{ height: '100%', background: 'linear-gradient(90deg, #007AFF, #00FFD1)', borderRadius: 10 }} />
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                    <div style={{ padding: '20px', background: '#141414', borderRadius: '16px', border: '1px solid #30302d' }}>
+                      <div style={{ fontSize: '10px', fontWeight: 700, color: '#d96464', letterSpacing: '0.08em', marginBottom: 8, fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                        PRIMARY THREAT ANOMALY
+                      </div>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: '#f2f0ea', marginBottom: 12, fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                        {categories[0]?.name || 'Analyzing telemetry...'}
+                      </div>
+                      <div style={{ height: 6, background: '#0d0d0d', borderRadius: 999, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: '85%', background: '#d96464', borderRadius: 999 }} />
                       </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                       {categories.slice(1, 4).map((cat, i) => (
                         <div key={i}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                            <span style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>{cat.name}</span>
-                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#fff' }}>{cat.count}</span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#8e8b84' }}>{cat.name}</span>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#f2f0ea', fontFamily: "'IBM Plex Mono', monospace" }}>{cat.count}</span>
                           </div>
-                          <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 10 }}>
-                            <div style={{ height: '100%', background: COLORS[i+1], width: `${(cat.count / (overview?.totalComplaints || 1)) * 100}%`, borderRadius: 10 }} />
+                          <div style={{ height: 4, background: '#141414', borderRadius: 999 }}>
+                            <div style={{ height: '100%', background: '#3DF5C0', width: `${(cat.count / (overview?.totalComplaints || 1)) * 100}%`, borderRadius: 999 }} />
                           </div>
                         </div>
                       ))}
@@ -429,45 +441,49 @@ export default function AdminDashboard() {
           </div>
 
           {/* Sidebar Area */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             
             {/* System Protocols */}
             <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
               style={{ 
-                padding: '32px', 
-                background: 'rgba(255, 255, 255, 0.03)', 
-                backdropFilter: 'blur(40px)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '32px'
+                padding: '28px', 
+                background: '#0d0d0d', 
+                border: '1px solid #30302d',
+                borderRadius: '16px'
               }}
             >
-              <h3 style={{ fontSize: '11px', fontWeight: 900, color: '#007AFF', marginBottom: 24, letterSpacing: '2px', textTransform: 'uppercase' }}>System Protocols</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <h3 style={{ fontSize: '11px', fontWeight: 700, color: '#8e8b84', marginBottom: 20, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                System Protocols
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button 
                   onClick={() => navigate('/admin/complaints')}
                   style={{ 
-                    width: '100%', padding: '16px', borderRadius: '18px', background: '#007AFF',
-                    border: 'none', color: '#fff', fontWeight: 800, fontSize: '13px', cursor: 'pointer',
-                    boxShadow: '0 10px 20px rgba(0, 122, 255, 0.3)', letterSpacing: '1px'
+                    width: '100%', padding: '14px', borderRadius: '999px', background: '#f2f0ea',
+                    border: 'none', color: '#070707', fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+                    fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.04em'
                   }}
-                >MANAGE REPOSITORY</button>
+                >
+                  MANAGE REPOSITORY
+                </button>
                 <button 
                   onClick={() => navigate('/admin/info')}
                   style={{ 
-                    width: '100%', padding: '16px', borderRadius: '18px', 
-                    background: 'linear-gradient(135deg, rgba(0,180,255,0.15), rgba(0,255,170,0.15))',
-                    border: '1px solid rgba(0,180,255,0.4)', color: '#00B4FF', fontWeight: 800, fontSize: '13px', cursor: 'pointer',
-                    boxShadow: '0 8px 16px rgba(0,180,255,0.15)', letterSpacing: '1px',
+                    width: '100%', padding: '12px', borderRadius: '999px', 
+                    background: '#141414', border: '1px solid #30302d', color: '#d8d5ce', fontWeight: 700, fontSize: '12px', cursor: 'pointer',
+                    fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.04em',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                   }}
                 >
-                  <UiIcon name="personnel-directory" size={18} /> USER & PERSONNEL DIRECTORY (INFO)
+                  <UiIcon name="personnel-directory" size={16} /> USER DIRECTORY
                 </button>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {['AUDIT', 'ALERT', 'SYNC', 'PURGE'].map((label, i) => (
-                    <button key={i} onClick={() => handleAction(label)} style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}>{label}</button>
+                    <button key={i} onClick={() => handleAction(label)} style={{ padding: '10px', borderRadius: '999px', background: '#141414', border: '1px solid #30302d', color: '#8e8b84', fontSize: '11px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif", cursor: 'pointer' }}>
+                      {label}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -475,86 +491,91 @@ export default function AdminDashboard() {
 
             {/* Neural Engine */}
             <div style={{ 
-              padding: '32px', 
-              background: 'rgba(175, 82, 222, 0.05)', 
-              backdropFilter: 'blur(40px)',
-              border: '1px solid rgba(175, 82, 222, 0.2)',
-              borderRadius: '32px'
+              padding: '28px', 
+              background: '#0d0d0d', 
+              border: '1px solid #30302d',
+              borderRadius: '16px'
             }}>
-              <h3 style={{ fontSize: '11px', fontWeight: 900, color: '#AF52DE', marginBottom: 20, letterSpacing: '2px', textTransform: 'uppercase' }}>Neural Engine</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#34C759', boxShadow: '0 0 10px #34C759' }} />
-                <span style={{ fontSize: '13px', fontWeight: 800, color: '#fff' }}>SYSTEM STABLE</span>
+              <h3 style={{ fontSize: '11px', fontWeight: 700, color: '#8e8b84', marginBottom: 16, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                Neural Engine Monitor
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3DF5C0' }} />
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#f2f0ea', fontFamily: "'IBM Plex Sans', sans-serif" }}>INFERENCE CLUSTER STABLE</span>
               </div>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24, paddingBottom: 24, borderBottom: '1px solid rgba(175, 82, 222, 0.2)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20, paddingBottom: 20, borderBottom: '1px solid #242421' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px' }}>VERSION</span>
-                  <span style={{ fontSize: '10px', color: '#fff', fontWeight: 800 }}>{mlStatus?.modelInfo?.version || 'v1.0.4-stable'}</span>
+                  <span style={{ fontSize: '10px', color: '#8e8b84', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif" }}>VERSION</span>
+                  <span style={{ fontSize: '10px', color: '#f2f0ea', fontFamily: "'IBM Plex Mono', monospace" }}>{mlStatus?.modelInfo?.version || 'v1.0.4-stable'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 800, letterSpacing: '1px' }}>ALGORITHM</span>
-                  <span style={{ fontSize: '10px', color: '#fff', fontWeight: 800 }}>TF-IDF + LR</span>
+                  <span style={{ fontSize: '10px', color: '#8e8b84', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif" }}>ALGORITHM</span>
+                  <span style={{ fontSize: '10px', color: '#f2f0ea', fontFamily: "'IBM Plex Mono', monospace" }}>TF-IDF + LR</span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
-                  { label: 'CPU LOAD', val: systemHealth.cpu, color: '#007AFF' },
-                  { label: 'MEMORY', val: systemHealth.memory, color: '#AF52DE' },
-                  { label: 'STORAGE', val: systemHealth.storage, color: '#FF9500' }
+                  { label: 'CPU LOAD', val: systemHealth.cpu, color: '#3DF5C0' },
+                  { label: 'MEMORY', val: systemHealth.memory, color: '#d8a43a' },
+                  { label: 'STORAGE', val: systemHealth.storage, color: '#8e8b84' }
                 ].map((item, i) => (
                   <div key={i}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.3)' }}>{item.label}</span>
-                      <span style={{ fontSize: '11px', fontWeight: 900, color: '#fff' }}>{Math.round(item.val)}%</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#8e8b84', fontFamily: "'IBM Plex Sans', sans-serif" }}>{item.label}</span>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#f2f0ea', fontFamily: "'IBM Plex Mono', monospace" }}>{Math.round(item.val)}%</span>
                     </div>
-                    <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 10 }}>
-                      <motion.div animate={{ width: `${item.val}%` }} style={{ height: '100%', background: item.color, borderRadius: 10 }} />
+                    <div style={{ height: 4, background: '#141414', borderRadius: 999 }}>
+                      <div style={{ width: `${Math.min(100, Math.max(0, item.val))}%`, height: '100%', background: item.color, borderRadius: 999 }} />
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid rgba(175, 82, 222, 0.2)' }}>
-                <h4 style={{ fontSize: '10px', fontWeight: 900, color: '#AF52DE', marginBottom: 16, letterSpacing: '1px', textTransform: 'uppercase' }}>Model Playground</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid #242421' }}>
+                <h4 style={{ fontSize: '10px', fontWeight: 700, color: '#8e8b84', marginBottom: 12, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                  Model Playground
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <textarea 
                     rows={2} 
-                    placeholder="Enter case text for AI analysis..."
+                    placeholder="Enter case text for inference test..."
                     value={testText}
                     onChange={(e) => setTestText(e.target.value)}
                     style={{ 
-                      width: '100%', resize: 'none', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px', padding: '12px', color: '#fff', fontSize: '11px', outline: 'none',
-                      fontFamily: 'Inter, sans-serif'
+                      width: '100%', resize: 'none', background: '#141414', border: '1px solid #30302d',
+                      borderRadius: '12px', padding: '10px', color: '#f2f0ea', fontSize: '12px', outline: 'none',
+                      boxSizing: 'border-box', fontFamily: "'IBM Plex Sans', sans-serif"
                     }}
                   />
                   <button 
                     onClick={handlePredict} 
                     disabled={predicting || !testText.trim()}
                     style={{ 
-                      width: '100%', padding: '12px', borderRadius: '12px', background: 'rgba(175, 82, 222, 0.2)',
-                      border: '1px solid rgba(175, 82, 222, 0.4)', color: '#fff', fontWeight: 800, fontSize: '11px', cursor: 'pointer',
+                      width: '100%', padding: '10px', borderRadius: '999px', background: '#f2f0ea',
+                      border: 'none', color: '#070707', fontWeight: 700, fontSize: '12px', cursor: 'pointer',
+                      fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.04em',
                       opacity: predicting || !testText.trim() ? 0.5 : 1
                     }}
                   >
-                    {predicting ? 'ANALYZING...' : 'RUN INFERENCE'}
+                    {predicting ? 'INFERRING...' : 'RUN INFERENCE'}
                   </button>
                   
                   <AnimatePresence>
                     {prediction && (
                       <motion.div 
-                        initial={{ opacity: 0, height: 0 }} 
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        style={{ overflow: 'hidden' }}
+                        initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.18, ease: 'easeOut' }}
                       >
-                        <div style={{ padding: '12px', background: 'rgba(175, 82, 222, 0.1)', borderRadius: '12px', border: '1px solid rgba(175, 82, 222, 0.2)', marginTop: 4 }}>
-                          <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', marginBottom: 4 }}>Prediction Result</div>
+                        <div style={{ padding: '10px', background: '#141414', borderRadius: '12px', border: '1px solid #30302d', marginTop: 4 }}>
+                          <div style={{ fontSize: '9px', color: '#8e8b84', textTransform: 'uppercase', marginBottom: 4, fontFamily: "'IBM Plex Sans', sans-serif" }}>Prediction Result</div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ color: '#AF52DE', fontWeight: 900, fontSize: '12px', textTransform: 'uppercase' }}>{prediction.category?.replace(/_/g, ' ')}</span>
-                            <span style={{ color: '#fff', fontSize: '11px', fontWeight: 800 }}>{Math.round(prediction.confidence * 100)}%</span>
+                            <span style={{ color: '#EFEDE8', fontWeight: 700, fontSize: '12px', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase' }}>
+                              {prediction.category?.replace(/_/g, ' ')}
+                            </span>
+                            <span style={{ color: '#f2f0ea', fontSize: '11px', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>
+                              {Math.round(prediction.confidence * 100)}%
+                            </span>
                           </div>
                         </div>
                       </motion.div>
@@ -566,29 +587,30 @@ export default function AdminDashboard() {
 
             {/* Incident Stream */}
             <div style={{ 
-              padding: '32px', 
-              background: 'rgba(255, 255, 255, 0.03)', 
-              backdropFilter: 'blur(40px)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '32px'
+              padding: '28px', 
+              background: '#0d0d0d', 
+              border: '1px solid #30302d',
+              borderRadius: '16px'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                <h3 style={{ fontSize: '11px', fontWeight: 900, color: '#34C759', margin: 0, letterSpacing: '2px', textTransform: 'uppercase' }}>Incident Stream</h3>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#34C759', boxShadow: '0 0 10px #34C759' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h3 style={{ fontSize: '11px', fontWeight: 700, color: '#8e8b84', margin: 0, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                  Realtime Case Stream
+                </h3>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3DF5C0' }} />
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {recentIncidents.map((inc, i) => (
                   <motion.div 
                     key={i} 
-                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.05)' }}
-                    style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}
+                    whileHover={{ y: -1 }}
+                    style={{ padding: '14px', background: '#141414', borderRadius: '14px', border: '1px solid #262522', cursor: 'pointer' }}
                     onClick={() => navigate('/admin/complaints')}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontSize: '10px', fontWeight: 900, color: '#007AFF' }}>{inc.complaintId || 'NEW'}</span>
-                      <span style={{ fontSize: '9px', fontWeight: 900, color: inc.severity === 'high' ? '#FF3B30' : 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>{inc.severity}</span>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#EFEDE8', fontFamily: "'IBM Plex Mono', monospace" }}>{inc.complaintId || 'NEW'}</span>
+                      <span style={{ fontSize: '9px', fontWeight: 700, color: inc.severity === 'high' ? '#d96464' : '#8e8b84', textTransform: 'uppercase', fontFamily: "'IBM Plex Sans', sans-serif" }}>{inc.severity}</span>
                     </div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{inc.title}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#f2f0ea', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: "'IBM Plex Sans', sans-serif" }}>{inc.title}</div>
                   </motion.div>
                 ))}
               </div>

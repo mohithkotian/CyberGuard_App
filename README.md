@@ -1,32 +1,58 @@
 # CyberGuard AI — Cybercrime Reporting & Forensic Intelligence Platform
 
-[![AI Powered](https://img.shields.io/badge/AI-Machine%20Learning-blueviolet?style=flat-square)](https://github.com)
 [![Node.js](https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-green?style=flat-square)](https://nodejs.org)
-[![React](https://img.shields.io/badge/Frontend-React%20%7C%20Three.js-cyan?style=flat-square)](https://reactjs.org)
+[![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Framer%20Motion-cyan?style=flat-square)](https://reactjs.org)
 [![Python ML](https://img.shields.io/badge/ML%20Service-Python%20%7C%20Flask%20%7C%20scikit--learn-yellow?style=flat-square)](https://python.org)
-[![Security](https://img.shields.io/badge/Security-AES%20%7C%20PII%20Masking%20%7C%20Zero--Trust-red?style=flat-square)](https://github.com)
+[![Security](https://img.shields.io/badge/Security-JWT%20%7C%20PII%20Masking%20%7C%20Zero--Trust-red?style=flat-square)](https://github.com)
+[![Deployed on Render](https://img.shields.io/badge/Deployed-Render-46E3B7?style=flat-square)](https://render.com)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)](#license)
+
+---
+
+## Product Demo
+
+End-to-end walkthrough — incident intake → PII masking → ML classification → statutory case tracking.
+
+[![CyberGuard Product Demo](docs/media/cyberguard-product-film-preview.gif)](docs/media/cyberguard-product-film.mp4)
+
+*Watch the 15-second CyberGuard product walkthrough.*
+
+---
+
+
+## Live Deployment
+
+| Service | URL |
+| :--- | :--- |
+| **Web App** | https://cybercrime-web.onrender.com |
+| **Backend API** | https://cybercrime-backend.onrender.com/api |
+| **ML Service** | https://cybercrime-ml-service.onrender.com/health |
+
+> Render free-tier services spin down after inactivity. The first request after a cold start may take 15–30 seconds.
 
 ---
 
 ## Overview
 
-CyberGuard AI is an AI-powered cybercrime complaint reporting, investigation, and threat intelligence system. It follows a **zero-trust, role-based privacy architecture**: personal identifiable information (PII) is automatically detected and masked, forensic indicators are extracted from evidence via OCR, incidents are classified using an NLP model, and real-time intelligence is delivered to citizens, forensic investigators, and law enforcement agencies.
+CyberGuard AI is an AI-powered cybercrime complaint reporting, investigation, and threat intelligence platform. It follows a **zero-trust, role-based privacy architecture**: PII is automatically d[...]
+
+**Onee**, the built-in interactive AI guide, walks citizens through the complaint form step by step — highlighting each field, validating input in real time, and offering a draft helper for incident[...]
 
 ---
 
 ## Key Features
 
-- **AI Cybercrime Classification** — automated NLP categorization into 11 attack vectors (financial fraud, phishing, ransomware, cyberbullying, hacking, identity theft, and others).
+- **AI Cybercrime Classification** — automated NLP categorization into 13 attack vectors: Financial Fraud, Phishing, Ransomware, Cyberbullying, Hacking, Identity Theft, Data Breach, Online Fraud, an[...]
 - **Zero-Trust Role-Based Privacy Architecture**
   - **Complaint Owner** — full unmasked access to their own filing.
   - **Officer / Admin** — raw case data, forensic link-analysis graphs, and investigation tools.
-  - **Community Browser** — PII automatically anonymized (`PERSON_1`, `PHONE_1`, `EMAIL_1`, `CITY_1`) for safe public browsing of threat patterns.
-- **OCR Evidence Intelligence** — extraction of bank accounts, UPI IDs, transaction hashes, and phone numbers from evidence screenshots using Tesseract OCR.
+  - **Community Browser** — PII automatically anonymized (`PERSON_1`, `PHONE_1`, `EMAIL_1`, `CITY_1`) for safe public browsing.
+- **Onee Interactive Guide** — step-by-step citizen walkthrough with field spotlight, real-time validation, and AI draft helper for incident narratives.
+- **OCR Evidence Intelligence** — extraction of bank accounts, UPI IDs, transaction hashes, and phone numbers from evidence screenshots.
 - **Threat Heatmaps & Link Analysis** — geospatial attack maps and suspect relationship graphs.
 - **Real-Time Communication** — Socket.IO powered notifications, status tracking, and encrypted chat channels.
-- **Interactive AI Assistant** — voice-driven navigation, audio alerts, and platform monitoring.
-- **Scam Search & Verification** — cross-referencing of suspect UPI IDs, phone numbers, and financial details against a verified threat database.
+- **Scam Search & Forensic Scanner** — cross-referencing suspect UPI IDs, phone numbers, and URLs against a verified threat database.
+- **Internal ML Security** — server-to-server `X-ML-Secret` authentication between the Node backend and Flask ML service; rate-limited inference endpoints (30 req/min predict, 10 req/min batch).
 
 ---
 
@@ -44,7 +70,7 @@ graph TD
     subgraph Gateway and Middleware
         C[Node.js Express API Server]
         D[Socket.IO Real-Time Engine]
-        E[Privacy Shield and PII Anonymizer]
+        E[Privacy Shield / PII Anonymizer]
     end
 
     subgraph Data and AI Intelligence
@@ -58,11 +84,27 @@ graph TD
     C <--> D
     C -->|Sanitize and Mask| E
     C <-->|Read / Write| F
-    C -->|Classify Text| G
+    C -->|X-ML-Secret + Classify Text| G
     C -->|Analyze Evidence Screenshots| H
 ```
 
-### 2. Multi-Tier Role-Based Privacy & Data Masking Flow
+### 2. ML Request Flow
+
+React and mobile clients **never call the ML service directly**. All classification goes through the Node/Express backend, which authenticates to the Flask ML service using a shared internal secret.
+
+```mermaid
+sequenceDiagram
+    actor User as Citizen / Mobile App
+    participant API as Node/Express Backend
+    participant ML as Flask ML Service
+
+    User->>API: POST /api/complaints (JWT Bearer)
+    API->>ML: POST /predict (X-ML-Secret header)
+    ML-->>API: { category, confidence, severity }
+    API-->>User: Complaint saved with AI classification
+```
+
+### 3. Multi-Tier Role-Based Privacy & Data Masking Flow
 
 ```mermaid
 sequenceDiagram
@@ -92,12 +134,12 @@ sequenceDiagram
     API-->>Admin: 200 OK (Full Unmasked Data and Forensic Metadata)
 ```
 
-### 3. Complaint Lifecycle & AI Classification Engine
+### 4. Complaint Lifecycle & AI Classification Engine
 
 ```mermaid
 stateDiagram-v2
     [*] --> Submitted : Victim files report
-    Submitted --> ML_Classification : PII-masked text sent to Python ML Model
+    Submitted --> ML_Classification : PII-masked text sent to Flask ML service
     ML_Classification --> OCR_Analysis : Evidence image uploaded
     OCR_Analysis --> Pending_Review : Category and Severity assigned
 
@@ -110,50 +152,19 @@ stateDiagram-v2
     Rejected --> [*]
 ```
 
-### 4. AI/ML Classification & OCR Pipeline
-
-```mermaid
-flowchart LR
-    A[Raw Complaint Text] --> B[Text Preprocessing<br/>Tokenize, Stopword Removal, Lemmatize]
-    B --> C[TF-IDF Vectorization]
-    C --> D[Logistic Regression Classifier]
-    D --> E[Category and Severity Output]
-
-    F[Evidence Screenshot] --> G[Tesseract OCR Engine]
-    G --> H[Pattern Extraction<br/>UPI ID, Phone, Account No, Tx Hash]
-    H --> I[Forensic Indicator Store]
-
-    E --> J[Complaint Record]
-    I --> J
-    J --> K[(MongoDB)]
-```
-
-### 5. Request/Data Flow Across Services
-
-```mermaid
-graph LR
-    Client[React Web / Mobile Client] -->|JWT Auth| Gateway[Express API Gateway]
-    Gateway -->|Rate Limited, Helmet Secured| Auth[Auth Middleware]
-    Auth --> Controller[Complaint / Chat / Analytics Controllers]
-    Controller -->|Text| ML[Flask ML Service :5003]
-    Controller -->|Image| OCR[OCR Service]
-    Controller -->|CRUD| DB[(MongoDB)]
-    Controller -->|Events| Socket[Socket.IO Engine]
-    Socket -->|Live Updates| Client
-```
-
 ---
 
 ## Technology Stack
 
 | Layer | Technologies |
 | :--- | :--- |
-| **Frontend Web** | React 18, Three.js, Recharts, Framer Motion, Axios |
-| **Frontend Mobile** | React Native, Expo, React Navigation |
+| **Frontend Web** | React 18, Framer Motion, Recharts, Axios, Socket.IO Client |
+| **Frontend Mobile** | React Native, Expo SDK 54, React Navigation _(not production-ready — see below)_ |
 | **Backend Core** | Node.js, Express.js, MongoDB, Mongoose, Socket.IO |
-| **AI / ML Service** | Python 3.10, Flask, scikit-learn, NLTK, TF-IDF + Logistic Regression |
+| **AI / ML Service** | Python 3.10, Flask, scikit-learn, TF-IDF + Calibrated Logistic Regression, Flask-Limiter |
 | **Forensics & OCR** | Tesseract.js / Tesseract OCR, Sharp |
-| **Security & Auth** | JWT, bcryptjs, Helmet, Express Rate Limit, PII Masking Shield |
+| **Security & Auth** | JWT, bcryptjs, Helmet, Express Rate Limit, PII Masking Shield, X-ML-Secret internal auth |
+| **Deployment** | Render (web + backend + ML service), render.yaml infrastructure-as-code |
 
 ---
 
@@ -162,167 +173,203 @@ graph LR
 ```text
 CyberGuard_App/
 ├── backend/                   Node.js + Express REST API server
-│   ├── src/
-│   │   ├── config/            Database and service connections
-│   │   ├── controllers/       Complaint, Auth, Chat and Analytics logic
-│   │   ├── middleware/        JWT auth and error handling
-│   │   ├── models/            MongoDB schemas (Complaint, User, Chat, etc.)
-│   │   ├── routes/            Express API route definitions
-│   │   ├── services/          OCR, SMS, Email and ML service connectors
-│   │   └── utils/             Privacy shield and PII masking utilities
-│   └── src/server.js          Entry point and Socket.IO server initialization
+│   └── src/
+│       ├── config/            Database and service connections
+│       ├── controllers/       Complaint, Auth, Chat and Analytics logic
+│       ├── middleware/        JWT auth, rate limiting, error handling
+│       ├── models/            MongoDB schemas (Complaint, User, Chat, etc.)
+│       ├── routes/            Express API route definitions
+│       ├── services/          OCR, ML, Email and notification connectors
+│       └── utils/             Privacy shield and PII masking utilities
 │
 ├── ml-service/                Python Flask AI classification engine
-│   ├── src/                   Flask API application
-│   ├── models/                Pre-trained TF-IDF vectorizers and ML models
-│   └── train_model.py         Model training pipeline script
-├── requirements.txt           Python dependencies for the ML service
+│   ├── src/
+│   │   ├── app.py             Flask API with rate limiting and internal auth
+│   │   ├── classifier.py      CybercrimeClassifier (TF-IDF + Logistic Regression)
+│   │   └── preprocessor.py    TextPreprocessor (regex, entity tokenization)
+│   ├── models/                Pre-trained classifier and vectorizer .pkl files
+│   ├── data/                  Training dataset (dataset.csv)
+│   ├── train_model.py         Model training pipeline
+│   ├── requirements.txt       Python dependencies
+│   └── Procfile               Gunicorn startup command
 │
 ├── web-app/                   React web application
-│   ├── public/                Static assets and voices
 │   └── src/
-│       ├── components/        Navbar, AI Assistant, CyberReport, Scanner
-│       ├── pages/              Dashboard, Community, Admin, Forensics, Settings
+│       ├── components/        Navbar, Onee Guide, CyberReport, Scanner, Chat
+│       ├── pages/             Dashboard, Community, Admin, Forensics, Settings
 │       ├── services/           API Axios client and Socket listener
-│       └── hooks/               Zustand auth and theme state management
+│       └── hooks/              Zustand auth and theme state management
 │
-└── mobile-app/                React Native Expo mobile app
-    └── src/                   Native screens and components
+├── mobile-app/                React Native Expo mobile app (⚠ not production-ready)
+│   └── src/                   Native screens and components
+│
+├── docs/                      Product and user documentation
+│   └── user-guides/           CYBERGUARD_CITIZEN_USER_GUIDE.md
+│
+└── render.yaml                Render infrastructure-as-code (3 services)
 ```
 
 ---
 
 ## Role-Based Access Matrix
 
-| Feature / View | Regular User (Victim) | Community Browser | Police Officer | Super Admin |
+| Feature / View | Citizen | Community Browser | Police Officer | Super Admin |
 | :--- | :---: | :---: | :---: | :---: |
-| File Complaint | Yes | No | Yes | Yes |
-| View Own Filings (Unmasked) | Yes | No | Yes | Yes |
-| Community Browser (Masked) | Yes | Yes | Yes | Yes |
-| View Other's Raw PII | No | No | Yes | Yes |
-| Command Center & Forensics | No | No | Yes | Yes |
-| Status Update & Resolution | No | No | Yes | Yes |
-| System User Management | No | No | No | Yes |
+| File Complaint | ✓ | — | ✓ | ✓ |
+| View Own Filings (Unmasked) | ✓ | — | ✓ | ✓ |
+| Community Browse (Masked) | ✓ | ✓ | ✓ | ✓ |
+| View Other's Raw PII | — | — | ✓ | ✓ |
+| Command Center & Forensics | — | — | ✓ | ✓ |
+| Status Update & Resolution | — | — | ✓ | ✓ |
+| System User Management | — | — | — | ✓ |
 
 ---
 
-## Quick Start Guide (Local Setup)
+## Quick Start — Local Development
 
 ### Prerequisites
+
 - Node.js v18+
-- Python v3.10+
-- MongoDB v7.0+ (local instance or MongoDB Atlas cluster)
+- Python 3.10+
+- MongoDB v7.0+ (local or Atlas)
 
 ### Step 1 — Start MongoDB
 
-On Windows, check the MongoDB service:
-
+**Windows:**
 ```powershell
 Get-Service MongoDB
-```
-
-If it is stopped, open PowerShell as Administrator and run:
-
-```powershell
+# If stopped:
 net start MongoDB
 ```
 
-On macOS, use `brew services start mongodb-community@7.0`. On Linux, use `sudo systemctl start mongod`.
+**macOS:** `brew services start mongodb-community@7.0`
+**Linux:** `sudo systemctl start mongod`
 
-### Step 2 — First-time ML Service Setup
+---
+
+### Step 2 — ML Service (first time)
 
 ```powershell
-cd C:\Users\Mohith\CyberGuard_App\ml-service
-py -3.11 -m venv .venv
+cd CyberGuard_App\ml-service
+py -3.10 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r ..\requirements.txt
-python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet')"
+pip install -r requirements.txt
 ```
 
-The Python dependency file is at `C:\Users\Mohith\CyberGuard_App\requirements.txt`. Do not run `train_model.py` unless the service reports that the model is missing.
+> Only run `python train_model.py` if the service reports the model is missing on startup.
 
-### Step 3 — First-time Backend Setup
+---
+
+### Step 3 — Backend (first time)
 
 ```powershell
-cd C:\Users\Mohith\CyberGuard_App\backend
+cd CyberGuard_App\backend
 npm install
 ```
 
-The backend environment file is `backend\.env`. Confirm that `ML_SERVICE_URL` is set to:
+Create `backend\.env` with at minimum:
 
 ```env
+MONGODB_URI=mongodb://127.0.0.1:27017/cyberguard
+JWT_SECRET=<random-secret>
+JWT_REFRESH_SECRET=<random-secret>
 ML_SERVICE_URL=http://127.0.0.1:5003
+ML_INTERNAL_SECRET=<same-value-as-ml-service>
+ALLOWED_ORIGINS=http://localhost:3000
 ```
 
-### Step 4 — First-time React Web Setup
+---
+
+### Step 4 — ML Service `.env` (first time)
+
+Create `ml-service\.env`:
+
+```env
+ML_INTERNAL_SECRET=<same-value-as-backend>
+ML_ALLOWED_ORIGINS=http://127.0.0.1:5002
+```
+
+> `ML_INTERNAL_SECRET` must be identical on both services. In production (Render), it is generated automatically on the backend and shared to the ML service via `fromService` in `render.yaml`.
+
+---
+
+### Step 5 — Web App (first time)
 
 ```powershell
-cd C:\Users\Mohith\CyberGuard_App\web-app
+cd CyberGuard_App\web-app
 npm install
 ```
 
-### Step 5 — Start the ML Service
+---
+
+### Every-session Startup Order
 
 ```powershell
-cd C:\Users\Mohith\CyberGuard_App\ml-service
+# Terminal 1 — ML Service (port 5003)
+cd CyberGuard_App\ml-service
 .\.venv\Scripts\Activate.ps1
 python src\app.py
-```
 
-Runs on `http://localhost:5003`. Optional health check:
-
-```powershell
-Invoke-RestMethod http://localhost:5003/health
-```
-
-### Step 6 — Start the Backend Server
-
-```powershell
-cd C:\Users\Mohith\CyberGuard_App\backend
+# Terminal 2 — Backend API (port 5002)
+cd CyberGuard_App\backend
 npm run dev
-```
 
-Runs on `http://localhost:5002`.
-
-### Step 7 — Start the React Web App
-
-```powershell
-cd C:\Users\Mohith\CyberGuard_App\web-app
+# Terminal 3 — React Web App (port 3000)
+cd CyberGuard_App\web-app
 npm start
 ```
 
-Runs on `http://localhost:3000`. Open that address in your browser.
+> Use `npm start` for the web app, not `npm run dev`.
 
-### Optional — Start the Mobile App
+---
+
+### Mobile App (development only)
+
+> ⚠ The mobile app is **not production-ready**. It has a hard-coded local tunnel API URL, a broken refresh token flow, and several crash-level bugs. Do not use it in production.
 
 ```powershell
-cd C:\Users\Mohith\CyberGuard_App\mobile-app
+cd CyberGuard_App\mobile-app
 npm install
 npx expo start
 ```
 
-Scan the QR code with the Expo Go app on iOS or Android.
-
-### Every-time Startup Order
-
-```text
-1. MongoDB
-2. ML service — port 5003
-3. Backend API — port 5002
-4. React web app — port 3000
-```
-
-Do not use `npm run dev` for the React app; this project uses `npm start`.
+Scan the QR code with Expo Go on iOS or Android.
 
 ---
 
-## Default Credentials
+## Deployment (Render)
+
+All three services are defined in `render.yaml` and deploy automatically on push to `main`.
+
+| Service | Type | Root | Start Command |
+| :--- | :--- | :--- | :--- |
+| `cybercrime-backend` | Node web | `backend/` | `npm start` |
+| `cybercrime-ml-service` | Python web | `ml-service/` | `gunicorn -w 1 --threads 2 -b 0.0.0.0:$PORT src.app:app` |
+| `cybercrime-web` | Static site | `web-app/` | `npm run build` |
+
+### Required Render environment variables (set manually in dashboard)
+
+| Service | Variable | Notes |
+| :--- | :--- | :--- |
+| backend | `MONGODB_URI` | Atlas connection string |
+| backend | `ADMIN_PASSWORD` | Initial admin account password |
+| backend | `GEMINI_API_KEY` | Google Gemini API key |
+| backend | `ALLOWED_ORIGINS` | `https://cybercrime-web.onrender.com` |
+| backend | `ML_INTERNAL_SECRET` | Auto-generated by Render (`generateValue: true`) |
+| ml-service | `ML_ALLOWED_ORIGINS` | `https://cybercrime-backend.onrender.com` |
+| ml-service | `ML_INTERNAL_SECRET` | Pulled automatically from backend via `fromService` |
+
+---
+
+## Default Dev Credentials
 
 | Role | Email | Password |
 | :--- | :--- | :--- |
 | Super Admin | `admin@cybercrime.gov` | `Admin@123456` |
 | Police Officer | `officer@cybercrime.gov` | `Officer@123456` |
-| Test User | `user@cybercrime.gov` | `User@123456` |
+| Test Citizen | `user@cybercrime.gov` | `User@123456` |
+
+> Change all default passwords immediately in any internet-facing environment.
 
 ---
 
@@ -331,13 +378,26 @@ Do not use `npm run dev` for the React app; this project uses `npm start`.
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | POST | `/api/auth/register` | Public | Register new user account |
-| POST | `/api/auth/login` | Public | Login and receive JWT access + refresh tokens |
-| POST | `/api/complaints` | Authenticated | Submit new complaint report with evidence |
-| GET | `/api/complaints?scope=own` | Authenticated | Get logged-in user's own complaints |
-| GET | `/api/complaints?scope=public` | Authenticated | Get all complaints (PII masked for non-owners) |
-| GET | `/api/complaints/:id` | Authenticated | Get single complaint detail (role-masked) |
-| PATCH | `/api/complaints/:id/status` | Officer / Admin | Update complaint status and add timeline entry |
-| GET | `/api/complaints/public/search` | Public | Search suspect phone, UPI, or account numbers |
+| POST | `/api/auth/login` | Public | Login — returns JWT access + refresh tokens |
+| POST | `/api/auth/refresh` | Public | Refresh access token |
+| POST | `/api/complaints` | Authenticated | Submit complaint with evidence |
+| GET | `/api/complaints?scope=own` | Authenticated | Get own complaints (unmasked) |
+| GET | `/api/complaints?scope=public` | Authenticated | Get all complaints (PII masked) |
+| GET | `/api/complaints/:id` | Authenticated | Single complaint detail (role-masked) |
+| PATCH | `/api/complaints/:id/status` | Officer / Admin | Update status and add timeline entry |
+| GET | `/api/complaints/public/search` | Public | Search by phone, UPI ID, or account number |
+| GET | `/health` | Public | Backend health check |
+
+---
+
+## Emergency Contacts (India)
+
+| Helpline | Number |
+| :--- | :--- |
+| National Cybercrime Helpline (financial fraud golden hour) | **1930** |
+| National Emergency (Police / Fire / Ambulance) | **112** |
+| Women Cyber Distress Helpline | **1091** |
+| National Childline | **1098** |
 
 ---
 

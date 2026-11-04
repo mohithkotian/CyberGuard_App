@@ -1,8 +1,11 @@
 import os
 import sys
 import logging
+import hmac
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 import joblib
 
@@ -29,7 +32,53 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-CORS(app)
+
+# CORS: ML service is called server-to-server (Node backend only).
+# Restrict to backend origin as defence-in-depth; browsers never call this directly.
+_allowed_origins = [o.strip() for o in os.getenv('ML_ALLOWED_ORIGINS', 'http://127.0.0.1:5002').split(',') if o.strip()]
+CORS(app, origins=_allowed_origins, methods=['GET', 'POST'])
+
+# Rate limiting: in-memory storage is correct for single-worker deployment (-w 1).
+# If workers are ever increased, switch storage_uri to a Redis URI.
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri='memory://'
+)
+
+def is_production_environment():
+    return (
+        os.getenv('FLASK_ENV', '').lower() == 'production' or
+        os.getenv('ENV', '').lower() == 'production' or
+        os.getenv('NODE_ENV', '').lower() == 'production' or
+        os.getenv('RENDER', '').lower() == 'true'
+    )
+
+@app.before_request
+def require_internal_secret():
+    # Only protect internal prediction endpoints; /health and / remain accessible for probes
+    if request.path in ('/predict', '/batch-predict'):
+        is_prod = is_production_environment()
+        secret = os.getenv('ML_INTERNAL_SECRET', '').strip()
+
+        # 1. Production must fail closed if secret is missing or misconfigured
+        if is_prod:
+            if not secret:
+                logger.error('[SECURITY FATAL] ML_INTERNAL_SECRET is missing or empty in production. Rejecting request.')
+                return jsonify({'error': 'Internal authentication configuration error.'}), 500
+
+            client_secret = request.headers.get('X-ML-Secret', '')
+            if not client_secret or not hmac.compare_digest(client_secret, secret):
+                return jsonify({'error': 'Unauthorized'}), 401
+
+        # 2. Local development mode
+        else:
+            if secret:
+                client_secret = request.headers.get('X-ML-Secret', '')
+                if not client_secret or not hmac.compare_digest(client_secret, secret):
+                    return jsonify({'error': 'Unauthorized'}), 401
+            # Development bypass permitted only when secret is explicitly unset locally
 
 MODEL_VERSION = '2.0.0-PRO'
 classifier = CybercrimeClassifier()
@@ -68,6 +117,7 @@ def health():
     })
 
 @app.route('/predict', methods=['POST'])
+@limiter.limit('30 per minute')
 def predict():
     if not model_loaded:
         return jsonify({'error': 'Model not loaded. Run train_model.py first.'}), 503
@@ -90,9 +140,10 @@ def predict():
         return jsonify({**result, 'model_version': MODEL_VERSION})
     except Exception as e:
         logger.error(f'Prediction error: {e}')
-        return jsonify({'error': 'Prediction failed.', 'detail': str(e)}), 500
+        return jsonify({'error': 'Prediction failed. Please try again.'}), 500
 
 @app.route('/batch-predict', methods=['POST'])
+@limiter.limit('10 per minute')
 def batch_predict():
     if not model_loaded:
         return jsonify({'error': 'Model not loaded.'}), 503
@@ -107,7 +158,8 @@ def batch_predict():
             cleaned = preprocessor.preprocess(str(text))
             results.append(classifier.predict(cleaned))
         except Exception as e:
-            results.append({'error': str(e)})
+            logger.error(f'Batch prediction error for item: {e}')
+            results.append({'error': 'Item prediction failed.'})
 
     return jsonify({'results': results, 'count': len(results), 'model_version': MODEL_VERSION})
 
@@ -122,7 +174,9 @@ def model_info():
     })
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5003))
+    port = int(os.getenv('ML_PORT', os.getenv('PORT', 5003)))
+    if port == 5002:
+        port = 5003
     debug = os.getenv('FLASK_ENV', 'development') == 'development'
     logger.info(f'[START] Cybercrime ML Microservice running on port {port}')
     app.run(host='0.0.0.0', port=port, debug=debug)

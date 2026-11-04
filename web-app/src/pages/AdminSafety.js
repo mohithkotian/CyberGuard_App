@@ -107,7 +107,7 @@ export default function AdminSafety() {
           location: prev.location || `${data.city || 'Detected Location'}, ${data.region || ''}`,
           pincode: prev.pincode || (data.postal ? String(data.postal).slice(0, 6) : '')
         }));
-        toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''} ◉`, { id: toastId });
+        toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''} â—‰`, { id: toastId });
         return true;
       }
     } catch (e) {
@@ -153,7 +153,7 @@ export default function AdminSafety() {
           location: placeName || prev.location,
           pincode: pin || prev.pincode
         }));
-        toast.success(`⌖ GPS locked: ${placeName}`, { id: toastId });
+        toast.success(`âŒ– GPS locked: ${placeName}`, { id: toastId });
       },
       (error) => {
         console.warn('GPS unavailable, falling back to IP geolocation:', error.message);
@@ -238,34 +238,30 @@ export default function AdminSafety() {
   };
 
   const getUrgencyColor = (severity) => {
-    return severity === 'critical' ? '#FF2D55' : severity === 'high' ? '#FF2D55' : severity === 'medium' ? '#FF9500' : '#007AFF';
+    return severity === 'critical' ? '#FF2D55' : severity === 'high' ? '#FF2D55' : severity === 'medium' ? '#FF9500' : '#8E8B85';
   };
 
   const getStatusBadge = (status) => {
     const s = (status || 'pending').toLowerCase();
     if (s === 'resolved') return { label: 'RESOLVED', bg: 'rgba(0, 200, 150, 0.15)', color: '#00C896', border: 'rgba(0, 200, 150, 0.3)' };
     if (s === 'investigating') return { label: 'DISPATCHED / ACTIVE', bg: 'rgba(255, 107, 53, 0.15)', color: '#FF6B35', border: 'rgba(255, 107, 53, 0.3)' };
-    if (s === 'under_review') return { label: 'UNDER REVIEW', bg: 'rgba(0, 180, 255, 0.15)', color: '#00B4FF', border: 'rgba(0, 180, 255, 0.3)' };
+    if (s === 'under_review') return { label: 'UNDER REVIEW', bg: '#1C1C1A', color: '#EFEDE8', border: '1px solid #242422' };
     return { label: 'PENDING ACTION', bg: 'rgba(255, 45, 85, 0.15)', color: '#FF2D55', border: 'rgba(255, 45, 85, 0.3)' };
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: '#02060A', 
-      color: '#fff', 
+    <div className="page-shell" style={{ 
+      minHeight: '100dvh', 
+      background: '#070707', 
+      color: '#f2f0ea', 
       position: 'relative', 
       overflowX: 'hidden',
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: "'IBM Plex Sans', sans-serif"
     }}>
-      {/* Liquid Atmospheric Backdrops */}
-      <div style={{ position: 'fixed', top: '-10%', left: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(255, 45, 85, 0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-10%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 122, 255, 0.05) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
 
       <Navbar />
 
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 24px', position: 'relative', zIndex: 1 }}>
+      <main className="report-layout" style={{ maxWidth: 1200, margin: '0 auto', padding: '44px 24px 100px', position: 'relative', zIndex: 1 }}>
         
         {/* Banner Alert if recent report submitted */}
         {lastSubmittedId && (
@@ -273,20 +269,20 @@ export default function AdminSafety() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 45, 85, 0.15) 0%, rgba(255, 149, 0, 0.15) 100%)',
+              color: 'var(--text)',
               border: '1px solid rgba(255, 45, 85, 0.4)',
-              backdropFilter: 'blur(20px)',
+              backdropFilter: 'none',
               borderRadius: 20,
               padding: '20px 24px',
               marginBottom: 32,
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              boxShadow: '0 10px 30px rgba(255, 45, 85, 0.2)'
+              boxShadow: 'var(--shadow)'
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#FF2D55', boxShadow: '0 0 12px #FF2D55' }} />
+              <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#FF2D55', boxShadow: 'none' }} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#fff', letterSpacing: 0.5 }}>
                   REPORT LODGED & PERSISTED TO SECURE DATABASE
@@ -330,9 +326,9 @@ export default function AdminSafety() {
             <h1 style={{ 
               fontSize: '3rem', 
               fontWeight: 900, 
-              background: 'linear-gradient(to bottom, #fff, rgba(255,255,255,0.5))',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: 'var(--text)',
+
+
               letterSpacing: '-1px',
               margin: 0 
             }}>
@@ -410,7 +406,7 @@ export default function AdminSafety() {
                         transition={{ delay: idx * 0.05 }}
                         style={{
                           background: 'rgba(255,255,255,0.025)',
-                          backdropFilter: 'blur(30px)',
+                          backdropFilter: 'none',
                           border: `1px solid ${incident.severity === 'high' || incident.severity === 'critical' ? 'rgba(255, 45, 85, 0.25)' : 'rgba(255,255,255,0.06)'}`,
                           borderRadius: 24,
                           padding: 26,
@@ -420,7 +416,7 @@ export default function AdminSafety() {
                         }}
                       >
                         {/* High Priority Gradient Line */}
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #FF2D55, #FF9500, #FF2D55)' }} />
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--bg-card)' }} />
 
                         {/* Top Bar: ID + Status + Timestamp */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -532,7 +528,7 @@ export default function AdminSafety() {
               exit={{ opacity: 0, y: -20 }}
               style={{
                 background: 'rgba(255,255,255,0.025)',
-                backdropFilter: 'blur(40px)',
+                backdropFilter: 'none',
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 32,
                 padding: 40,
@@ -635,7 +631,7 @@ export default function AdminSafety() {
                       onClick={handleGetLocation}
                       style={{ 
                         background: formData.lat ? 'rgba(0, 255, 209, 0.15)' : 'rgba(0, 180, 255, 0.1)', 
-                        color: formData.lat ? '#00FFD1' : '#00B4FF', 
+                        color: formData.lat ? '#3DF5C0' : '#8E8B85', 
                         border: `1px solid ${formData.lat ? 'rgba(0, 255, 209, 0.4)' : 'rgba(0, 180, 255, 0.3)'}`, 
                         padding: '6px 14px', 
                         borderRadius: 10, 
@@ -680,7 +676,7 @@ export default function AdminSafety() {
                     disabled={loading} 
                     style={{
                       padding: '16px 36px',
-                      background: 'linear-gradient(135deg, #FF2D55 0%, #FF9500 100%)',
+                      color: 'var(--text)',
                       color: '#fff',
                       border: 'none',
                       borderRadius: 16,
@@ -708,3 +704,4 @@ export default function AdminSafety() {
     </div>
   );
 }
+

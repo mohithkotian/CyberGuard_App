@@ -24,14 +24,38 @@ import GlobalChatScreen      from '../screens/GlobalChatScreen';
 const Stack = createNativeStackNavigator();
 const Tab   = createBottomTabNavigator();
 
+const LINKING_CONFIG = {
+  prefixes: ['cyberguard://', 'https://cyberguard.app'],
+  config: {
+    screens: {
+      Login: 'login',
+      Register: 'register',
+      Main: {
+        screens: {
+          Home: 'home',
+          Submit: 'submit',
+          ScamSearch: 'radar',
+          Comms: 'comms',
+          Admin: 'triage',
+          Profile: 'profile',
+        },
+      },
+      ComplaintDetail: 'complaint/:complaintId',
+      Track: 'track/:complaintId',
+      ThreatRadar: 'threat-radar',
+      Forensics: 'forensics',
+    },
+  },
+};
+
 const SCREEN_OPTIONS = {
   headerShown: false,
   contentStyle: { backgroundColor: '#070C18' },
 };
 
 function UserTabs() {
-  const { isAdmin, isOfficer } = useAuthStore();
-  const showAdminTab = isAdmin?.() || isOfficer?.();
+  const { isAuthorizedPersonnel } = useAuthStore();
+  const showAdminTab = isAuthorizedPersonnel ? isAuthorizedPersonnel() : false;
 
   return (
     <Tab.Navigator
@@ -97,7 +121,7 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={LINKING_CONFIG}>
       <Stack.Navigator screenOptions={SCREEN_OPTIONS}>
         {!user ? (
           <>

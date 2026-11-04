@@ -1,4 +1,11 @@
 import React from 'react';
+import {
+  Search, AlertTriangle, Check, X, ChevronLeft, ChevronRight, Copy, Pencil,
+  Trash2, KeyRound, RefreshCw, Upload, Download, Shield, Network, FileText,
+  Paperclip, Mail, Phone, Settings, Info, Play, MapPin, ExternalLink, Circle,
+  ScanSearch, Database, Users, Link2, BrainCircuit, Image, CreditCard, UserRound,
+  Siren
+} from 'lucide-react';
 
 const ADMIN_ICON_NAMES = new Set([
   'critical-action', 'extracted-phones', 'investigator-protocol', 'link-search', 'live-cases',
@@ -6,11 +13,18 @@ const ADMIN_ICON_NAMES = new Set([
   'payment-identifiers', 'personnel-directory', 'phishing-links', 'scam-phone-tab'
 ]);
 
-const SYMBOLS = {
-  search: '⌕', warning: '!', success: 'v', close: '×', back: '‹', next: '›', copy: '⧉',
-  edit: 'edit', delete: '⌫', password: '◇', refresh: '↻', upload: '⇧', download: '⇩',
-  shield: '◈', network: '⌁', document: '▤', attachment: '⌕', mail: '@', phone: '⌕',
-  settings: '≡', info: 'i', check: 'v', play: '▶', location: '⌖', link: '↗',
+const ICONS = {
+  search: Search, warning: AlertTriangle, success: Check, close: X, back: ChevronLeft,
+  next: ChevronRight, copy: Copy, edit: Pencil, delete: Trash2, password: KeyRound,
+  refresh: RefreshCw, upload: Upload, download: Download, shield: Shield,
+  network: Network, document: FileText, attachment: Paperclip, mail: Mail,
+  phone: Phone, settings: Settings, info: Info, play: Play, location: MapPin,
+  link: ExternalLink, scan: ScanSearch, database: Database, users: Users,
+  'link-search': Link2, 'neural-accuracy': BrainCircuit, 'ocr-identifiers': Image,
+  'payment-identifiers': CreditCard, 'personnel-directory': UserRound,
+  'critical-action': Siren, 'live-cases': FileText, 'investigator-protocol': Shield,
+  'operational-nodes': Network, 'other-threats': AlertTriangle,
+  'phishing-links': Link2, 'scam-phone-tab': Phone,
 };
 
 export default function UiIcon({ name, size = 20, label, decorative = !label, style, ...rest }) {
@@ -28,15 +42,17 @@ export default function UiIcon({ name, size = 20, label, decorative = !label, st
     );
   }
 
+  const Icon = ICONS[name] || Circle;
   return (
-    <span
+    <Icon
+      size={size}
+      strokeWidth={1.9}
+      aria-hidden={decorative ? 'true' : undefined}
       role={decorative ? undefined : 'img'}
       aria-label={decorative ? undefined : label}
-      aria-hidden={decorative ? 'true' : undefined}
-      style={{ display: 'inline-flex', width: size, height: size, alignItems: 'center', justifyContent: 'center', lineHeight: 1, fontSize: size * 0.9, fontWeight: 800, ...style }}
+      data-missing-icon={!ICONS[name] ? name : undefined}
+      style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0, ...style }}
       {...rest}
-    >
-      {SYMBOLS[name] || '•'}
-    </span>
+    />
   );
 }

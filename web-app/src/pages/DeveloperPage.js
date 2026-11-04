@@ -18,7 +18,7 @@ const JsonView = ({ obj }) => (
   }}>
     {Object.entries(obj).map(([key, value]) => (
       <div key={key} style={{ marginBottom: 4 }}>
-        <span style={{ color: '#00B4FF', fontWeight: 600 }}>{key}</span>: 
+        <span style={{ color: '#EFEDE8', fontWeight: 600 }}>{key}</span>: 
         {typeof value === 'object' && value !== null ? (
           <JsonView obj={value} />
         ) : (
@@ -65,7 +65,8 @@ export default function DeveloperPage() {
       setCodebaseTree(res.data.data.codebase);
     } catch (err) {
       console.error(err);
-      toast.error('Failed to access secure codebase');
+      const msg = err.response?.data?.message || 'Failed to access secure codebase';
+toast.error(msg);
     } finally {
       setIsLoadingCode(false);
     }
@@ -77,7 +78,7 @@ export default function DeveloperPage() {
       <div key={node.name + i} style={{ paddingLeft: pad, marginBottom: 5 }}>
         {node.type === 'directory' ? (
           <div>
-            <span style={{ color: '#00B4FF', marginRight: 5 }}>▤</span>
+            <span style={{ color: '#EFEDE8', marginRight: 5 }}>â–¤</span>
             <span style={{ color: '#A9B1D6', fontFamily: 'monospace', fontSize: 13 }}>{node.name}</span>
             <div>{renderFileTree(node.children, pad + 15)}</div>
           </div>
@@ -90,7 +91,7 @@ export default function DeveloperPage() {
               padding: '2px 5px', borderRadius: 4
             }}
           >
-            <span style={{ color: '#00FF88', marginRight: 5 }}>▤</span>
+            <span style={{ color: '#00FF88', marginRight: 5 }}>â–¤</span>
             <span style={{ color: selectedFile?.name === node.name ? '#00FF88' : '#888', fontFamily: 'monospace', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
           </div>
         )}
@@ -181,12 +182,12 @@ export default function DeveloperPage() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      minHeight: '100dvh',
       background: '#02060A',
       color: '#fff',
       display: 'flex',
       flexDirection: 'column',
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: 'var(--font-sans)'
     }}>
       {/* HEADER */}
       <header style={{
@@ -205,7 +206,7 @@ export default function DeveloperPage() {
             transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
             style={{ width: 30, height: 30, border: '2px dashed #00FF88', borderRadius: '50%' }}
           />
-          <h1 style={{ margin: 0, fontSize: '20px', fontFamily: 'Orbitron, monospace', letterSpacing: '3px', color: '#00FF88' }}>
+          <h1 style={{ margin: 0, fontSize: '20px', fontFamily: 'var(--font-sans)', letterSpacing: '3px', color: '#00FF88' }}>
             DEVELOPER OVERRIDE <span style={{ color: '#fff', opacity: 0.5 }}>// ROOT ACCESS</span>
           </h1>
         </div>
@@ -216,7 +217,7 @@ export default function DeveloperPage() {
           padding: '8px 20px',
           borderRadius: '4px',
           cursor: 'pointer',
-          fontFamily: 'Orbitron, monospace'
+          fontFamily: 'var(--font-sans)'
         }}>
           EXIT GOD MODE
         </button>
@@ -246,7 +247,7 @@ export default function DeveloperPage() {
               style={{
                 padding: '15px 30px',
                 cursor: 'pointer',
-                fontFamily: 'Orbitron, monospace',
+                fontFamily: 'var(--font-sans)',
                 fontSize: '14px',
                 letterSpacing: '1px',
                 background: activeTab === tab ? 'rgba(0, 255, 136, 0.1)' : 'transparent',
@@ -266,7 +267,7 @@ export default function DeveloperPage() {
           
           {activeTab === 'database' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <h2 style={{ fontFamily: 'Orbitron, monospace', color: '#00FF88', marginTop: 0 }}>RAW DATABASE METRICS</h2>
+              <h2 style={{ fontFamily: 'var(--font-sans)', color: '#00FF88', marginTop: 0 }}>RAW DATABASE METRICS</h2>
               <div style={{ display: 'flex', gap: 20, marginBottom: 40 }}>
                 <div style={{ flex: 1, background: 'rgba(255,255,255,0.02)', padding: 30, borderRadius: 12, border: '1px solid rgba(0,255,136,0.1)' }}>
                   <div style={{ fontSize: 48, fontWeight: 800, color: '#fff' }}>{dbData.users.length}</div>
@@ -309,8 +310,8 @@ export default function DeveloperPage() {
                         alignItems: 'center'
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00FFD1', boxShadow: '0 0 10px #00FFD1' }} />
-                          <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 12, color: '#fff' }}>RECORD: {c.complaintId || c._id}</span>
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00FFD1', boxShadow: 'none' }} />
+                          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: '#fff' }}>RECORD: {c.complaintId || c._id}</span>
                         </div>
                         <span style={{ fontSize: 10, color: '#5A6480', fontFamily: 'monospace' }}>_id: {c._id}</span>
                       </div>
@@ -328,7 +329,7 @@ export default function DeveloperPage() {
           {activeTab === 'developer' && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
-                <h2 style={{ fontFamily: 'Orbitron, monospace', color: '#00FFD1', margin: 0, textShadow: '0 0 10px rgba(0, 255, 209, 0.5)' }}>SYSTEM ARCHITECTURE // BLOCK DIAGRAM</h2>
+                <h2 style={{ fontFamily: 'var(--font-sans)', color: '#00FFD1', margin: 0, textShadow: '0 0 10px rgba(0, 255, 209, 0.5)' }}>SYSTEM ARCHITECTURE // BLOCK DIAGRAM</h2>
                 <button 
                   onClick={() => showCodebase ? setShowCodebase(false) : handleAccessCodebase()}
                   style={{
@@ -336,7 +337,7 @@ export default function DeveloperPage() {
                     border: showCodebase ? '1px solid #FF0055' : '1px solid #00FF88',
                     color: showCodebase ? '#FF0055' : '#00FF88',
                     padding: '8px 16px', borderRadius: 8, cursor: 'pointer',
-                    fontFamily: 'Orbitron, monospace', fontSize: 12
+                    fontFamily: 'var(--font-sans)', fontSize: 12
                   }}
                 >
                   {showCodebase ? 'EXIT CODEBASE' : 'ACCESS CODEBASE'}
@@ -350,9 +351,9 @@ export default function DeveloperPage() {
                     width: '300px', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(0,180,255,0.3)',
                     borderRadius: 12, padding: 15, overflowY: 'auto', display: 'flex', flexDirection: 'column'
                   }}>
-                    <div style={{ color: '#00B4FF', fontFamily: 'Orbitron, monospace', marginBottom: 15, borderBottom: '1px solid rgba(0,180,255,0.2)', paddingBottom: 10 }}>SYSTEM REPOSITORY</div>
+                    <div style={{ color: '#EFEDE8', fontFamily: 'var(--font-sans)', marginBottom: 15, borderBottom: '1px solid #242422', paddingBottom: 10 }}>SYSTEM REPOSITORY</div>
                     {isLoadingCode ? (
-                      <div style={{ color: '#00B4FF', fontFamily: 'monospace', fontSize: 12, marginTop: 20 }}>Scanning secure sectors...</div>
+                      <div style={{ color: '#EFEDE8', fontFamily: 'monospace', fontSize: 12, marginTop: 20 }}>Scanning secure sectors...</div>
                     ) : (
                       <div style={{ flex: 1 }}>{renderFileTree(codebaseTree)}</div>
                     )}
@@ -363,7 +364,7 @@ export default function DeveloperPage() {
                     flex: 1, background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(0,255,136,0.3)',
                     borderRadius: 12, padding: 20, overflowY: 'auto', display: 'flex', flexDirection: 'column'
                   }}>
-                    <div style={{ color: '#00FF88', fontFamily: 'Orbitron, monospace', marginBottom: 15, borderBottom: '1px solid rgba(0,255,136,0.2)', paddingBottom: 10 }}>
+                    <div style={{ color: '#00FF88', fontFamily: 'var(--font-sans)', marginBottom: 15, borderBottom: '1px solid rgba(0,255,136,0.2)', paddingBottom: 10 }}>
                       {selectedFile ? `VIEWING: ${selectedFile.name}` : 'AWAITING FILE SELECTION...'}
                     </div>
                     {selectedFile ? (
@@ -378,7 +379,7 @@ export default function DeveloperPage() {
                   </div>
                 </div>
               ) : (
-                <div style={{ position: 'relative', width: '100%', height: 600, background: 'radial-gradient(circle at center, rgba(0, 180, 255, 0.05) 0%, transparent 70%)', border: '1px solid rgba(0, 180, 255, 0.2)', borderRadius: 20, overflow: 'hidden' }}>
+                <div style={{ position: 'relative', width: '100%', height: 600, background: '#0E0E0E', border: '1px solid #242422', borderRadius: 20, overflow: 'hidden' }}>
                   {/* SVG Connections with data packets (pipelining) */}
                   <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
                     <defs>
@@ -413,38 +414,38 @@ export default function DeveloperPage() {
                   </svg>
 
                   {/* WEB APP BLOCK */}
-                  <div style={{ position: 'absolute', top: 200, left: 200, transform: 'translate(-50%, -50%)', width: 160, height: 80, background: 'rgba(3, 15, 25, 0.9)', border: '2px solid #00B4FF', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(0, 180, 255, 0.3)', flexDirection: 'column', zIndex: 2 }}>
-                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'Orbitron', letterSpacing: 1 }}>WEB APP</div>
-                    <div style={{ color: '#00B4FF', fontSize: 10, marginTop: 4 }}>REACT.JS</div>
+                  <div style={{ position: 'absolute', top: 200, left: 200, transform: 'translate(-50%, -50%)', width: 160, height: 80, background: '#141414', border: '1px solid #242422', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'none', flexDirection: 'column', zIndex: 2 }}>
+                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'var(--font-sans)', letterSpacing: 1 }}>WEB APP</div>
+                    <div style={{ color: '#EFEDE8', fontSize: 10, marginTop: 4 }}>REACT.JS</div>
                   </div>
 
                   {/* MOBILE APP BLOCK */}
-                  <div style={{ position: 'absolute', top: 400, left: 200, transform: 'translate(-50%, -50%)', width: 160, height: 80, background: 'rgba(3, 15, 25, 0.9)', border: '2px solid #00B4FF', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(0, 180, 255, 0.3)', flexDirection: 'column', zIndex: 2 }}>
-                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'Orbitron', letterSpacing: 1 }}>MOBILE APP</div>
-                    <div style={{ color: '#00B4FF', fontSize: 10, marginTop: 4 }}>REACT NATIVE</div>
+                  <div style={{ position: 'absolute', top: 400, left: 200, transform: 'translate(-50%, -50%)', width: 160, height: 80, background: '#141414', border: '1px solid #242422', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'none', flexDirection: 'column', zIndex: 2 }}>
+                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'var(--font-sans)', letterSpacing: 1 }}>MOBILE APP</div>
+                    <div style={{ color: '#EFEDE8', fontSize: 10, marginTop: 4 }}>REACT NATIVE</div>
                   </div>
 
                   {/* BACKEND API BLOCK */}
-                  <div style={{ position: 'absolute', top: 300, left: 500, transform: 'translate(-50%, -50%)', width: 180, height: 100, background: 'rgba(3, 15, 25, 0.95)', border: '3px solid #00B4FF', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 40px rgba(0, 180, 255, 0.5)', flexDirection: 'column', zIndex: 2 }}>
-                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'Orbitron', fontSize: 16, letterSpacing: 1 }}>BACKEND CORE</div>
-                    <div style={{ color: '#00B4FF', fontSize: 12, marginTop: 4 }}>NODE.JS / EXPRESS</div>
+                  <div style={{ position: 'absolute', top: 300, left: 500, transform: 'translate(-50%, -50%)', width: 180, height: 100, background: '#141414', border: '1px solid #2C2B28', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'none', flexDirection: 'column', zIndex: 2 }}>
+                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'var(--font-sans)', fontSize: 16, letterSpacing: 1 }}>BACKEND CORE</div>
+                    <div style={{ color: '#EFEDE8', fontSize: 12, marginTop: 4 }}>NODE.JS / EXPRESS</div>
                     <div style={{ color: '#888', fontSize: 10, marginTop: 10 }}>THROUGHPUT: 12ms</div>
                   </div>
 
                   {/* ML SERVICES BLOCK */}
-                  <div style={{ position: 'absolute', top: 200, left: 800, transform: 'translate(-50%, -50%)', width: 160, height: 80, background: 'rgba(3, 15, 25, 0.9)', border: '2px solid #FF0055', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(255, 0, 85, 0.3)', flexDirection: 'column', zIndex: 2 }}>
-                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'Orbitron', letterSpacing: 1 }}>ML SERVICES</div>
+                  <div style={{ position: 'absolute', top: 200, left: 800, transform: 'translate(-50%, -50%)', width: 160, height: 80, background: '#141414', border: '2px solid #FF0055', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'none', flexDirection: 'column', zIndex: 2 }}>
+                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'var(--font-sans)', letterSpacing: 1 }}>ML SERVICES</div>
                     <div style={{ color: '#FF0055', fontSize: 10, marginTop: 4 }}>PYTHON / TENSORFLOW</div>
                   </div>
 
                   {/* DATABASE BLOCK */}
-                  <div style={{ position: 'absolute', top: 400, left: 800, transform: 'translate(-50%, -50%)', width: 160, height: 80, background: 'rgba(3, 15, 25, 0.9)', border: '2px solid #00FF88', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 20px rgba(0, 255, 136, 0.3)', flexDirection: 'column', zIndex: 2 }}>
-                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'Orbitron', letterSpacing: 1 }}>DATABASE</div>
+                  <div style={{ position: 'absolute', top: 400, left: 800, transform: 'translate(-50%, -50%)', width: 160, height: 80, background: '#141414', border: '2px solid #00FF88', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'none', flexDirection: 'column', zIndex: 2 }}>
+                    <div style={{ color: '#fff', fontWeight: 'bold', fontFamily: 'var(--font-sans)', letterSpacing: 1 }}>DATABASE</div>
                     <div style={{ color: '#00FF88', fontSize: 10, marginTop: 4 }}>MONGODB</div>
                   </div>
                   
                   {/* Floating Metrics Overlay */}
-                  <div style={{ position: 'absolute', top: 30, left: 30, background: 'rgba(0,0,0,0.7)', padding: '15px 20px', borderLeft: '4px solid #00B4FF', fontFamily: 'monospace', color: '#00B4FF', borderRadius: 4, backdropFilter: 'blur(10px)', zIndex: 3 }}>
+                  <div style={{ position: 'absolute', top: 30, left: 30, background: 'var(--bg-card)', padding: '15px 20px', border: '1px solid var(--border)', fontFamily: 'var(--font-mono)', color: 'var(--primary)', borderRadius: 'var(--radius-sm)', backdropFilter: 'none', zIndex: 3 }}>
                     <div style={{ marginBottom: 5 }}>SERVER LOAD: <span style={{ color: '#fff', fontWeight: 'bold' }}>24%</span></div>
                     <div style={{ marginBottom: 5 }}>ACTIVE SOCKETS: <span style={{ color: '#fff', fontWeight: 'bold' }}>142</span></div>
                     <div>UPTIME: <span style={{ color: '#fff', fontWeight: 'bold' }}>99.99%</span></div>
@@ -456,10 +457,10 @@ export default function DeveloperPage() {
 
           {activeTab === 'accounts' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <h2 style={{ fontFamily: 'Orbitron, monospace', color: '#00FF88', marginTop: 0 }}>GLOBAL IDENTITY MANAGEMENT</h2>
+              <h2 style={{ fontFamily: 'var(--font-sans)', color: '#00FF88', marginTop: 0 }}>GLOBAL IDENTITY MANAGEMENT</h2>
               <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 20 }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(0,255,136,0.2)', color: '#888', textAlign: 'left', fontFamily: 'Orbitron, monospace', fontSize: 12 }}>
+                  <tr style={{ borderBottom: '1px solid rgba(0,255,136,0.2)', color: '#888', textAlign: 'left', fontFamily: 'var(--font-sans)', fontSize: 12 }}>
                     <th style={{ padding: '15px' }}>ID</th>
                     <th style={{ padding: '15px' }}>NAME / EMAIL</th>
                     <th style={{ padding: '15px' }}>CURRENT ROLE</th>
@@ -505,7 +506,7 @@ export default function DeveloperPage() {
 
           {activeTab === 'ai' && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <h2 style={{ fontFamily: 'Orbitron, monospace', color: '#00FF88', marginTop: 0 }}>FRIDAY: DEVELOPER ASSISTANT</h2>
+              <h2 style={{ fontFamily: 'var(--font-sans)', color: '#00FF88', marginTop: 0 }}>FRIDAY: DEVELOPER ASSISTANT</h2>
               <div style={{ 
                 flex: 1, background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(0,255,136,0.1)', 
                 borderRadius: 12, padding: 20, display: 'flex', flexDirection: 'column',
@@ -518,7 +519,7 @@ export default function DeveloperPage() {
                       maxWidth: '80%', display: 'flex', gap: 15
                     }}>
                       {msg.role === 'ai' && (
-                        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,255,136,0.1)', border: '1px solid #00FF88', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00FF88', fontFamily: 'Orbitron, monospace', fontWeight: 'bold' }}>
+                        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,255,136,0.1)', border: '1px solid #00FF88', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00FF88', fontFamily: 'var(--font-sans)', fontWeight: 'bold' }}>
                           F
                         </div>
                       )}
@@ -552,7 +553,7 @@ export default function DeveloperPage() {
                   <button type="submit" style={{
                     background: '#00FF88', color: '#000', border: 'none', padding: '0 30px',
                     borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer',
-                    fontFamily: 'Orbitron, monospace', letterSpacing: 1
+                    fontFamily: 'var(--font-sans)', letterSpacing: 1
                   }}>
                     EXECUTE
                   </button>
@@ -578,3 +579,4 @@ export default function DeveloperPage() {
     </div>
   );
 }
+

@@ -10,6 +10,7 @@ import { authAPI, userAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import * as faceapi from '@vladmandic/face-api';
 import { getAvatarUrl } from '../utils/avatar';
+import { Bell, Palette, Globe, Wifi, Shield, User, Camera, Lock, Check } from 'lucide-react';
 
 const Settings = () => {
   const { user, logout, syncUser } = useAuthStore();
@@ -83,7 +84,7 @@ const Settings = () => {
       const objectUrl = URL.createObjectURL(file);
       setAvatarPreview(objectUrl);
 
-      const toastId = toast.loading('Uploading neural signature...');
+      const toastId = toast.loading('Uploading avatar signature...');
       try {
         const fd = new FormData();
         fd.append('avatar', file);
@@ -133,7 +134,7 @@ const Settings = () => {
       !settings.instantPurge 
         ? 'Instant Purge Activated: Sessions will self-destruct on idle.'
         : 'Instant Purge Deactivated.',
-      { icon: !settings.instantPurge ? '!' : '◈' }
+      { icon: !settings.instantPurge ? '!' : '✓' }
     );
   };
 
@@ -153,7 +154,6 @@ const Settings = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        // Start automated scanning loop
         scanIntervalRef.current = setInterval(performScan, 600);
       }
     } catch (err) {
@@ -172,12 +172,9 @@ const Settings = () => {
       }
       
       setScanStatus('Slowly turn your head in a circle...');
-      
-      // Save descriptor
       descriptorsRef.current.push(Array.from(detection.descriptor));
       const currentCount = descriptorsRef.current.length;
       
-      // 5 captures for a complete profile
       const newProgress = Math.min((currentCount / 5) * 100, 100);
       setScanProgress(newProgress);
       
@@ -185,7 +182,6 @@ const Settings = () => {
         clearInterval(scanIntervalRef.current);
         setScanStatus('Finalizing Biometric Hash...');
         
-        // Average the 5 descriptors for a highly robust "iPhone style" hash
         let averagedDescriptor = new Array(128).fill(0);
         for (let desc of descriptorsRef.current) {
           for (let i = 0; i < 128; i++) {
@@ -215,27 +211,33 @@ const Settings = () => {
   };
 
   const tabs = [
-    { id: 'about', label: t('SETTINGS.PROFILE', 'About Me'), icon: <img src="/icons/cyberguard/profile-user.svg" alt="" style={{ width: 20, height: 20, objectFit: "contain", verticalAlign: "middle" }} /> },
-    { id: 'notifications', label: t('SETTINGS.NOTIFICATIONS', 'Notifications'), icon: '•' },
-    { id: 'theme', label: t('SETTINGS.APPEARANCE', 'Display & Theme'), icon: '◈' },
-    { id: 'language', label: t('SETTINGS.LANGUAGE_TAB', 'Language'), icon: '◉' },
-    { id: 'internet', label: 'Internet & Connection', icon: '⌁' },
-    { id: 'security', label: t('SETTINGS.SECURITY', 'Security'), icon: '◈' },
+    { id: 'about', label: t('SETTINGS.PROFILE', 'About Me'), icon: <User size={16} /> },
+    { id: 'notifications', label: t('SETTINGS.NOTIFICATIONS', 'Notifications'), icon: <Bell size={16} /> },
+    { id: 'theme', label: t('SETTINGS.APPEARANCE', 'Display & Theme'), icon: <Palette size={16} /> },
+    { id: 'language', label: t('SETTINGS.LANGUAGE_TAB', 'Language'), icon: <Globe size={16} /> },
+    { id: 'internet', label: 'Internet & Connection', icon: <Wifi size={16} /> },
+    { id: 'security', label: t('SETTINGS.SECURITY', 'Security'), icon: <Shield size={16} /> },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
       case 'about':
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="setting-panel">
-            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '40px' }}>User Identity Terminal</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '32px', marginBottom: '48px' }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="setting-panel">
+            <h2 style={{ fontSize: '24px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif", letterSpacing: '0.5px', marginBottom: '32px', color: '#f2f0ea' }}>
+              User Identity Terminal
+            </h2>
+            
+            {/* Avatar & Upload */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '28px', marginBottom: '40px' }}>
               <div style={{ 
-                width: 100, height: 100, borderRadius: '40px', 
-                background: 'linear-gradient(135deg, #007AFF, #00FFD1)',
+                width: 88, height: 88, borderRadius: '24px', 
+                background: '#141414',
+                border: '1px solid #30302d',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                fontSize: '40px', fontWeight: 900, color: '#fff', 
-                boxShadow: '0 20px 40px rgba(0, 122, 255, 0.3)', overflow: 'hidden' 
+                fontSize: '36px', fontWeight: 800, color: '#f2f0ea', 
+                boxShadow: 'none', overflow: 'hidden',
+                fontFamily: "'IBM Plex Sans', sans-serif"
               }}>
                 {avatarPreview ? (
                   <img 
@@ -245,38 +247,91 @@ const Settings = () => {
                     onError={() => setAvatarPreview(null)} 
                   />
                 ) : (
-                  user?.name?.[0]
+                  user?.name?.[0]?.toUpperCase() || 'U'
                 )}
               </div>
               <div>
                 <input type="file" ref={fileInputRef} onChange={handleAvatarChange} style={{ display: 'none' }} accept="image/*" />
-                <button className="liquid-btn-secondary" onClick={() => fileInputRef.current.click()}>Modify Neural Signature</button>
-                <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', marginTop: 12, fontWeight: 600 }}>Biometric Avatar (PNG/JPG up to 5MB)</div>
+                <button 
+                  className="liquid-btn-secondary" 
+                  onClick={() => fileInputRef.current.click()}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <Camera size={14} />
+                  Modify Neural Signature
+                </button>
+                <div style={{ fontSize: '12px', color: '#777', marginTop: 10, fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                  Biometric Avatar (PNG/JPG up to 5MB)
+                </div>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '32px', marginBottom: '48px' }}>
+
+            {/* Profile Fields */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', marginBottom: '40px' }}>
               <div>
                 <label className="setting-label">Designation</label>
-                <input className="liquid-input" style={{ width: '100%', boxSizing: 'border-box' }} value={isEditingProfile ? profileData.name : user?.name} onChange={(e) => setProfileData({...profileData, name: e.target.value})} readOnly={!isEditingProfile} />
+                <input 
+                  className="liquid-input" 
+                  style={{ width: '100%', boxSizing: 'border-box' }} 
+                  value={isEditingProfile ? profileData.name : user?.name} 
+                  onChange={(e) => setProfileData({...profileData, name: e.target.value})} 
+                  readOnly={!isEditingProfile} 
+                />
               </div>
               <div>
                 <label className="setting-label">Neural Email</label>
-                <input className="liquid-input" style={{ width: '100%', boxSizing: 'border-box' }} value={user?.email} readOnly={true} style={{ opacity: 0.7 }} />
+                <input 
+                  className="liquid-input" 
+                  style={{ width: '100%', boxSizing: 'border-box', opacity: 0.7 }} 
+                  value={user?.email || ''} 
+                  readOnly={true} 
+                />
               </div>
               <div>
                 <label className="setting-label">Mobile Uplink</label>
-                <input className="liquid-input" style={{ width: '100%', boxSizing: 'border-box' }} value={isEditingProfile ? profileData.phone : (user?.phone || 'Not Configured')} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} readOnly={!isEditingProfile} placeholder="+91..." />
+                <input 
+                  className="liquid-input" 
+                  style={{ width: '100%', boxSizing: 'border-box' }} 
+                  value={isEditingProfile ? profileData.phone : (user?.phone || 'Not Configured')} 
+                  onChange={(e) => setProfileData({...profileData, phone: e.target.value})} 
+                  readOnly={!isEditingProfile} 
+                  placeholder="+91..." 
+                />
               </div>
               <div>
                 <label className="setting-label">Clearance Role</label>
-                <div style={{ padding: '16px 20px', background: 'rgba(0, 122, 255, 0.1)', borderRadius: '16px', color: '#007AFF', fontWeight: 800, fontSize: '14px', letterSpacing: '1px' }}>{user?.role?.toUpperCase()}</div>
+                <div style={{ 
+                  padding: '14px 20px', 
+                  background: '#141414', 
+                  border: '1px solid #30302d', 
+                  borderRadius: '14px', 
+                  color: '#f2f0ea', 
+                  fontWeight: 700, 
+                  fontSize: '13px', 
+                  letterSpacing: '1px',
+                  fontFamily: "'IBM Plex Mono', monospace"
+                }}>
+                  {user?.role?.toUpperCase() || 'USER'}
+                </div>
               </div>
               <div>
                 <label className="setting-label">Active Terminal</label>
-                <div style={{ padding: '16px 20px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', color: 'rgba(255,255,255,0.4)', fontSize: '14px', fontWeight: 600 }}>{deviceInfo}</div>
+                <div style={{ 
+                  padding: '14px 20px', 
+                  background: '#141414', 
+                  border: '1px solid #30302d', 
+                  borderRadius: '14px', 
+                  color: '#b8b8b0', 
+                  fontSize: '13px', 
+                  fontFamily: "'IBM Plex Mono', monospace"
+                }}>
+                  {deviceInfo}
+                </div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '20px', paddingBottom: '40px', borderBottom: '1px solid rgba(255,255,255,0.05)', flexWrap: 'wrap' }}>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '16px', paddingBottom: '36px', borderBottom: '1px solid #292927', flexWrap: 'wrap' }}>
               {isEditingProfile ? (
                 <>
                   <button className="liquid-btn-primary" onClick={handleProfileSave}>SYNCHRONIZE CHANGES</button>
@@ -286,7 +341,7 @@ const Settings = () => {
                 <>
                   <button className="liquid-btn-primary" onClick={() => setIsEditingProfile(true)}>EDIT PROFILE DATA</button>
                   {user?.email === 'pruthvishetty04@gmail.com' && (
-                    <button className="liquid-btn-secondary" onClick={startFaceEnrollment} style={{ border: '1px solid #00B4FF', color: '#00B4FF' }}>SETUP J.A.R.V.I.S. FACE ID</button>
+                    <button className="liquid-btn-secondary" onClick={startFaceEnrollment}>SETUP J.A.R.V.I.S. FACE ID</button>
                   )}
                 </>
               )}
@@ -294,90 +349,103 @@ const Settings = () => {
             
             {/* FACE ID ENROLLMENT MODAL */}
             {isEnrollingFace && (
-              <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(2,6,10,0.95)', backdropFilter: 'blur(10px)', zIndex: 99999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <h3 style={{ color: '#00B4FF', fontFamily: 'Orbitron', margin: '0 0 20px 0', fontSize: '24px', letterSpacing: '2px' }}>BIOMETRIC SCANNER ACTIVE</h3>
+              <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(7,7,7,0.96)', zIndex: 99999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <h3 style={{ color: '#f2f0ea', fontFamily: "'IBM Plex Sans', sans-serif", margin: '0 0 20px 0', fontSize: '24px', letterSpacing: '2px', fontWeight: 700 }}>
+                  BIOMETRIC SCANNER ACTIVE
+                </h3>
                 
-                <div style={{ position: 'relative', width: 340, height: 340, marginBottom: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {/* iPhone Style Circular Progress Ring */}
-                  <svg width="340" height="340" style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)', zIndex: 2 }}>
-                    <circle cx="170" cy="170" r="160" fill="none" stroke="rgba(0,180,255,0.1)" strokeWidth="10" />
-                    <circle cx="170" cy="170" r="160" fill="none" stroke="#00B4FF" strokeWidth="10" strokeDasharray="1005" strokeDashoffset={1005 - (1005 * scanProgress) / 100} style={{ transition: 'stroke-dashoffset 0.5s ease' }} strokeLinecap="round" />
+                <div style={{ position: 'relative', width: 320, height: 320, marginBottom: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="320" height="320" style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)', zIndex: 2 }}>
+                    <circle cx="160" cy="160" r="150" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
+                    <circle cx="160" cy="160" r="150" fill="none" stroke="#f2f0ea" strokeWidth="8" strokeDasharray="942" strokeDashoffset={942 - (942 * scanProgress) / 100} style={{ transition: 'stroke-dashoffset 0.5s ease' }} strokeLinecap="round" />
                   </svg>
                   
-                  <div style={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', overflow: 'hidden', zIndex: 1, boxShadow: '0 0 40px rgba(0,180,255,0.2)' }}>
+                  <div style={{ position: 'absolute', width: 280, height: 280, borderRadius: '50%', overflow: 'hidden', zIndex: 1, border: '2px solid #30302d' }}>
                     <video ref={videoRef} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }} />
-                    {!isModelsLoaded && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#00B4FF', fontWeight: 'bold' }}>LOADING...</div>}
+                    {!isModelsLoaded && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: '#f2f0ea', fontWeight: 'bold', fontFamily: "'IBM Plex Sans', sans-serif" }}>LOADING...</div>}
                   </div>
                 </div>
                 
-                <div style={{ color: '#fff', fontSize: '18px', fontWeight: 600, marginBottom: '40px', fontFamily: 'Inter', textAlign: 'center', height: '30px' }}>
+                <div style={{ color: '#b8b8b0', fontSize: '16px', fontWeight: 600, marginBottom: '32px', fontFamily: "'IBM Plex Sans', sans-serif", textAlign: 'center', height: '30px' }}>
                   {scanStatus}
-                  {scanProgress > 0 && scanProgress < 100 && <span style={{ display: 'block', color: '#00B4FF', fontSize: '14px', marginTop: 10 }}>{scanProgress}% Completed</span>}
+                  {scanProgress > 0 && scanProgress < 100 && <span style={{ display: 'block', color: '#f2f0ea', fontSize: '13px', marginTop: 8, fontFamily: "'IBM Plex Mono', monospace" }}>{scanProgress}% Completed</span>}
                 </div>
 
-                <button className="liquid-btn-secondary" onClick={closeCamera} style={{ padding: '12px 40px', fontSize: '16px', zIndex: 999999, position: 'relative' }}>ABORT SCAN</button>
+                <button className="liquid-btn-secondary" onClick={closeCamera} style={{ padding: '12px 36px', fontSize: '14px', zIndex: 999999, position: 'relative' }}>ABORT SCAN</button>
               </div>
             )}
             
-            <div style={{ marginTop: 40 }}>
-              <button className="liquid-btn-danger" onClick={logout} style={{ background: 'rgba(255, 59, 48, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, letterSpacing: '1px' }}>TERMINATE SECURE SESSION / LOGOUT</button>
+            <div style={{ marginTop: 32 }}>
+              <button className="liquid-btn-danger" onClick={logout}>
+                TERMINATE SECURE SESSION / LOGOUT
+              </button>
             </div>
           </motion.div>
         );
       case 'notifications':
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="setting-panel">
-            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '40px' }}>Dispatch Comms</h2>
-            <ToggleRow label="Push Broadcasts" desc="Real-time alerts for incoming neural threats" active={settings.pushNotifications} onClick={() => settings.setSetting('pushNotifications', !settings.pushNotifications)} />
-            <ToggleRow label="Direct Intel Comms" desc="Receive direct messages from field agents" active={settings.directMessages} onClick={() => settings.setSetting('directMessages', !settings.directMessages)} />
-            <ToggleRow label="System Diagnostic Reports" desc="Weekly breakdown of security health" active={settings.systemUpdates} onClick={() => settings.setSetting('systemUpdates', !settings.systemUpdates)} />
-            <ToggleRow label="Critical Breach Alarms" desc="High-priority overrides for critical alerts" active={settings.criticalAlerts} onClick={() => settings.setSetting('criticalAlerts', !settings.criticalAlerts)} />
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="setting-panel">
+            <h2 style={{ fontSize: '24px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif", letterSpacing: '0.5px', marginBottom: '32px', color: '#f2f0ea' }}>
+              Dispatch Comms
+            </h2>
+            <ToggleRow label="Push Broadcasts" desc="Real-time alerts for incoming threat intelligence" active={settings.pushNotifications} onClick={() => settings.setSetting('pushNotifications', !settings.pushNotifications)} />
+            <ToggleRow label="Direct Intel Comms" desc="Receive direct messages from field agents and officers" active={settings.directMessages} onClick={() => settings.setSetting('directMessages', !settings.directMessages)} />
+            <ToggleRow label="System Diagnostic Reports" desc="Weekly breakdown of account security health" active={settings.systemUpdates} onClick={() => settings.setSetting('systemUpdates', !settings.systemUpdates)} />
+            <ToggleRow label="Critical Breach Alarms" desc="High-priority overrides for urgent critical alerts" active={settings.criticalAlerts} onClick={() => settings.setSetting('criticalAlerts', !settings.criticalAlerts)} />
           </motion.div>
         );
       case 'theme':
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="setting-panel">
-            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '40px' }}>Visual Architecture</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: 40 }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="setting-panel">
+            <h2 style={{ fontSize: '24px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif", letterSpacing: '0.5px', marginBottom: '32px', color: '#f2f0ea' }}>
+              Visual Architecture
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: 32 }}>
               {['dark', 'matrix', 'cyber'].map(t => (
-                <div key={t} onClick={() => setTheme(t)} style={{
-                  padding: '24px', borderRadius: '24px', cursor: 'pointer',
-                  background: theme === t ? 'rgba(0, 122, 255, 0.15)' : 'rgba(255,255,255,0.03)',
-                  border: theme === t ? '2px solid #007AFF' : '1px solid rgba(255,255,255,0.05)',
-                  boxShadow: theme === t ? '0 10px 30px rgba(0, 122, 255, 0.3)' : 'none',
-                  transition: '0.4s'
-                }}>
-                  <div style={{ fontSize: '20px', fontWeight: 800, textTransform: 'capitalize', marginBottom: 8, color: theme === t ? '#fff' : 'rgba(255,255,255,0.6)' }}>{t}</div>
-                  <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)' }}>{t === 'dark' ? 'Stealth Obsidian' : t === 'matrix' ? 'Terminal Emerald' : 'Neon Cyan'}</div>
+                <div 
+                  key={t} 
+                  onClick={() => setTheme(t)} 
+                  style={{
+                    padding: '24px', 
+                    borderRadius: '20px', 
+                    cursor: 'pointer',
+                    background: theme === t ? '#1c1c1a' : '#141414',
+                    border: theme === t ? '1px solid #f2f0ea' : '1px solid #30302d',
+                    boxShadow: 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ fontSize: '18px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif", textTransform: 'capitalize', marginBottom: 6, color: theme === t ? '#f2f0ea' : '#888880' }}>{t}</div>
+                  <div style={{ fontSize: '12px', color: '#777', fontFamily: "'IBM Plex Sans', sans-serif" }}>{t === 'dark' ? 'Stealth Obsidian' : t === 'matrix' ? 'Terminal Emerald' : 'Graphite Slate'}</div>
                 </div>
               ))}
             </div>
-            <ToggleRow label="Atmospheric Glow" desc="Enable high-fidelity volumetric lighting effects" active={settings.accentGlow} onClick={() => settings.setSetting('accentGlow', !settings.accentGlow)} />
+            <ToggleRow label="Atmospheric Glow" desc="Enable subtle volumetric ambient lighting accents" active={settings.accentGlow} onClick={() => settings.setSetting('accentGlow', !settings.accentGlow)} />
           </motion.div>
         );
       case 'language':
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="setting-panel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="setting-panel">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
               <div>
-                <h2 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 8px 0', background: 'linear-gradient(135deg, #00B4FF, #00FFD1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <h2 style={{ fontSize: '24px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif", margin: '0 0 8px 0', color: '#f2f0ea' }}>
                   {t('SETTINGS.LANGUAGE', 'Portal Language & Localization')}
                 </h2>
-                <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '13px', margin: 0, lineHeight: 1.5, maxWidth: '600px' }}>
-                  {t('SETTINGS.LANGUAGE_DESC', 'Cybercrime affects citizens across diverse linguistic regions. Select your preferred Indian language to translate all portal menus, intelligence feeds, and report forms in real time.')}
+                <p style={{ color: '#b8b8b0', fontSize: '13px', margin: 0, lineHeight: 1.6, maxWidth: '600px', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+                  {t('SETTINGS.LANGUAGE_DESC', 'Select your preferred Indian language to translate all portal menus, intelligence feeds, and incident reporting forms in real time.')}
                 </p>
               </div>
               <div style={{
-                background: 'rgba(0, 180, 255, 0.1)',
-                border: '1px solid rgba(0, 180, 255, 0.3)',
+                background: '#141414',
+                border: '1px solid #30302d',
                 padding: '8px 16px',
-                borderRadius: '12px',
+                borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                <span style={{ fontSize: '11px', color: '#8892B0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Current:</span>
-                <span style={{ fontSize: '13px', color: '#00FFD1', fontWeight: 800 }}>
+                <span style={{ fontSize: '11px', color: '#777', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', fontFamily: "'IBM Plex Sans', sans-serif" }}>Current:</span>
+                <span style={{ fontSize: '13px', color: '#f2f0ea', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif" }}>
                   {languages.find(l => l.code === currentLanguage)?.name} ({languages.find(l => l.code === currentLanguage)?.nativeName})
                 </span>
               </div>
@@ -386,124 +454,90 @@ const Settings = () => {
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '16px',
-              marginTop: '28px'
+              gap: '14px',
+              marginTop: '24px'
             }}>
               {languages.map(lang => {
                 const isActive = currentLanguage === lang.code;
                 return (
-                  <motion.div
+                  <div
                     key={lang.code}
                     onClick={() => {
                       setLanguage(lang.code);
                       toast.success(`${t('SETTINGS.LANGUAGE_SAVED', 'Language updated successfully to')} ${lang.name} (${lang.nativeName})`);
                     }}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
                     style={{
-                      padding: '22px 20px',
+                      padding: '20px',
                       borderRadius: '16px',
                       cursor: 'pointer',
-                      background: isActive ? 'linear-gradient(135deg, rgba(0, 180, 255, 0.18), rgba(0, 255, 209, 0.08))' : 'rgba(255, 255, 255, 0.03)',
-                      border: isActive ? '2px solid #00B4FF' : '1px solid rgba(255, 255, 255, 0.08)',
-                      boxShadow: isActive ? '0 0 25px rgba(0, 180, 255, 0.3)' : 'none',
-                      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                      background: isActive ? '#1c1c1a' : '#141414',
+                      border: isActive ? '1px solid #f2f0ea' : '1px solid #30302d',
+                      boxShadow: 'none',
+                      transition: 'all 0.2s ease',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '12px'
+                      gap: '10px'
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '32px' }}>{lang.flag}</span>
+                      <span style={{ fontSize: '28px' }}>{lang.flag}</span>
                       {isActive ? (
                         <span style={{
-                          background: 'linear-gradient(135deg, #00B4FF, #00FFD1)',
-                          color: '#02060A',
+                          background: '#f2f0ea',
+                          color: '#070707',
                           fontSize: '10px',
-                          fontWeight: 900,
+                          fontWeight: 800,
                           padding: '3px 10px',
-                          borderRadius: '20px',
+                          borderRadius: '8px',
                           textTransform: 'uppercase',
-                          letterSpacing: '1px'
+                          letterSpacing: '1px',
+                          fontFamily: "'IBM Plex Sans', sans-serif"
                         }}>
                           ACTIVE
                         </span>
                       ) : (
                         <span style={{
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          color: 'rgba(255, 255, 255, 0.4)',
+                          background: '#101010',
+                          color: '#777',
                           fontSize: '10px',
                           fontWeight: 700,
                           padding: '3px 8px',
-                          borderRadius: '20px',
-                          textTransform: 'uppercase'
+                          borderRadius: '6px',
+                          textTransform: 'uppercase',
+                          fontFamily: "'IBM Plex Mono', monospace"
                         }}>
                           {lang.code.toUpperCase()}
                         </span>
                       )}
                     </div>
                     <div>
-                      <div style={{ fontSize: '18px', fontWeight: 800, color: isActive ? '#00FFD1' : '#fff', letterSpacing: '0.3px', marginBottom: '2px' }}>
+                      <div style={{ fontSize: '17px', fontWeight: 700, color: '#f2f0ea', fontFamily: "'IBM Plex Sans', sans-serif", marginBottom: '2px' }}>
                         {lang.nativeName}
                       </div>
-                      <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>
+                      <div style={{ fontSize: '12px', color: '#777', fontFamily: "'IBM Plex Sans', sans-serif" }}>
                         {lang.name}
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
-            </div>
-
-            <div style={{
-              marginTop: '36px',
-              padding: '20px 24px',
-              background: 'rgba(255, 255, 255, 0.02)',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <span style={{ fontSize: '24px' }}>◈</span>
-                <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>
-                    Instant Real-Time Localization
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)' }}>
-                    Menus, cybercrime reporting forms, status trackers, and security alerts adapt instantly upon selection.
-                  </div>
-                </div>
-              </div>
-              <div style={{
-                fontSize: '11px',
-                fontWeight: 800,
-                color: '#00B4FF',
-                fontFamily: 'Orbitron, monospace',
-                letterSpacing: '1px',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                background: 'rgba(0, 180, 255, 0.1)',
-                border: '1px solid rgba(0, 180, 255, 0.3)'
-              }}>
-                PERSISTENT
-              </div>
             </div>
           </motion.div>
         );
       case 'internet':
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="setting-panel">
-            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '40px' }}>Neural Bandwidth</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: 40 }}>
-              <div style={{ padding: '24px', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="setting-panel">
+            <h2 style={{ fontSize: '24px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif", letterSpacing: '0.5px', marginBottom: '32px', color: '#f2f0ea' }}>
+              Neural Bandwidth
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: 32 }}>
+              <div style={{ padding: '24px', background: '#141414', borderRadius: '20px', border: '1px solid #30302d' }}>
                 <div className="setting-label">Sync Speed</div>
-                <div style={{ fontSize: '32px', fontWeight: 800, color: '#007AFF' }}>{networkInfo?.downlink || '0'} <span style={{ fontSize: 16 }}>Mbps</span></div>
+                <div style={{ fontSize: '28px', fontWeight: 700, color: '#f2f0ea', fontFamily: "'IBM Plex Mono', monospace" }}>{networkInfo?.downlink || '0'} <span style={{ fontSize: 15, color: '#777' }}>Mbps</span></div>
               </div>
-              <div style={{ padding: '24px', background: 'rgba(255,255,255,0.03)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="setting-label">Neural Latency</div>
-                <div style={{ fontSize: '32px', fontWeight: 800, color: '#34C759' }}>24 <span style={{ fontSize: 16 }}>ms</span></div>
+              <div style={{ padding: '24px', background: '#141414', borderRadius: '20px', border: '1px solid #30302d' }}>
+                <div className="setting-label">Latency Buffer</div>
+                <div style={{ fontSize: '28px', fontWeight: 700, color: '#EFEDE8', fontFamily: "'IBM Plex Mono', monospace" }}>24 <span style={{ fontSize: 15, color: '#777' }}>ms</span></div>
               </div>
             </div>
             <button className="liquid-btn-primary" onClick={() => { 
@@ -511,7 +545,7 @@ const Settings = () => {
               setTimeout(() => {
                 setIsSpeedTesting(false);
                 toast.success('Bandwidth optimal. Latency locked at 24ms.');
-              }, 2000); 
+              }, 1500); 
             }}>
               {isSpeedTesting ? 'CALIBRATING...' : 'RE-CALIBRATE BANDWIDTH'}
             </button>
@@ -519,50 +553,78 @@ const Settings = () => {
         );
       case 'security':
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="setting-panel">
-            <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '20px' }}>{t('SETTINGS.SECURITY', 'Armor & Encryption')}</h2>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="setting-panel">
+            <h2 style={{ fontSize: '24px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif", letterSpacing: '0.5px', marginBottom: '24px', color: '#f2f0ea' }}>
+              {t('SETTINGS.SECURITY', 'Armor & Encryption')}
+            </h2>
             
-            <ToggleRow label={t('SETTINGS.2FA', 'Two-Factor Shield')} desc={t('SETTINGS.2FA_DESC', 'Dual-layer biometric verification on login')} active={is2FAEnabled} onClick={handle2FAToggle} />
-            <ToggleRow label="Instant Purge" desc="Auto-terminate sessions after inactivity" active={settings.instantPurge} onClick={handleInstantPurge} />
+            <ToggleRow label={t('SETTINGS.2FA', 'Two-Factor Shield')} desc={t('SETTINGS.2FA_DESC', 'Dual-layer verification on portal login')} active={is2FAEnabled} onClick={handle2FAToggle} />
+            <ToggleRow label="Instant Purge" desc="Auto-terminate authenticated sessions after idle threshold" active={settings.instantPurge} onClick={handleInstantPurge} />
             
-            <div style={{ marginTop: 40 }}>
-              <button className="liquid-btn-secondary" style={{ width: '100%' }} onClick={() => setShowPasswordModal(true)}>
+            <div style={{ marginTop: 36 }}>
+              <button className="liquid-btn-secondary" style={{ width: '100%', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={() => setShowPasswordModal(true)}>
+                <Lock size={15} />
                 {t('SETTINGS.CHANGE_PASSWORD', 'ROTATE ENCRYPTION KEYS / CHANGE PASSWORD')}
               </button>
             </div>
           </motion.div>
         );
       default:
-        return <div className="setting-panel">Feature coming in v1.1.0</div>;
+        return <div className="setting-panel" style={{ color: '#777' }}>Feature available in next release</div>;
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#02060A', color: '#fff', position: 'relative', overflowX: 'hidden', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '60%', height: '60%', background: 'radial-gradient(circle, rgba(0, 122, 255, 0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
+    <div className="page-shell">
       <Navbar />
-      <div style={{ display: 'flex', maxWidth: 1300, margin: '60px auto', gap: '60px', padding: '0 40px', position: 'relative', zIndex: 1 }}>
-        <aside style={{ width: 300, flexShrink: 0 }}>
-          <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: 48, letterSpacing: '-1.5px', background: 'linear-gradient(to bottom, #fff, rgba(255,255,255,0.5))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Settings</h1>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      
+      <div style={{ display: 'flex', maxWidth: 1240, margin: '40px auto', gap: '40px', padding: '0 24px', position: 'relative', zIndex: 1, flexWrap: 'wrap' }}>
+        <aside style={{ width: 260, flexShrink: 0 }}>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: 28, letterSpacing: '-1px', color: '#f2f0ea', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+            Settings
+          </h1>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {tabs.map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 24px', borderRadius: '20px', border: '1px solid transparent', fontSize: '15px', fontWeight: 600, cursor: 'pointer', textAlign: 'left', transition: '0.4s cubic-bezier(0.16, 1, 0.3, 1)', background: activeTab === tab.id ? 'rgba(255, 255, 255, 0.08)' : 'transparent', color: activeTab === tab.id ? '#fff' : 'rgba(255, 255, 255, 0.4)', boxShadow: activeTab === tab.id ? '0 10px 25px rgba(0,0,0,0.2)' : 'none', border: activeTab === tab.id ? '1px solid rgba(255,255,255,0.1)' : '1px solid transparent' }}>
-                <span style={{ fontSize: 20 }}>{tab.icon}</span>{tab.label}
+              <button 
+                key={tab.id} 
+                onClick={() => setActiveTab(tab.id)} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '12px', 
+                  padding: '12px 18px', 
+                  borderRadius: '12px', 
+                  fontSize: '14px', 
+                  fontWeight: 700, 
+                  cursor: 'pointer', 
+                  textAlign: 'left', 
+                  transition: 'all 0.2s ease', 
+                  background: activeTab === tab.id ? '#141414' : 'transparent', 
+                  color: activeTab === tab.id ? '#f2f0ea' : '#888880', 
+                  border: activeTab === tab.id ? '1px solid #30302d' : '1px solid transparent',
+                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  letterSpacing: '0.5px'
+                }}
+              >
+                <span>{tab.icon}</span>
+                {tab.label}
               </button>
             ))}
           </div>
         </aside>
-        <main style={{ flex: 1 }}>
+        
+        <main style={{ flex: 1, minWidth: '320px' }}>
           <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
         </main>
       </div>
+
       <TwoFactorModal isOpen={show2FAModal} onClose={() => setShow2FAModal(false)} onEnabled={() => setIs2FAEnabled(true)} />
       
       {/* Password Rotation Modal */}
       {showPasswordModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowPasswordModal(false)}>
-          <div style={{ background: '#111827', width: '100%', maxWidth: 400, borderRadius: 20, border: '1px solid rgba(0, 180, 255, 0.2)', padding: 32 }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ color: '#fff', fontSize: 20, marginBottom: 24, marginTop: 0 }}>Rotate Encryption Keys</h3>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={() => setShowPasswordModal(false)}>
+          <div style={{ background: '#0d0d0d', width: '100%', maxWidth: 420, borderRadius: '24px', border: '1px solid #30302d', padding: 32 }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ color: '#f2f0ea', fontSize: 20, marginBottom: 20, marginTop: 0, fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 700 }}>Rotate Security Key</h3>
             <form onSubmit={handlePasswordChange}>
               <div style={{ marginBottom: 16 }}>
                 <label className="setting-label">Current Key</label>
@@ -573,8 +635,8 @@ const Settings = () => {
                 <input type="password" required className="liquid-input" style={{ width: '100%', boxSizing: 'border-box' }} value={passData.newPassword} onChange={e => setPassData({...passData, newPassword: e.target.value})} />
               </div>
               <div style={{ display: 'flex', gap: 12 }}>
-                <button type="submit" className="liquid-btn-primary" style={{ flex: 1, padding: '12px' }}>CONFIRM</button>
-                <button type="button" className="liquid-btn-secondary" style={{ flex: 1, padding: '12px' }} onClick={() => setShowPasswordModal(false)}>ABORT</button>
+                <button type="submit" className="liquid-btn-primary" style={{ flex: 1, height: '46px' }}>CONFIRM</button>
+                <button type="button" className="liquid-btn-secondary" style={{ flex: 1, height: '46px' }} onClick={() => setShowPasswordModal(false)}>ABORT</button>
               </div>
             </form>
           </div>
@@ -582,15 +644,111 @@ const Settings = () => {
       )}
 
       <style>{`
-        .setting-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(40px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 48px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
-        .liquid-input { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 16px 20px; color: #fff; font-size: 15px; outline: none; }
-        .liquid-btn-primary { background: linear-gradient(135deg, #007AFF 0%, #00B4FF 100%); border: none; border-radius: 16px; padding: 16px 32px; color: #fff; font-weight: 800; cursor: pointer; box-shadow: 0 10px 25px rgba(0, 122, 255, 0.3); }
-        .liquid-btn-secondary { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 12px 24px; color: #fff; font-weight: 700; cursor: pointer; }
-        .liquid-btn-danger { background: rgba(255, 59, 48, 0.1); border: 1px solid rgba(255, 59, 48, 0.2); border-radius: 16px; padding: 16px 24px; color: #FF3B30; font-weight: 700; cursor: pointer; text-align: left; width: 100%; }
-        .setting-label { font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
-        .toggle-container { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-        .toggle-track { width: 52px; height: 32px; border-radius: 32px; padding: 2px; cursor: pointer; transition: 0.3s; }
-        .toggle-thumb { width: 28px; height: 28px; background: #fff; border-radius: 50%; transition: 0.3s; }
+        .setting-panel { 
+          background: #0d0d0d; 
+          border: 1px solid #30302d; 
+          border-radius: 16px; 
+          padding: 36px 40px; 
+          box-shadow: 0 24px 60px rgba(0,0,0,0.45); 
+        }
+        .liquid-input { 
+          background: #141414; 
+          border: 1px solid #30302d; 
+          border-radius: 12px; 
+          padding: 13px 18px; 
+          color: #f2f0ea; 
+          font-size: 14px; 
+          outline: none; 
+          font-family: 'IBM Plex Sans', sans-serif;
+          transition: border-color 0.2s;
+        }
+        .liquid-input:focus {
+          border-color: #f2f0ea;
+        }
+        .liquid-btn-primary { 
+          background: #f2f0ea; 
+          border: none; 
+          border-radius: 999px; 
+          padding: 13px 32px; 
+          color: #070707; 
+          font-family: 'IBM Plex Sans', sans-serif;
+          font-weight: 800; 
+          font-size: 13px;
+          letter-spacing: 1px;
+          cursor: pointer; 
+          box-shadow: none; 
+          transition: all 0.2s ease;
+        }
+        .liquid-btn-primary:hover {
+          transform: translateY(-1px);
+        }
+        .liquid-btn-secondary { 
+          background: #141414; 
+          border: 1px solid #30302d; 
+          border-radius: 999px; 
+          padding: 12px 24px; 
+          color: #f2f0ea; 
+          font-family: 'IBM Plex Sans', sans-serif;
+          font-weight: 700; 
+          font-size: 13px;
+          letter-spacing: 0.5px;
+          cursor: pointer; 
+          transition: all 0.2s ease;
+        }
+        .liquid-btn-secondary:hover {
+          border-color: #f2f0ea;
+        }
+        .liquid-btn-danger { 
+          background: #1a1212; 
+          border: 1px solid #3d1f1f; 
+          border-radius: 12px; 
+          padding: 14px 24px; 
+          color: #d96464; 
+          font-family: 'IBM Plex Sans', sans-serif;
+          font-weight: 700; 
+          font-size: 13px;
+          letter-spacing: 1px;
+          cursor: pointer; 
+          text-align: center; 
+          width: 100%; 
+          transition: all 0.2s ease;
+        }
+        .liquid-btn-danger:hover {
+          background: #241414;
+          border-color: #5a2626;
+        }
+        .setting-label { 
+          font-size: 11px; 
+          font-weight: 700; 
+          color: #888880; 
+          text-transform: uppercase; 
+          letter-spacing: 1px; 
+          margin-bottom: 8px; 
+          display: block; 
+          font-family: 'IBM Plex Sans', sans-serif;
+        }
+        .toggle-container { 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: center; 
+          padding: 20px 0; 
+          border-bottom: 1px solid #20201f; 
+        }
+        .toggle-track { 
+          width: 48px; 
+          height: 28px; 
+          border-radius: 999px; 
+          padding: 2px; 
+          cursor: pointer; 
+          transition: 0.2s; 
+        }
+        .toggle-thumb { 
+          width: 24px; 
+          height: 24px; 
+          background: #fff; 
+          border-radius: 50%; 
+          transition: 0.2s; 
+        }
       `}</style>
     </div>
   );
@@ -599,11 +757,11 @@ const Settings = () => {
 const ToggleRow = ({ label, desc, active, onClick }) => (
   <div className="toggle-container">
     <div>
-      <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 500 }}>{desc}</div>
+      <div style={{ fontSize: '15px', fontWeight: 700, color: '#f2f0ea', marginBottom: 4, fontFamily: "'IBM Plex Sans', sans-serif" }}>{label}</div>
+      <div style={{ fontSize: '12px', color: '#777', fontFamily: "'IBM Plex Sans', sans-serif" }}>{desc}</div>
     </div>
-    <div className="toggle-track" onClick={onClick} style={{ background: active ? '#34C759' : 'rgba(255,255,255,0.1)' }}>
-      <div className="toggle-thumb" style={{ transform: active ? 'translateX(20px)' : 'translateX(0)' }} />
+    <div className="toggle-track" onClick={onClick} style={{ background: active ? '#3DF5C0' : '#222' }}>
+      <div className="toggle-thumb" style={{ transform: active ? 'translateX(20px)' : 'translateX(0)', background: active ? '#070707' : '#888' }} />
     </div>
   </div>
 );

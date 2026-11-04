@@ -55,8 +55,8 @@ exports.getMessages = async (req, res, next) => {
     }
 
     // Access Control
-    const isOwner = complaint.userId.toString() === req.user._id.toString();
-    const isOfficer = ['admin', 'officer'].includes(req.user.role);
+    const isOwner = complaint.userId?.toString() === req.user._id.toString();
+    const isOfficer = req.user.role === 'admin' || (req.user.role === 'officer' && (!complaint.assignedTo || complaint.assignedTo.toString() === req.user._id.toString()));
     
     if (!isOwner && !isOfficer) {
       return next(new AppError('Not authorized to access this chat', 403));
@@ -94,6 +94,14 @@ exports.sendMessage = async (req, res, next) => {
     });
 
     if (!complaint) return next(new AppError('Complaint not found', 404));
+
+    // Access Control: sender must be case owner or assigned officer / admin
+    const isOwner = complaint.userId?.toString() === req.user._id.toString();
+    const isOfficer = req.user.role === 'admin' || (req.user.role === 'officer' && (!complaint.assignedTo || complaint.assignedTo.toString() === req.user._id.toString()));
+
+    if (!isOwner && !isOfficer) {
+      return next(new AppError('Not authorized to send messages in this chat', 403));
+    }
 
     const message = await Message.create({
       complaintId: complaint._id,

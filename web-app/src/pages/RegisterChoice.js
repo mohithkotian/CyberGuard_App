@@ -7,20 +7,21 @@ export default function RegisterChoice() {
 
   return (
     <div style={{ 
-      minHeight: '100vh', 
-      background: '#02060A', 
+      minHeight: '100dvh', 
+      background: 'var(--bg)', 
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center', 
       padding: '40px 24px',
       position: 'relative',
       overflowX: 'hidden',
-      fontFamily: 'Inter, sans-serif'
+      fontFamily: 'var(--font-sans)',
+      color: 'var(--text)'
     }}>
       {/* Liquid Atmospheric Accents */}
-      <div style={{ position: 'fixed', top: '-10%', right: '-10%', width: '50%', height: '50%', background: 'radial-gradient(circle, rgba(0, 122, 255, 0.08) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: '-10%', left: '-10%', width: '50%', height: '50%', background: 'radial-gradient(circle, rgba(168, 85, 247, 0.05) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
+      
+      
+      <div style={{ position: 'fixed', inset: 0, backgroundImage: 'none', backgroundSize: '40px 40px', pointerEvents: 'none', zIndex: 0 }} />
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }} 
@@ -33,12 +34,12 @@ export default function RegisterChoice() {
             color: '#fff', 
             margin: '0 0 16px 0',
             fontWeight: 800,
-            background: 'linear-gradient(to bottom, #fff, rgba(255,255,255,0.5))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+
+
+
             letterSpacing: '-1.5px'
           }}>
-            Join the <span style={{ color: '#00B4FF' }}>Network</span>
+            Join the <span style={{ color: '#EFEDE8' }}>Network</span>
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '18px', fontWeight: 400 }}>
             Establish your identity and clearance level below
@@ -59,10 +60,10 @@ export default function RegisterChoice() {
               padding: '40px', 
               cursor: 'pointer',
               background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
               border: '1px solid rgba(0, 255, 170, 0.15)',
-              borderRadius: '32px',
+              borderRadius: 'var(--radius-lg)',
               textAlign: 'left',
               display: 'flex',
               flexDirection: 'column',
@@ -80,16 +81,17 @@ export default function RegisterChoice() {
             </p>
             <button style={{ 
               width: '100%', 
-              background: 'linear-gradient(135deg, #00C853 0%, #00E676 100%)', 
+   
               color: '#000', 
               fontWeight: 800,
               border: 'none',
-              borderRadius: '16px',
+              borderRadius: 'var(--radius-md)',
               padding: '16px',
               fontSize: '14px',
               cursor: 'pointer',
               transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: '0 8px 24px rgba(0, 200, 83, 0.3)'
+              boxShadow: 'none',
+              background: 'var(--primary)'
             }}>
               INITIALIZE ACCESS
             </button>
@@ -102,10 +104,10 @@ export default function RegisterChoice() {
               padding: '40px', 
               cursor: 'pointer',
               background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
               border: '1px solid rgba(255, 214, 0, 0.15)',
-              borderRadius: '32px',
+              borderRadius: 'var(--radius-lg)',
               textAlign: 'left',
               display: 'flex',
               flexDirection: 'column',
@@ -123,16 +125,19 @@ export default function RegisterChoice() {
             </p>
             <button style={{ 
               width: '100%', 
-              background: 'linear-gradient(135deg, #FF8F00 0%, #FFD600 100%)', 
+   
               color: '#000', 
               fontWeight: 800,
               border: 'none',
-              borderRadius: '16px',
+              borderRadius: 'var(--radius-md)',
               padding: '16px',
               fontSize: '14px',
               cursor: 'pointer',
               transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: '0 8px 24px rgba(255, 143, 0, 0.3)'
+              boxShadow: 'none',
+              background: 'rgba(255, 214, 0, 0.15)',
+              border: '1px solid rgba(255, 214, 0, 0.35)',
+              color: '#FFD600'
             }}>
               OFFICER CREDENTIALS
             </button>
@@ -145,10 +150,10 @@ export default function RegisterChoice() {
               padding: '40px', 
               cursor: 'pointer',
               background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
               border: '1px solid rgba(0, 180, 255, 0.15)',
-              borderRadius: '32px',
+              borderRadius: 'var(--radius-lg)',
               textAlign: 'left',
               display: 'flex',
               flexDirection: 'column',
@@ -160,22 +165,25 @@ export default function RegisterChoice() {
             <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(0, 180, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
               <img src="/icons/cyberguard/admin-command.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
             </div>
-            <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#00B4FF', marginBottom: 12 }}>Admin</h3>
+            <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#EFEDE8', marginBottom: 12 }}>Admin</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: 32, lineHeight: 1.6, flexGrow: 1 }}>
               Full system clearance for global oversight, trend analysis, and root-level operations.
             </p>
             <button style={{ 
               width: '100%', 
-              background: 'linear-gradient(135deg, #007AFF 0%, #00B4FF 100%)', 
+   
               color: '#fff', 
               fontWeight: 800,
               border: 'none',
-              borderRadius: '16px',
+              borderRadius: 'var(--radius-md)',
               padding: '16px',
               fontSize: '14px',
               cursor: 'pointer',
               transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3)'
+              boxShadow: 'none',
+              background: 'rgba(0, 180, 255, 0.15)',
+              border: '1px solid rgba(0, 180, 255, 0.35)',
+              color: '#28B7E8'
             }}>
               ADMIN PRIVILEGES
             </button>
@@ -188,10 +196,10 @@ export default function RegisterChoice() {
               padding: '40px', 
               cursor: 'pointer',
               background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
               border: '1px solid rgba(168, 85, 247, 0.15)',
-              borderRadius: '32px',
+              borderRadius: 'var(--radius-lg)',
               textAlign: 'left',
               display: 'flex',
               flexDirection: 'column',
@@ -203,22 +211,25 @@ export default function RegisterChoice() {
             <div style={{ width: 48, height: 48, borderRadius: '14px', background: 'rgba(168, 85, 247, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
               <img src="/icons/cyberguard/cyber-educator.png" alt="" style={{ width: 32, height: 32, objectFit: 'contain' }} />
             </div>
-            <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#A855F7', marginBottom: 12 }}>Education</h3>
+            <h3 style={{ fontSize: '22px', fontWeight: 700, color: '#EFEDE8', marginBottom: 12 }}>Education</h3>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: 32, lineHeight: 1.6, flexGrow: 1 }}>
               Training clearance for safety awareness, certifications, and academic resources.
             </p>
             <button style={{ 
               width: '100%', 
-              background: 'linear-gradient(135deg, #7C3AED 0%, #A855F7 100%)', 
+   
               color: '#fff', 
               fontWeight: 800,
               border: 'none',
-              borderRadius: '16px',
+              borderRadius: 'var(--radius-md)',
               padding: '16px',
               fontSize: '14px',
               cursor: 'pointer',
               transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-              boxShadow: '0 8px 24px rgba(124, 58, 237, 0.3)'
+              boxShadow: 'none',
+              background: 'rgba(168, 85, 247, 0.15)',
+              border: '1px solid rgba(168, 85, 247, 0.35)',
+              color: '#C084FC'
             }}>
               ENROLL IN ACADEMY
             </button>
@@ -237,7 +248,7 @@ export default function RegisterChoice() {
             fontWeight: 600,
             cursor: 'pointer',
             padding: '10px 24px',
-            borderRadius: '20px',
+            borderRadius: 'var(--radius-md)',
             transition: '0.3s'
           }}
           onMouseOver={e => {
@@ -261,3 +272,4 @@ export default function RegisterChoice() {
     </div>
   );
 }
+

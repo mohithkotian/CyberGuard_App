@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import Button, { IconButton } from './Button';
 
 const TwoFactorModal = ({ isOpen, onClose, onEnabled }) => {
   const [step, setStep] = useState(1); // 1: Info, 2: QR, 3: Verify
@@ -41,29 +42,29 @@ const TwoFactorModal = ({ isOpen, onClose, onEnabled }) => {
   if (!isOpen) return null;
 
   return (
-    <div style={s.overlay} onClick={onClose}>
+      <div className="cg-modal-backdrop" onClick={onClose}>
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        style={s.modal} 
+        className="cg-modal"
         onClick={e => e.stopPropagation()}
       >
-        <div style={s.header}>
+        <div className="cg-modal__header">
           <h3 style={s.title}>Secure Your Account</h3>
-          <button style={s.closeBtn} onClick={onClose}>&times;</button>
+          <IconButton label="Close security setup" size="sm" onClick={onClose}>&times;</IconButton>
         </div>
 
-        <div style={s.content}>
+        <div className="cg-modal__body">
           {step === 1 && (
             <div style={s.stepContent}>
               <div style={s.icon}>
                 <img src="/icons/cyberguard/cyberguard-security-badge.png" alt="CyberGuard security badge" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <p style={s.text}>Two-factor authentication adds an extra layer of security. Every time you log in, you'll need to provide a code from your authenticator app.</p>
-              <button style={s.btnPrimary} onClick={handleStartSetup} disabled={loading}>
+              <Button loading={loading} onClick={handleStartSetup}>
                 {loading ? 'Initializing...' : 'Get Started'}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -83,7 +84,7 @@ const TwoFactorModal = ({ isOpen, onClose, onEnabled }) => {
               </div>
               <p style={s.manualLabel}>Manual Entry Key:</p>
               <code style={s.secretCode}>{setupData?.secret}</code>
-              <button style={s.btnPrimary} onClick={() => setStep(3)}>Next Step</button>
+              <Button onClick={() => setStep(3)}>Next step</Button>
             </div>
           )}
 
@@ -98,10 +99,10 @@ const TwoFactorModal = ({ isOpen, onClose, onEnabled }) => {
                 onChange={e => setToken(e.target.value.replace(/\D/g, ''))}
               />
               <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-                <button style={s.btnPrimary} onClick={handleVerify} disabled={loading}>
+                <Button loading={loading} onClick={handleVerify}>
                   {loading ? 'Verifying...' : 'Enable 2FA'}
-                </button>
-                <button style={s.btnSecondary} onClick={() => setStep(2)}>Back</button>
+                </Button>
+                <Button variant="secondary" onClick={() => setStep(2)}>Back</Button>
               </div>
             </div>
           )}
@@ -114,7 +115,7 @@ const TwoFactorModal = ({ isOpen, onClose, onEnabled }) => {
 const s = {
   overlay: {
     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+    background: 'rgba(0,0,0,0.85)', backdropFilter: 'none',
     zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center',
     padding: 20
   },
@@ -136,14 +137,14 @@ const s = {
   instruction: { fontSize: 14, color: '#fff', marginBottom: 16, fontWeight: 600 },
   qrWrapper: { padding: 12, background: '#fff', borderRadius: 12, marginBottom: 16 },
   manualLabel: { fontSize: 11, color: '#8892B0', textTransform: 'uppercase', marginBottom: 4 },
-  secretCode: { background: 'rgba(255,255,255,0.05)', padding: '8px 12px', borderRadius: 6, fontSize: 14, color: '#00B4FF', marginBottom: 24, letterSpacing: 1 },
+  secretCode: { background: 'rgba(255,255,255,0.05)', padding: '8px 12px', borderRadius: 6, fontSize: 14, color: '#EFEDE8', fontFamily: "'IBM Plex Mono', monospace", marginBottom: 24, letterSpacing: 1 },
   tokenInput: {
     width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(0, 180, 255, 0.3)',
     borderRadius: 12, padding: '16px', fontSize: 24, textAlign: 'center', color: '#fff',
     fontFamily: 'monospace', letterSpacing: 8, outline: 'none'
   },
   btnPrimary: {
-    width: '100%', background: '#00B4FF', color: '#fff', border: 'none',
+    width: '100%', background: '#EFEDE8', color: '#0A0A0A', border: 'none',
     padding: '14px', borderRadius: 12, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s'
   },
   btnSecondary: {
@@ -153,3 +154,4 @@ const s = {
 };
 
 export default TwoFactorModal;
+

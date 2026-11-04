@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import useTranslationStore from './hooks/useTranslationStore';
+import { applyLanguage } from './services/languageService';
 import { Toaster } from 'react-hot-toast';
 import useAuthStore from './hooks/useAuthStore';
 import useThemeStore from './hooks/useThemeStore';
@@ -43,6 +45,21 @@ import CommunityComplaints from './pages/CommunityComplaints';
 import CyberReport from './components/CyberReport';
 import ProtectedRoute from './components/ProtectedRoute';
 import DeveloperPage from './pages/DeveloperPage';
+import CitizenAssistant from './components/CitizenAssistant';
+
+function LanguageSynchronizer() {
+  const location = useLocation();
+  const { currentLanguage } = useTranslationStore();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      applyLanguage(currentLanguage);
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [location.pathname, currentLanguage]);
+
+  return null;
+}
 
 export default function App() {
   const { addNotification } = useNotificationStore();
@@ -122,17 +139,19 @@ export default function App() {
   return (
     <div className={accentGlow ? 'atmospheric-glow' : ''}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <LanguageSynchronizer />
         {/* ── Global Styles ── */}
         <style>
           {`
             body { 
               margin: 0; 
-              font-family: 'Inter', sans-serif;
+              font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
               -webkit-font-smoothing: antialiased;
               transition: background-color 0.3s ease;
             }
             #root {
               min-height: 100vh;
+              min-height: 100dvh;
             }
             .atmospheric-glow {
               position: relative;
@@ -141,7 +160,7 @@ export default function App() {
               content: '';
               position: fixed;
               top: 0; left: 0; right: 0; bottom: 0;
-              background: radial-gradient(circle at center, rgba(0, 122, 255, 0.15) 0%, transparent 60%);
+              display: none;
               pointer-events: none;
               z-index: 9999;
               mix-blend-mode: screen;
@@ -230,6 +249,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <CitizenAssistant />
     </BrowserRouter>
     </div>
   );

@@ -1,9 +1,12 @@
-﻿import React, { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-hot-toast';
 import { complaintsAPI } from '../services/api';
 import useTranslationStore from '../hooks/useTranslationStore';
+import { ArrowLeft, Upload, X, MapPin, Lock, Check, Mic, Sparkles, Scale, FileText } from 'lucide-react';
+import OneeCompanion from './onee/OneeCompanion';
+import { useOneeGuideEngine } from './onee/useOneeGuideEngine';
 
 const SUBCATEGORIES_BY_CATEGORY = {
   'Financial Fraud': [
@@ -80,134 +83,195 @@ const SUBCATEGORIES_BY_CATEGORY = {
   ]
 };
 
-const CATEGORY_STYLES = {
-  'Phishing': { color: '#FFB800', bg: 'rgba(255, 184, 0, 0.15)', border: 'rgba(255, 184, 0, 0.4)' },
-  'Financial Fraud': { color: '#00B4FF', bg: 'rgba(0, 180, 255, 0.15)', border: 'rgba(0, 180, 255, 0.4)' },
-  'Ransomware': { color: '#FF3366', bg: 'rgba(255, 51, 102, 0.15)', border: 'rgba(255, 51, 102, 0.4)' },
-  'Identity Theft': { color: '#A855F7', bg: 'rgba(168, 85, 247, 0.15)', border: 'rgba(168, 85, 247, 0.4)' },
-  'Cyber Bullying': { color: '#FF6B35', bg: 'rgba(255, 107, 53, 0.15)', border: 'rgba(255, 107, 53, 0.4)' },
-  'Hacking': { color: '#9C27B0', bg: 'rgba(156, 39, 176, 0.15)', border: 'rgba(156, 39, 176, 0.4)' },
-  'Data Breach': { color: '#EC4899', bg: 'rgba(236, 72, 153, 0.15)', border: 'rgba(236, 72, 153, 0.4)' },
-  'Online Fraud': { color: '#38BDF8', bg: 'rgba(56, 189, 248, 0.15)', border: 'rgba(56, 189, 248, 0.4)' },
-  'Child Exploitation': { color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.4)' },
-  'Women/Child Safety': { color: '#FF2A6D', bg: 'rgba(255, 42, 109, 0.15)', border: 'rgba(255, 42, 109, 0.4)' },
-  'DDoS / Network Attacks': { color: '#F97316', bg: 'rgba(249, 115, 22, 0.15)', border: 'rgba(249, 115, 22, 0.4)' },
-  'Cryptocurrency Scams': { color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.4)' },
-  'Other': { color: '#94A3B8', bg: 'rgba(148, 163, 184, 0.15)', border: 'rgba(148, 163, 184, 0.4)' }
-};
+const progressSections = [
+  { label: 'Incident', target: 'incident-details' },
+  { label: 'Contact', target: 'location-contact' },
+  { label: 'Evidence', target: 'evidence' },
+  { label: 'Verification', target: 'verification' }
+];
 
 const CyberReport = () => {
   const navigate = useNavigate();
+  const routerLocation = useLocation();
   const { t } = useTranslationStore();
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [subCategory, setSubCategory] = useState("");
-  const [incidentDateTime, setIncidentDateTime] = useState("");
-  const [modusOperandi, setModusOperandi] = useState("");
+
+  // Phase 6: Oral/Voice Statement Transcription Assistant
+  const [showTranscribeModal, setShowTranscribeModal] = useState(false);
+  const [oralStatement, setOralStatement] = useState('');
+  const [transcribing, setTranscribing] = useState(false);
+  const [transcribeResult, setTranscribeResult] = useState(null);
+
+  const handleTranscribeStatement = async (overrideText) => {
+    const textToUse = overrideText !== undefined ? overrideText : oralStatement;
+    if (!textToUse || !textToUse.trim()) {
+      toast.error('Please enter or speak your statement.');
+      return;
+    }
+    setTranscribing(true);
+    setTranscribeResult(null);
+    try {
+      const { data } = await complaintsAPI.transcribeStatement(textToUse);
+      setTranscribeResult(data.data);
+      toast.success('Oral statement normalized into structured forensic dossier.');
+    } catch (err) {
+      toast.error('Transcription failed: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
+  const applyTranscribedStatement = () => {
+    if (!transcribeResult) return;
+    if (transcribeResult.suggestedTitle) setTitle(transcribeResult.suggestedTitle);
+    if (transcribeResult.normalizedDossier) setDescription(transcribeResult.normalizedDossier);
+    if (transcribeResult.lossAmount) {
+      setLostMoney(true);
+      setAmountLost(transcribeResult.lossAmount.toString());
+    }
+    if (transcribeResult.extractedEntities?.utrs?.[0]) {
+      setTransactionReference(transcribeResult.extractedEntities.utrs[0]);
+    }
+    if (transcribeResult.category) {
+      let mapped = 'Financial Fraud';
+      if (/women|child|sextortion/i.test(transcribeResult.category)) mapped = 'Women/Child Safety';
+      else if (/harass/i.test(transcribeResult.category)) mapped = 'Cyber Bullying';
+      else if (/kyc|phish/i.test(transcribeResult.category)) mapped = 'Phishing';
+      else if (/identity/i.test(transcribeResult.category)) mapped = 'Identity Theft';
+      setCategory(mapped);
+      setUserOverrodeCategory(true);
+      const sub = SUBCATEGORIES_BY_CATEGORY[mapped]?.[0] || 'General Incident';
+      setSubCategory(sub);
+    }
+    if (!incidentDateTime) {
+      setIncidentDateTime(new Date().toISOString().slice(0, 16));
+    }
+    setShowTranscribeModal(false);
+    toast.success('Pre-filled complaint fields from oral statement!');
+  };
+
+  const [title, setTitle] = useState('');
+  const [category, setCategory] = useState('');
+  const [subCategory, setSubCategory] = useState('');
+  const [incidentDateTime, setIncidentDateTime] = useState('');
+  const [modusOperandi, setModusOperandi] = useState('');
   const [lostMoney, setLostMoney] = useState(false);
-  const [incidentOccurredWhere, setIncidentOccurredWhere] = useState("");
-  const [relationshipWithVictim, setRelationshipWithVictim] = useState("");
-  const [description, setDescription] = useState("");
+  const [amountLost, setAmountLost] = useState('');
+  const [transactionReference, setTransactionReference] = useState('');
+  const [incidentOccurredWhere, setIncidentOccurredWhere] = useState('');
+  const [relationshipWithVictim, setRelationshipWithVictim] = useState('');
+  const [description, setDescription] = useState('');
   const [files, setFiles] = useState([]);
   const [nationalIdFile, setNationalIdFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userOverrodeCategory, setUserOverrodeCategory] = useState(false);
+  const [skipEvidence, setSkipEvidence] = useState(false);
+  const [consentAgreed, setConsentAgreed] = useState(false);
 
-  const [aiDetection, setAiDetection] = useState(null);
-  const [analysis, setAnalysis] = useState({ label: "READY", color: "var(--muted)" });
-
-  const [pincode, setPincode] = useState("");
+  const [pincode, setPincode] = useState('');
   const [location, setLocation] = useState(null);
   const [gettingLocation, setGettingLocation] = useState(false);
-  const [areaSearchQuery, setAreaSearchQuery] = useState("");
-  const [showAreaSearch, setShowAreaSearch] = useState(false);
-  const [email, setEmail] = useState("");
-  const [countryCode, setCountryCode] = useState("+91");
-  const [mobile, setMobile] = useState("");
+  const [areaSearchQuery, setAreaSearchQuery] = useState('');
+  const [email, setEmail] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [mobile, setMobile] = useState('');
 
-  // Real-time advanced AI neural analysis on title + description
+  // Interactive Onee Citizen Guide State Controller
+  const formStateForGuide = {
+    title,
+    description,
+    category,
+    subCategory,
+    incidentDateTime,
+    lostMoney,
+    amountLost,
+    transactionReference,
+    incidentOccurredWhere,
+    email,
+    mobile,
+    filesCount: files.length,
+    hasNationalId: Boolean(nationalIdFile),
+    skipEvidence,
+    relationshipWithVictim,
+    consentAgreed,
+    isSubmitting
+  };
+  const oneeGuide = useOneeGuideEngine(formStateForGuide);
+
+  // Scanner prefill consumer
+  useEffect(() => {
+    const prefill = routerLocation.state?.prefill;
+    if (prefill) {
+      if (prefill.title) setTitle(prefill.title);
+      if (prefill.description) setDescription(prefill.description);
+      if (prefill.category) {
+        setCategory(prefill.category);
+        setUserOverrodeCategory(true);
+        const firstSub = SUBCATEGORIES_BY_CATEGORY[prefill.category]?.[0] || 'General Incident';
+        setSubCategory(firstSub);
+      }
+    }
+  }, [routerLocation.state]);
+
+  // AI analysis fallback
   useEffect(() => {
     const fullText = `${title} ${description}`.trim();
-    if (fullText.length < 10) {
-      setAnalysis({ label: "AWAITING DETAILS", color: "rgba(255,255,255,0.4)" });
-      setAiDetection(null);
-      return;
-    }
-
-    setAnalysis({ label: "SCANNING THREAT SIGNATURES...", color: "var(--electric)" });
+    if (fullText.length < 10) return;
 
     const timer = setTimeout(async () => {
       try {
         const { data } = await complaintsAPI.analyze(fullText);
-        if (data.status === 'success' && data.data) {
+        if (data.status === 'success' && data.data && (!userOverrodeCategory || !category)) {
           const res = data.data;
-          const detectedCategory = res.category || 'Other';
-          const detectedSub = res.subcategory || (SUBCATEGORIES_BY_CATEGORY[detectedCategory]?.[0] || 'General Incident');
-          const confPercent = Math.round((res.confidence || 0.85) * 100);
-          const style = CATEGORY_STYLES[detectedCategory] || CATEGORY_STYLES['Other'];
-
-          setAiDetection({
-            category: detectedCategory,
-            subcategory: detectedSub,
-            confidence: confPercent,
-            severity: res.severity || 'high',
-            style
-          });
-
-          setAnalysis({
-            label: `${detectedCategory.toUpperCase()} DETECTED (${confPercent}%)`,
-            color: style.color
-          });
-
-          // Auto-apply AI categorization if user hasn't manually selected yet
-          if (!userOverrodeCategory || !category) {
-            setCategory(detectedCategory);
-            setSubCategory(detectedSub);
-          }
+          const detectedCat = res.category || 'Other';
+          const detectedSub = res.subcategory || (SUBCATEGORIES_BY_CATEGORY[detectedCat]?.[0] || 'General Incident');
+          setCategory(detectedCat);
+          setSubCategory(detectedSub);
         }
       } catch (err) {
-        console.warn("AI Analysis local fallback active", err);
-        setAnalysis({ label: "AI ONLINE (HYBRID)", color: "var(--electric)" });
+        // silent fallback
       }
-    }, 450);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [title, description, userOverrodeCategory, category]);
 
-  const handleApplyAiSuggestion = () => {
-    if (aiDetection) {
-      setCategory(aiDetection.category);
-      setSubCategory(aiDetection.subcategory);
-      setUserOverrodeCategory(false);
-      toast.success(`Applied AI Category: ${aiDetection.category}`);
-    }
-  };
+  // Synchronize with Onee Citizen Assistant
+  useEffect(() => {
+    const checklist = {
+      title: !!(title && title.trim().length >= 5),
+      category: !!category,
+      incidentDate: !!incidentDateTime,
+      description: !!(description && description.trim().length >= 20),
+      contact: !!(email && email.includes('@') && mobile && mobile.length >= 10),
+      declaration: consentAgreed
+    };
+    const formData = {
+      incidentDate: incidentDateTime,
+      category,
+      amountLost: lostMoney ? amountLost : '',
+      transactionRef: lostMoney ? transactionReference : '',
+      suspectContact: ''
+    };
+    window.dispatchEvent(new CustomEvent('cyberguard:assistant-event', {
+      detail: { type: 'form_state_update', checklist, formData }
+    }));
+  }, [title, category, incidentDateTime, description, email, mobile, consentAgreed, lostMoney, amountLost, transactionReference]);
 
-  // High-precision reverse geocoding with OpenStreetMap Nominatim
-  const reverseGeocode = async (lat, lng) => {
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
-        headers: { 'Accept-Language': 'en' }
-      });
-      const data = await res.json();
-      if (data && data.address) {
-        const city = data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.county || data.address.state_district || 'Local Area';
-        const state = data.address.state || '';
-        const postcode = data.address.postcode || '';
-        return { city, state, postcode, displayName: data.display_name };
+  useEffect(() => {
+    const handlePopulate = (e) => {
+      if (e.detail?.text) {
+        setDescription(e.detail.text);
+        toast.success('Applied incident description from Onee Assistant!');
       }
-    } catch (err) {
-      console.warn("Reverse geocode failed:", err);
-    }
-    return null;
-  };
+    };
+    window.addEventListener('cyberguard:populate-description', handlePopulate);
+    return () => window.removeEventListener('cyberguard:populate-description', handlePopulate);
+  }, []);
 
-  // Geocode 6-digit Indian PIN code with postal service and Nominatim
   const geocodePincode = async (pin) => {
     if (!pin || pin.length !== 6) return;
     setGettingLocation(true);
     try {
-      // 1. Try Nominatim postal search
       const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${pin}&country=India&format=json`);
       const nomData = await nomRes.json();
       if (nomData && nomData.length > 0) {
@@ -218,18 +282,12 @@ const CyberReport = () => {
         const area = parts[1] || parts[0];
         const state = parts[parts.length - 2] || 'India';
 
-        setLocation({
-          lat,
-          lng,
-          city: area,
-          region: state
-        });
+        setLocation({ lat, lng, city: area, region: state });
         setGettingLocation(false);
         toast.success(`PIN ${pin} Located: ${area}, ${state}`);
         return;
       }
 
-      // 2. Postal PIN Code fallback
       const pinRes = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
       const pinData = await pinRes.json();
       if (pinData && pinData[0]?.Status === 'Success' && pinData[0]?.PostOffice?.length > 0) {
@@ -237,15 +295,9 @@ const CyberReport = () => {
         const district = po.District;
         const state = po.State;
 
-        // Search city coordinates
-        const citySearchRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(district + ', ' + state + ', India')}&format=json`);
-        const citySearchData = await citySearchRes.json();
-        const lat = citySearchData?.[0]?.lat ? parseFloat(citySearchData[0].lat) : 12.97;
-        const lng = citySearchData?.[0]?.lon ? parseFloat(citySearchData[0].lon) : 77.59;
-
         setLocation({
-          lat,
-          lng,
+          lat: 12.97,
+          lng: 77.59,
           city: `${po.Name}, ${district}`,
           region: state
         });
@@ -254,15 +306,14 @@ const CyberReport = () => {
         return;
       }
     } catch (err) {
-      console.warn("PIN geocode failed", err);
+      console.warn('PIN geocode failed', err);
     }
     setGettingLocation(false);
   };
 
-  // Search by area or city name (e.g. Udupi, Indiranagar, Mangalore, Bandra)
   const handleSearchArea = async () => {
     if (!areaSearchQuery || areaSearchQuery.trim().length < 2) {
-      toast.error("Please enter a city or area name to search");
+      toast.error('Please enter a city or area name to search');
       return;
     }
     setGettingLocation(true);
@@ -277,109 +328,38 @@ const CyberReport = () => {
         const state = match.address?.state || '';
         const postcode = match.address?.postcode || '';
 
-        setLocation({
-          lat,
-          lng,
-          city,
-          region: state
-        });
+        setLocation({ lat, lng, city, region: state });
         if (postcode && /^\d{6}$/.test(postcode)) {
           setPincode(postcode);
         }
-        setShowAreaSearch(false);
         setGettingLocation(false);
-        toast.success(`Location Locked: ${city}, ${state}`);
+        toast.success(`Location: ${city}, ${state}`);
         return;
       } else {
-        toast.error(`No results found for "${areaSearchQuery}". Please try another landmark or city.`);
+        toast.error(`No results found for "${areaSearchQuery}"`);
       }
     } catch (err) {
-      toast.error("Area search service error. Please try again.");
+      toast.error('Location service error. Please try again.');
     }
     setGettingLocation(false);
   };
 
-  const fallbackIpLocation = async () => {
-    try {
-      const res = await fetch('https://ipwho.is/');
-      const data = await res.json();
-      if (data && data.success !== false && data.latitude && data.longitude) {
-        setLocation({
-          lat: data.latitude,
-          lng: data.longitude,
-          city: data.city,
-          region: data.region
-        });
-        setGettingLocation(false);
-      toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''}`);
-        return true;
-      }
-    } catch (e) {
-      console.warn("ipwho.is lookup failed", e);
-    }
-    setGettingLocation(false);
-    toast.info("Please enter your 6-digit PIN code or search for your city directly.");
-    return false;
-  };
-
-  const handleGetLocation = () => {
-    setGettingLocation(true);
-
-    if (!navigator.geolocation) {
-      if (pincode && pincode.length === 6) {
-        geocodePincode(pincode);
-      } else {
-        fallbackIpLocation();
-      }
-      return;
-    }
-
-    // High Accuracy GPS Mode
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-
-        const geo = await reverseGeocode(lat, lng);
-        if (geo) {
-          setLocation({
-            lat,
-            lng,
-            city: geo.city,
-            region: geo.state
-          });
-          if (geo.postcode && /^\d{6}$/.test(geo.postcode)) {
-            setPincode(geo.postcode);
-          }
-          setGettingLocation(false);
-          toast.success(`Exact Location Locked: ${geo.city}, ${geo.state}`);
-        } else {
-          setLocation({ lat, lng });
-          setGettingLocation(false);
-          toast.success(`High-Precision GPS Locked: (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
-        }
-      },
-      (error) => {
-        console.warn("High-accuracy GPS request failed/denied:", error.message);
-        if (pincode && pincode.length === 6) {
-          geocodePincode(pincode);
-        } else {
-          fallbackIpLocation();
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 12000,
-        maximumAge: 0
-      }
-    );
-  };
-
-  // File upload handling
   const onDrop = useCallback((acceptedFiles) => {
-    setFiles(prev => [...prev, ...acceptedFiles].slice(0, 5));
-    toast.success(`${acceptedFiles.length} file(s) attached. AI OCR analyzer primed!`);
-  }, []);
+    const maxEvidence = nationalIdFile ? 4 : 5;
+    setFiles(prev => {
+      const remainingSlots = Math.max(0, maxEvidence - prev.length);
+      if (remainingSlots <= 0) {
+        toast.error(`Maximum file limit reached (${maxEvidence} evidence files)`);
+        return prev;
+      }
+      const added = acceptedFiles.slice(0, remainingSlots);
+      if (added.length > 0) {
+        toast.success(`${added.length} file(s) attached.`);
+        setSkipEvidence(false);
+      }
+      return [...prev, ...added];
+    });
+  }, [nationalIdFile]);
 
   const removeFile = (index) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
@@ -397,31 +377,58 @@ const CyberReport = () => {
   });
 
   const handleSubmit = async () => {
-    if (!title || title.length < 5) {
-      return toast.error("Title must be at least 5 characters");
+    const notifyValidationError = (msg) => {
+      window.dispatchEvent(new CustomEvent('cyberguard:assistant-event', {
+        detail: { type: 'validation_error' }
+      }));
+      return toast.error(msg);
+    };
+
+    if (!title || title.trim().length < 5) {
+      return notifyValidationError('Incident title must be at least 5 characters');
     }
-    if (!description || description.length < 20) {
-      return toast.error("Description must be at least 20 characters");
+    if (!description || description.trim().length < 20) {
+      return notifyValidationError('Detailed narrative must be at least 20 characters');
+    }
+    if (!category) {
+      return notifyValidationError('Please select an incident category');
+    }
+    if (!subCategory) {
+      return notifyValidationError('Please select an incident sub-category');
     }
     if (!incidentDateTime) {
-      return toast.error("Please select incident date and time");
+      return notifyValidationError('Please select date and time of incident');
     }
-    if (!pincode || pincode.length !== 6) {
-      return toast.error("Please enter a valid 6-digit PIN code");
+    if (lostMoney && (!amountLost || Number(amountLost) <= 0)) {
+      return notifyValidationError('Please enter the financial amount lost in INR');
+    }
+    if (!email || !email.includes('@')) {
+      return notifyValidationError('Please enter a valid email address');
+    }
+    if (!mobile || mobile.length < 10) {
+      return notifyValidationError('Please enter a valid 10-digit mobile number');
+    }
+    if (!relationshipWithVictim) {
+      return notifyValidationError('Please select your relationship to the victim');
+    }
+    if (!consentAgreed) {
+      return notifyValidationError('Please confirm accuracy by checking the declaration');
     }
 
     setIsSubmitting(true);
 
     try {
-      const finalCategory = category || aiDetection?.category || 'Other';
-      const finalSubCategory = subCategory || aiDetection?.subcategory || (SUBCATEGORIES_BY_CATEGORY[finalCategory]?.[0] || 'General');
+      let combinedDescription = description.trim();
+      if (lostMoney && amountLost) {
+        combinedDescription += `\n[Financial Loss: INR ${amountLost}${transactionReference ? ` | Ref: ${transactionReference}` : ''}]`;
+      }
 
       const formData = new FormData();
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('category', finalCategory);
-      formData.append('subCategory', finalSubCategory);
-      formData.append('modusOperandi', modusOperandi || 'Phishing / Digital Fraud');
+      formData.append('title', title.trim());
+      formData.append('description', combinedDescription);
+      formData.append('category', category);
+      formData.append('subCategory', subCategory);
+      formData.append('modusOperandi', modusOperandi || 'Unknown');
       formData.append('lostMoney', lostMoney);
       formData.append('relationshipWithVictim', relationshipWithVictim || 'Self');
 
@@ -432,7 +439,9 @@ const CyberReport = () => {
         location: pincode,
         email,
         countryCode,
-        mobile
+        mobile,
+        amountLost: lostMoney ? amountLost : undefined,
+        transactionReference: lostMoney ? transactionReference : undefined
       }));
 
       if (location) {
@@ -449,32 +458,39 @@ const CyberReport = () => {
         formData.append('evidence', nationalIdFile);
       }
 
-      await complaintsAPI.create(formData);
+      const response = await complaintsAPI.create(formData);
+      const caseId = response.data?.complaintId || response.data?.data?._id || '';
 
-      toast.success(`Incident logged under [${finalCategory}] & projected on Live Map`, { duration: 5000 });
+      toast.success(`Incident reported successfully${caseId ? ` [Case #${caseId}]` : ''}`, { duration: 5000 });
+      window.dispatchEvent(new CustomEvent('cyberguard:assistant-event', {
+        detail: { type: 'complaint_submitted', caseId }
+      }));
 
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setIncidentDateTime("");
-      setCategory("");
-      setSubCategory("");
-      setModusOperandi("");
+      // Reset
+      setTitle('');
+      setDescription('');
+      setIncidentDateTime('');
+      setCategory('');
+      setSubCategory('');
+      setModusOperandi('');
       setLostMoney(false);
-      setIncidentOccurredWhere("");
-      setRelationshipWithVictim("");
-      setPincode("");
+      setAmountLost('');
+      setTransactionReference('');
+      setIncidentOccurredWhere('');
+      setRelationshipWithVictim('');
+      setPincode('');
       setLocation(null);
+      setEmail('');
+      setMobile('');
       setFiles([]);
       setNationalIdFile(null);
-      setAiDetection(null);
       setUserOverrodeCategory(false);
-      setAnalysis({ label: "READY", color: "var(--muted)" });
+      setConsentAgreed(false);
 
       navigate('/complaints');
     } catch (err) {
       console.error(err.response?.data);
-      const msg = err.response?.data?.message || "Submission failed";
+      const msg = err.response?.data?.message || 'Submission failed. Please check required fields and retry.';
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -486,737 +502,693 @@ const CyberReport = () => {
     'Other'
   ];
 
+  // Step completions
+  const section1Complete = Boolean(
+    title.trim().length >= 5 &&
+    description.trim().length >= 20 &&
+    category &&
+    subCategory &&
+    incidentDateTime
+  );
+
+  const section2Complete = Boolean(
+    email.trim().includes('@') &&
+    mobile.trim().length >= 10
+  );
+
+  const section3Complete = Boolean(
+    files.length > 0 || nationalIdFile || skipEvidence
+  );
+
+  const section4Complete = Boolean(
+    relationshipWithVictim && consentAgreed
+  );
+
+  const completedSections = [
+    section1Complete,
+    section2Complete,
+    section3Complete,
+    section4Complete
+  ];
+
+  const completedCount = completedSections.filter(Boolean).length;
+  
+  // Track active section for orientation as user scrolls through the form
+  const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sectionElements = progressSections
+        .map(sec => document.getElementById(sec.target))
+        .filter(Boolean);
+
+      if (sectionElements.length === 0) return;
+
+      const scrollPosition = window.scrollY + 200;
+      let currentIndex = 0;
+
+      sectionElements.forEach((el, idx) => {
+        if (scrollPosition >= el.offsetTop) {
+          currentIndex = idx;
+        }
+      });
+
+      setActiveSectionIndex(currentIndex);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleScrollToSection = (e, targetId, idx) => {
+    e.preventDefault();
+    setActiveSectionIndex(idx);
+    const el = document.getElementById(targetId);
+    if (el) {
+      const yOffset = -28;
+      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
+  // Connected progress rail percentage across 4 checkpoints (0, 1, 2, 3 segments)
+  const progressPercent =
+    completedCount === 0 ? 0 :
+    completedCount === 1 ? 33.33 :
+    completedCount === 2 ? 66.67 : 100;
+
   return (
-    <section style={{
-      maxWidth: '1040px',
-      margin: '0 auto',
-      padding: '80px 24px',
-      position: 'relative',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center'
-    }}>
-      {/* Liquid Back Button */}
-      <button
-        onClick={() => navigate('/')}
-        style={{
-          position: 'fixed',
-          left: '40px',
-          top: '40px',
-          width: 50, height: 50, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.05)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          color: '#00B4FF', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-          zIndex: 100,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-        }}
-        onMouseOver={e => {
-          e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-        }}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-      </button>
+    <main className="page-shell">
+      {/* Main Report Layout */}
+      <div className="report-layout">
+        {/* Top Subheading / Aside Row */}
+        <aside className="report-aside">
+          <button
+            type="button"
+            className="back-link"
+            onClick={() => navigate(-1)}
+            aria-label="Go back to previous page"
+          >
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span>Back</span>
+          </button>
+          <div className="aside-copy">
+            <p className="eyebrow">SECURE SUBMISSION</p>
+            <h1>CYBER INCIDENT REPORT</h1>
+            <p>Complete the details below. Required fields are marked with an asterisk.</p>
+          </div>
+          <div className="help-note">
+            <p>Immediate danger?</p>
+            <span>Contact local emergency services before completing this form.</span>
+          </div>
+        </aside>
 
-      {/* Main Liquid Glass Container */}
-      <div style={{
-        width: '100%',
-        background: 'rgba(10, 15, 30, 0.45)',
-        backdropFilter: 'blur(40px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '32px',
-        padding: '50px 60px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Glow Accents */}
-        <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(0, 180, 255, 0.15) 0%, transparent 70%)', zIndex: -1 }}></div>
-        <div style={{ position: 'absolute', bottom: '-100px', left: '-100px', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%)', zIndex: -1 }}></div>
-
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h2 style={{
-            fontSize: '3.2rem',
-            margin: '0 0 12px 0',
-            fontWeight: 800,
-            background: 'linear-gradient(to bottom, #fff 30%, rgba(255,255,255,0.5) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-1px',
-            fontFamily: 'Inter, sans-serif'
-          }}>
-            {t('REPORT.TITLE', 'Report Cybercrime')}
-          </h2>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '16px', fontWeight: 400 }}>
-            {t('REPORT.SUBTITLE', 'Neural AI-assisted incident categorization & forensic intake')}
-          </p>
-        </div>
-
-        {/* AI Insight Live Bar */}
-        {aiDetection && (
-          <div style={{
-            background: aiDetection.style.bg,
-            border: `1px solid ${aiDetection.style.border}`,
-            borderRadius: '20px',
-            padding: '16px 24px',
-            marginBottom: '35px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            backdropFilter: 'blur(20px)',
-            boxShadow: `0 8px 25px ${aiDetection.style.color}22`
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <span style={{
-                width: '12px', height: '12px', borderRadius: '50%',
-                background: aiDetection.style.color,
-                boxShadow: `0 0 14px ${aiDetection.style.color}`
-              }}></span>
+        {/* Form Workspace with Left Vertical Bar */}
+        <div className="form-workspace">
+          <form
+            className="report-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+          >
+            {/* Form Intro Banner */}
+            <div className="form-intro" data-onee-target="form-intro">
               <div>
-                <div style={{ color: '#fff', fontSize: '15px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>AI DETECTED:</span>
-                  <span style={{ color: aiDetection.style.color }}>{aiDetection.category}</span>
-                  <span style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '8px', fontSize: '12px', color: '#fff' }}>
-                    {aiDetection.confidence}% Match
+                <p className="step-label">REPORT DETAILS</p>
+                <h2>Tell us what happened</h2>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <p className="required-note">
+                  <span aria-hidden="true">*</span> Required fields
+                </p>
+              </div>
+            </div>
+
+            {/* That Vertical Bar: Integrated Interactive Timeline Rail */}
+            <nav className="report-progress" aria-label="Report progress">
+              <div className="progress-summary">
+                <div className="progress-summary-header">
+                  <span>REPORT PROGRESS</span>
+                  <span className={`progress-pill ${completedCount === 4 ? 'is-finished' : ''}`}>
+                    {Math.round((completedCount / 4) * 100)}%
                   </span>
                 </div>
-                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', marginTop: '3px' }}>
-                  Sub-Type: <strong>{aiDetection.subcategory}</strong> â€¢ Severity: <span style={{ textTransform: 'uppercase', color: aiDetection.style.color }}>{aiDetection.severity}</span>
+                <strong>
+                  {completedCount === 4
+                    ? 'All 4 sections verified'
+                    : `${completedCount} of 4 complete`}
+                </strong>
+              </div>
+              <div className="progress-rail">
+                <div className="progress-track" aria-hidden="true">
+                  <span
+                    className={`progress-fill progress-${completedCount}`}
+                    style={{
+                      '--progress-scale': progressPercent / 100,
+                      '--has-progress': completedCount > 0 ? 1 : 0
+                    }}
+                  />
                 </div>
+                <ol className="progress-steps">
+                  {progressSections.map((sec, idx) => {
+                    const isComplete = completedSections[idx];
+                    const isCurrent = activeSectionIndex === idx;
+                    return (
+                      <li
+                        key={sec.target}
+                        className={`${isComplete ? 'is-complete' : ''} ${isCurrent ? 'is-current' : ''}`}
+                      >
+                        <a
+                          href={`#${sec.target}`}
+                          aria-current={isCurrent ? 'step' : undefined}
+                          aria-label={`Step ${idx + 1}: ${sec.label}${isComplete ? ', completed' : ''}${isCurrent ? ', current section' : ''}`}
+                          onClick={(e) => handleScrollToSection(e, sec.target, idx)}
+                        >
+                          <span className="step-badge">
+                            {isComplete ? (
+                              <Check size={12} strokeWidth={3} aria-hidden="true" />
+                            ) : (
+                              `0${idx + 1}`
+                            )}
+                          </span>
+                          <span className="step-label-text">{sec.label}</span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ol>
               </div>
-            </div>
-            {category !== aiDetection.category && (
-              <button
-                type="button"
-                onClick={handleApplyAiSuggestion}
-                style={{
-                  background: aiDetection.style.color,
-                  color: '#000',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '8px 18px',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  boxShadow: `0 4px 14px ${aiDetection.style.color}44`
-                }}
-              >
-                Sync with AI Suggestion
-              </button>
-            )}
-          </div>
-        )}
+            </nav>
 
-        <div style={{ display: 'grid', gap: '35px' }}>
-          {/* INCIDENT DETAILS GRID */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '25px' }}>
-            <div style={{ gridColumn: 'span 3' }}>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>
-                {t('REPORT.INCIDENT_TITLE', 'Incident Title *')}
-              </label>
-              <input
-                type="text"
-                style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px 20px', color: '#fff', fontSize: '16px', outline: 'none', transition: '0.3s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)' }}
-                className="liquid-input"
-                placeholder={t('REPORT.TITLE_PLACEHOLDER', 'e.g. Microsoft 365 Phishing email / Unauthorized UPI debit')}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-
-            {/* DESCRIPTION */}
-            <div style={{ gridColumn: 'span 3' }}>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>
-                Detailed Narrative & Threat Context *
-              </label>
-              <div style={{ position: 'relative' }}>
-                <textarea
-                  style={{
-                    width: '100%',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '20px',
-                    padding: '20px',
-                    paddingBottom: '55px',
-                    color: '#fff',
-                    fontSize: '15px',
-                    outline: 'none',
-                    transition: '0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                    height: '190px',
-                    resize: 'none',
-                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)',
-                    fontFamily: 'Inter, sans-serif',
-                    lineHeight: '1.6'
-                  }}
-                  placeholder="Describe what occurred in detail. You can paste phishing email headers, OTP scam details, ransomware notes, suspect links, or threat communications..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-                <div style={{
-                  position: 'absolute',
-                  bottom: '15px',
-                  right: '15px',
-                  background: 'rgba(0,0,0,0.6)',
-                  backdropFilter: 'blur(12px)',
-                  padding: '8px 16px',
-                  borderRadius: '12px',
-                  fontSize: '11px',
-                  color: analysis.color,
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  border: `1px solid ${analysis.color}44`,
-                  boxShadow: `0 4px 12px rgba(0,0,0,0.3)`
-                }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: analysis.color, boxShadow: `0 0 12px ${analysis.color}` }}></span>
-                  AI ANALYZER: {analysis.label}
+            {/* Section 01: Incident details */}
+            <section
+              className="form-section"
+              id="incident-details"
+              data-report-section
+            >
+              <div className="section-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+                <div>
+                  <h3>Incident details</h3>
+                  <p>Start with the key facts. Use clear, specific language.</p>
                 </div>
-              </div>
-            </div>
-
-            {/* CATEGORY DROPDOWN */}
-            <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>
-                {t('REPORT.CATEGORY', 'Category of Cybercrime *')}
-              </label>
-              <select
-                style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px 20px', color: '#fff', fontSize: '15px', outline: 'none', transition: '0.3s', WebkitAppearance: 'none', cursor: 'pointer' }}
-                className="liquid-input"
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value);
-                  setUserOverrodeCategory(true);
-                  const firstSub = SUBCATEGORIES_BY_CATEGORY[e.target.value]?.[0] || 'General';
-                  setSubCategory(firstSub);
-                }}
-              >
-                <option value="" style={{ color: '#000' }}>Select Category</option>
-                {Object.keys(SUBCATEGORIES_BY_CATEGORY).map((catName) => (
-                  <option key={catName} value={catName} style={{ color: '#000' }}>
-                    {catName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* SUBCATEGORY DROPDOWN */}
-            <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>
-                Sub-Category of Cybercrime *
-              </label>
-              <select
-                style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px 20px', color: '#fff', fontSize: '15px', outline: 'none', transition: '0.3s', WebkitAppearance: 'none', cursor: 'pointer' }}
-                className="liquid-input"
-                value={subCategory}
-                onChange={(e) => setSubCategory(e.target.value)}
-              >
-                <option value="" style={{ color: '#000' }}>Select Sub-Category</option>
-                {currentSubcategories.map((sub) => (
-                  <option key={sub} value={sub} style={{ color: '#000' }}>
-                    {sub}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                Date & Time of Incident *
-              </label>
-              <input
-                type="datetime-local"
-                style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px 20px', color: '#fff', fontSize: '15px', outline: 'none', transition: '0.3s', colorScheme: 'dark' }}
-                className="liquid-input"
-                value={incidentDateTime}
-                onChange={(e) => setIncidentDateTime(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Modus Operandi</label>
-              <select
-                style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px 20px', color: '#fff', fontSize: '15px', outline: 'none', transition: '0.3s', WebkitAppearance: 'none', cursor: 'pointer' }}
-                className="liquid-input"
-                value={modusOperandi}
-                onChange={(e) => setModusOperandi(e.target.value)}
-              >
-                <option value="" style={{ color: '#000' }}>Select Modus Operandi</option>
-                <option value="Phishing Websites & Spoofed SSO" style={{ color: '#000' }}>Phishing Websites & Spoofed SSO</option>
-                <option value="UPI / QR Code Fraud" style={{ color: '#000' }}>UPI / QR Code Fraud</option>
-                <option value="Ransomware & Malware Delivery" style={{ color: '#000' }}>Ransomware & Malware Delivery</option>
-                <option value="SIM Swap & Identity Theft" style={{ color: '#000' }}>SIM Swap & Identity Theft</option>
-                <option value="Android Malware & Hosting" style={{ color: '#000' }}>Android Malware & Hosting</option>
-                <option value="Digital Arrest & Extortion" style={{ color: '#000' }}>Digital Arrest & Extortion</option>
-                <option value="Investment Scam - Stock Market / Crypto" style={{ color: '#000' }}>Investment Scam - Stock Market / Crypto</option>
-                <option value="Loan Apps Extortion" style={{ color: '#000' }}>Loan Apps Extortion</option>
-                <option value="E-Commerce & Booking Scams" style={{ color: '#000' }}>E-Commerce & Booking Scams</option>
-                <option value="Impersonation & Deepfakes" style={{ color: '#000' }}>Impersonation & Deepfakes</option>
-                <option value="Others" style={{ color: '#000' }}>Others</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Have You Lost Money in INR?</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                <span style={{ color: !lostMoney ? '#fff' : 'rgba(255,255,255,0.4)' }}>No</span>
-                <div
-                  onClick={() => setLostMoney(!lostMoney)}
-                  style={{ width: '50px', height: '26px', background: lostMoney ? '#00B4FF' : 'rgba(255,255,255,0.2)', borderRadius: '13px', position: 'relative', cursor: 'pointer', transition: '0.3s' }}
-                >
-                  <div style={{ width: '22px', height: '22px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: lostMoney ? '26px' : '2px', transition: '0.3s' }}></div>
-                </div>
-                <span style={{ color: lostMoney ? '#00B4FF' : 'rgba(255,255,255,0.4)' }}>Yes</span>
-              </div>
-            </div>
-
-            <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Where did the Incident Occur?</label>
-              <select
-                style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px 20px', color: '#fff', fontSize: '15px', outline: 'none', transition: '0.3s', WebkitAppearance: 'none', cursor: 'pointer' }}
-                className="liquid-input"
-                value={incidentOccurredWhere}
-                onChange={(e) => setIncidentOccurredWhere(e.target.value)}
-              >
-                <option value="" style={{ color: '#000' }}>Select Platform</option>
-                <option value="Email" style={{ color: '#000' }}>Email</option>
-                <option value="Website URL" style={{ color: '#000' }}>Website URL</option>
-                <option value="WhatsApp" style={{ color: '#000' }}>WhatsApp</option>
-                <option value="Telegram" style={{ color: '#000' }}>Telegram</option>
-                <option value="Instagram" style={{ color: '#000' }}>Instagram</option>
-                <option value="Facebook" style={{ color: '#000' }}>Facebook</option>
-                <option value="LinkedIn" style={{ color: '#000' }}>LinkedIn</option>
-                <option value="Mobile App" style={{ color: '#000' }}>Mobile App</option>
-                <option value="SMS / Text Message" style={{ color: '#000' }}>SMS / Text Message</option>
-                <option value="Twitter / X" style={{ color: '#000' }}>Twitter / X</option>
-                <option value="Youtube" style={{ color: '#000' }}>Youtube</option>
-                <option value="Other Media" style={{ color: '#000' }}>Other Media</option>
-              </select>
-            </div>
-          </div>
-
-          {/* LOCATION GRID */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr', gap: '24px', alignItems: 'start' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', paddingLeft: '4px' }}>
-                <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Pin Code</label>
-                <span style={{ fontSize: '11px', color: '#00B4FF', cursor: 'pointer' }} onClick={() => pincode && geocodePincode(pincode)}>
-                  {pincode?.length === 6 ? 'Auto-Geocoded' : 'Enter 6-digit PIN'}
-                </span>
-              </div>
-              <input
-                type="text"
-                style={{
-                  width: '100%',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '16px',
-                  padding: '16px 20px',
-                  color: '#fff',
-                  fontSize: '16px',
-                  outline: 'none',
-                  transition: '0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
-                }}
-                placeholder="6-digit PIN (e.g. 560001)"
-                value={pincode}
-                maxLength={6}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  setPincode(val);
-                  if (val.length === 6) {
-                    geocodePincode(val);
-                  }
-                }}
-                onBlur={() => {
-                  if (pincode?.length === 6) {
-                    geocodePincode(pincode);
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', paddingLeft: '4px' }}>
-                <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Geospatial Threat Map Tag</label>
                 <button
                   type="button"
-                  onClick={() => setShowAreaSearch(!showAreaSearch)}
+                  onClick={() => { setShowTranscribeModal(true); setTranscribeResult(null); }}
                   style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#00B4FF',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '8px 14px',
+                    background: 'rgba(61, 245, 192, 0.08)',
+                    border: '1px solid #3DF5C0',
+                    borderRadius: '8px',
+                    color: '#3DF5C0',
                     fontSize: '12px',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     cursor: 'pointer',
-                    textDecoration: 'underline'
+                    fontFamily: "'IBM Plex Sans', sans-serif"
                   }}
                 >
-                  {showAreaSearch ? 'Close Search' : 'Search City / Area'}
+                  <Mic size={14} />
+                  <span>RECORD AUDIO STATEMENT</span>
                 </button>
               </div>
 
-              {showAreaSearch ? (
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input
-                    type="text"
-                    placeholder="Enter city or locality (e.g. Udupi, Indiranagar, Mangalore)..."
-                    value={areaSearchQuery}
-                    onChange={(e) => setAreaSearchQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleSearchArea();
-                      }
-                    }}
-                    style={{
-                      flex: 1,
-                      background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid #00B4FF',
-                      borderRadius: '16px',
-                      padding: '14px 18px',
-                      color: '#fff',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSearchArea}
-                    style={{
-                      background: 'linear-gradient(135deg, #00B4FF, #0070F3)',
-                      border: 'none',
-                      borderRadius: '16px',
-                      padding: '0 20px',
-                      color: '#fff',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Locate
-                  </button>
+              <label className="field" htmlFor="incident-title">
+                <div className="field-label">
+                  <span>INCIDENT TITLE *</span>
                 </div>
-              ) : (
-                <div
-                  onClick={handleGetLocation}
-                  style={{
-                    background: location ? 'rgba(0, 180, 255, 0.1)' : 'rgba(255,255,255,0.03)',
-                    border: location ? '1px solid rgba(0, 180, 255, 0.3)' : '1px solid rgba(255,255,255,0.1)',
-                    color: location ? '#00B4FF' : 'rgba(255,255,255,0.7)',
-                    padding: '16px',
-                    borderRadius: '16px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '12px',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                    height: '54px',
-                    boxShadow: location ? '0 0 20px rgba(0, 180, 255, 0.2)' : 'none'
-                  }}
-                  onMouseOver={e => e.currentTarget.style.background = location ? 'rgba(0, 180, 255, 0.15)' : 'rgba(255,255,255,0.08)'}
-                  onMouseOut={e => e.currentTarget.style.background = location ? 'rgba(0, 180, 255, 0.1)' : 'rgba(255,255,255,0.03)'}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                  </svg>
-                  {gettingLocation 
-                    ? "ACQUIRING SATELLITE GPS..." 
-                    : location 
-                      ? (location.city ? `${location.city.toUpperCase()}, ${location.region || ''} (${location.lat.toFixed(2)}, ${location.lng.toFixed(2)})` : `GPS LOCKED (${location.lat.toFixed(2)}, ${location.lng.toFixed(2)})`) 
-                      : "CAPTURE LIVE GPS / PIN MAP"}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* CONTACT INFO GRID */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-            <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Email Address</label>
-              <input
-                type="email"
-                style={{
-                  width: '100%',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '16px',
-                  padding: '16px 20px',
-                  color: '#fff',
-                  fontSize: '16px',
-                  outline: 'none',
-                  transition: '0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
-                }}
-                placeholder="victim@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Mobile Number</label>
-              <div style={{ display: 'flex', gap: '12px' }}>
                 <input
+                  id="incident-title"
+                  data-onee-target="incident-title"
                   type="text"
-                  style={{
-                    width: '80px',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '16px',
-                    padding: '16px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    outline: 'none',
-                    textAlign: 'center'
-                  }}
-                  placeholder="+91"
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
+                  placeholder="e.g. Unauthorized UPI debit"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
                 />
-                <input
-                  type="text"
-                  style={{
-                    flex: 1,
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '16px',
-                    padding: '16px 20px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    outline: 'none'
-                  }}
-                  placeholder="Enter mobile number"
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* EVIDENCE SECTION */}
-          <div style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px dashed rgba(255,255,255,0.15)',
-            borderRadius: '24px',
-            padding: '30px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-              <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Image Evidence & Screenshots (AI OCR Enabled)
               </label>
-              <span style={{ fontSize: '11px', color: '#00B4FF', background: 'rgba(0, 180, 255, 0.1)', padding: '4px 10px', borderRadius: '10px' }}>
-                Auto-Extracts UPIs, Phone Numbers & Accounts
-              </span>
-            </div>
 
-            <div
-              {...getRootProps()}
-              style={{
-                padding: '40px 20px',
-                textAlign: 'center',
-                borderRadius: '16px',
-                border: isDragActive ? '1px solid #00B4FF' : 'none',
-                background: isDragActive ? 'rgba(0,180,255,0.05)' : 'transparent',
-                transition: '0.3s'
-              }}
-            >
-              <input {...getInputProps()} />
-              <img src="/icons/cyberguard/evidence-folder.png" alt="" aria-hidden="true" style={{ width: 42, height: 42, objectFit: 'contain', marginBottom: '16px', opacity: 0.85 }} />
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: '20px' }}>
-                Drag & Drop screenshots of phishing emails, transaction receipts, WhatsApp threats, or ransomware screens
-              </p>
-              <button
-                type="button"
-                onClick={open}
-                style={{
-                  background: '#fff',
-                  color: '#000',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '10px 24px',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: '0.3s',
-                  boxShadow: '0 8px 16px rgba(255,255,255,0.1)'
-                }}
-                onMouseOver={e => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 12px 24px rgba(255,255,255,0.2)';
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(255,255,255,0.1)';
-                }}
-              >
-                Browse Files
-              </button>
-            </div>
+              <label className="field" htmlFor="narrative">
+                <div className="field-label">
+                  <span>DETAILED NARRATIVE *</span>
+                </div>
+                <textarea
+                  id="narrative"
+                  data-onee-target="incident-description"
+                  rows={7}
+                  placeholder="Describe what occurred, including messages received, actions taken, transaction details, links, account names, and anything else that may help an investigator."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+                <span className="field-hint">
+                  Do not include passwords, PINs, or one-time passcodes.
+                </span>
+              </label>
 
-            {/* PREVIEWS */}
-            {files.length > 0 && (
-              <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                {files.map((file, idx) => (
-                  <div key={idx} style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    padding: '8px 14px',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    fontSize: '13px',
-                    color: '#fff',
-                    backdropFilter: 'blur(10px)'
-                  }}>
-                    <img src="/icons/cyberguard/evidence-attachment.png" alt="" aria-hidden="true" style={{ width: 18, height: 18, objectFit: 'contain' }} />
-                    <span style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', opacity: 0.9 }}>
-                      {file.name}
-                    </span>
+              <div className="field-grid">
+                <div className="field" data-onee-target="incident-category">
+                  <div className="field-label">
+                    <span>INCIDENT CATEGORY *</span>
+                  </div>
+                  <select
+                    id="category"
+                    value={category}
+                    onChange={(e) => {
+                      setCategory(e.target.value);
+                      setUserOverrodeCategory(true);
+                      const firstSub = SUBCATEGORIES_BY_CATEGORY[e.target.value]?.[0] || 'General';
+                      setSubCategory(firstSub);
+                    }}
+                    required
+                  >
+                    <option value="" disabled>Select a category</option>
+                    {Object.keys(SUBCATEGORIES_BY_CATEGORY).map((catName) => (
+                      <option key={catName} value={catName}>
+                        {catName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field">
+                  <div className="field-label">
+                    <span>SUB-CATEGORY *</span>
+                  </div>
+                  <select
+                    id="sub-category"
+                    value={subCategory}
+                    onChange={(e) => setSubCategory(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>Select a sub-category</option>
+                    {currentSubcategories.map((sub) => (
+                      <option key={sub} value={sub}>
+                        {sub}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <label className="field" htmlFor="incident-time" data-onee-target="incident-time">
+                  <div className="field-label">
+                    <span>DATE AND TIME OF INCIDENT *</span>
+                  </div>
+                  <input
+                    id="incident-time"
+                    type="datetime-local"
+                    value={incidentDateTime}
+                    onChange={(e) => setIncidentDateTime(e.target.value)}
+                    required
+                  />
+                </label>
+
+                <div className="field">
+                  <div className="field-label">
+                    <span>HOW DID IT HAPPEN?</span>
+                  </div>
+                  <select
+                    id="method"
+                    value={modusOperandi}
+                    onChange={(e) => setModusOperandi(e.target.value)}
+                  >
+                    <option value="">Select a method</option>
+                    <option value="Link or QR code">Link or QR code</option>
+                    <option value="Phone call or SMS">Phone call or SMS</option>
+                    <option value="Remote access">Remote access</option>
+                    <option value="Credential theft">Credential theft</option>
+                    <option value="Malicious attachment">Malicious attachment</option>
+                    <option value="UPI / Payment fraud">UPI / Payment fraud</option>
+                    <option value="Digital Arrest & Extortion">Digital Arrest & Extortion</option>
+                    <option value="Unknown">Unknown</option>
+                  </select>
+                </div>
+
+                <div className="field">
+                  <div className="field-label">
+                    <span>WHERE DID IT HAPPEN?</span>
+                  </div>
+                  <select
+                    id="platform"
+                    value={incidentOccurredWhere}
+                    onChange={(e) => setIncidentOccurredWhere(e.target.value)}
+                  >
+                    <option value="">Select a platform</option>
+                    <option value="Banking or payment app">Banking or payment app</option>
+                    <option value="Email">Email</option>
+                    <option value="WhatsApp">WhatsApp</option>
+                    <option value="Telegram">Telegram</option>
+                    <option value="Social media">Social media</option>
+                    <option value="Website">Website</option>
+                    <option value="Phone call or SMS">Phone call or SMS</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <fieldset className="field toggle-field" data-onee-target="financial-loss">
+                  <legend className="field-label">DID YOU LOSE MONEY?</legend>
+                  <div className="segmented-control">
                     <button
-                      onClick={() => removeFile(idx)}
-                      style={{ background: 'rgba(255,59,48,0.2)', border: 'none', color: '#FF3B30', cursor: 'pointer', padding: '2px', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}
+                      className={!lostMoney ? 'is-selected' : ''}
+                      type="button"
+                      onClick={() => setLostMoney(false)}
+                      aria-pressed={!lostMoney}
                     >
-                      Remove
+                      NO
+                    </button>
+                    <button
+                      className={lostMoney ? 'is-selected' : ''}
+                      type="button"
+                      onClick={() => setLostMoney(true)}
+                      aria-pressed={lostMoney}
+                    >
+                      YES
                     </button>
                   </div>
-                ))}
+                </fieldset>
               </div>
-            )}
-          </div>
 
-          {/* COMPLAINANT DETAILS SECTION */}
-          <div style={{
-            background: 'rgba(255,255,255,0.02)',
-            border: '1px dashed rgba(255,255,255,0.1)',
-            borderRadius: '24px',
-            padding: '30px'
-          }}>
-            <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px', display: 'block' }}>Complainant Verification</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
-              <div>
-                <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>Relationship with the Victim *</label>
-                <select
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px 20px', color: '#fff', fontSize: '15px', outline: 'none', transition: '0.3s', WebkitAppearance: 'none', cursor: 'pointer' }}
-                  className="liquid-input"
-                  value={relationshipWithVictim}
-                  onChange={(e) => setRelationshipWithVictim(e.target.value)}
-                >
-                  <option value="" style={{ color: '#000' }}>Select Relationship</option>
-                  <option value="Self" style={{ color: '#000' }}>Self</option>
-                  <option value="Father" style={{ color: '#000' }}>Father</option>
-                  <option value="Mother" style={{ color: '#000' }}>Mother</option>
-                  <option value="Husband" style={{ color: '#000' }}>Husband</option>
-                  <option value="Wife" style={{ color: '#000' }}>Wife</option>
-                  <option value="Son" style={{ color: '#000' }}>Son</option>
-                  <option value="Daughter" style={{ color: '#000' }}>Daughter</option>
-                  <option value="Brother" style={{ color: '#000' }}>Brother</option>
-                  <option value="Sister" style={{ color: '#000' }}>Sister</option>
-                  <option value="Friend" style={{ color: '#000' }}>Friend</option>
-                  <option value="Corporate Representative" style={{ color: '#000' }}>Corporate Representative</option>
-                  <option value="Lawyer" style={{ color: '#000' }}>Lawyer</option>
-                  <option value="Others" style={{ color: '#000' }}>Others</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', display: 'block', paddingLeft: '4px' }}>National ID Verification (Optional)</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <label style={{
-                    background: '#fff', color: '#000', padding: '10px 24px', borderRadius: '12px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', transition: '0.3s', boxShadow: '0 8px 16px rgba(255,255,255,0.1)'
-                  }}>
-                    Upload ID
+              {lostMoney && (
+                <div className="money-details">
+                  <label className="field" htmlFor="amount">
+                    <div className="field-label">
+                      <span>AMOUNT LOST (INR) *</span>
+                    </div>
+                    <div className="input-prefix">
+                      <span>₹</span>
+                      <input
+                        id="amount"
+                        type="number"
+                        min="0"
+                        step="any"
+                        placeholder="0.00"
+                        value={amountLost}
+                        onChange={(e) => setAmountLost(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </label>
+                  <label className="field" htmlFor="transaction-reference" data-onee-target="utr-number">
+                    <div className="field-label">
+                      <span>TRANSACTION REFERENCE</span>
+                      <span className="optional">OPTIONAL</span>
+                    </div>
                     <input
-                      type="file"
-                      style={{ display: 'none' }}
-                      accept=".jpg,.jpeg,.png,.pdf"
-                      onChange={(e) => setNationalIdFile(e.target.files[0])}
+                      id="transaction-reference"
+                      type="text"
+                      placeholder="UTR or transaction ID"
+                      value={transactionReference}
+                      onChange={(e) => setTransactionReference(e.target.value)}
                     />
                   </label>
-                  <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {nationalIdFile ? nationalIdFile.name : "no document chosen"}
+                </div>
+              )}
+            </section>
+
+            {/* Section 02: Location and contact */}
+            <section
+              className="form-section"
+              id="location-contact"
+              data-report-section
+            >
+              <div className="section-heading">
+                <h3>Location and contact</h3>
+                <p>Add a location and a reliable way for investigators to reach you.</p>
+              </div>
+
+              <div className="field-grid" data-onee-target="contact-info">
+                <label className="field" htmlFor="pin-code">
+                  <div className="field-label">
+                    <span>PIN CODE</span>
+                  </div>
+                  <input
+                    id="pin-code"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder="6-digit PIN"
+                    value={pincode}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setPincode(val);
+                      if (val.length === 6) {
+                        geocodePincode(val);
+                      }
+                    }}
+                  />
+                </label>
+
+                <div className="field">
+                  <div className="field-label">
+                    <span>CITY OR AREA</span>
+                  </div>
+                  <div className="input-icon">
+                    <MapPin size={16} aria-hidden="true" />
+                    <input
+                      id="city"
+                      type="text"
+                      placeholder="Search city or area"
+                      value={areaSearchQuery}
+                      onChange={(e) => setAreaSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleSearchArea();
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <label className="field" htmlFor="email">
+                  <div className="field-label">
+                    <span>EMAIL ADDRESS *</span>
+                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </label>
+
+                <label className="field" htmlFor="mobile">
+                  <div className="field-label">
+                    <span>MOBILE NUMBER *</span>
+                  </div>
+                  <div className="phone-input">
+                    <span>+91</span>
+                    <input
+                      id="mobile"
+                      type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      placeholder="Enter mobile number"
+                      value={mobile}
+                      onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                      required
+                    />
+                  </div>
+                </label>
+              </div>
+            </section>
+
+            {/* Section 03: Supporting evidence */}
+            <section
+              className="form-section"
+              id="evidence"
+              data-report-section
+            >
+              <div className="section-heading">
+                <h3>Supporting evidence</h3>
+                <p>Attach screenshots, receipts, messages, or relevant documents.</p>
+              </div>
+
+              <div
+                className={`upload-area ${isDragActive ? 'is-drag-active' : ''}`}
+                data-onee-target="evidence-upload"
+                {...getRootProps()}
+              >
+                <input {...getInputProps()} />
+                <Upload size={30} aria-hidden="true" />
+                <div>
+                  <p>Drop files here or choose from your device</p>
+                  <span>PNG, JPG, PDF, or TXT · Maximum 10 MB per file</span>
+                </div>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={open}
+                >
+                  CHOOSE FILES
+                </button>
+              </div>
+
+              {files.length === 0 && (
+                <button
+                  type="button"
+                  className={`skip-evidence ${skipEvidence ? 'is-skipped' : ''}`}
+                  onClick={() => setSkipEvidence((s) => !s)}
+                >
+                  {skipEvidence ? 'Evidence skipped — add files instead' : 'Skip for now'}
+                </button>
+              )}
+
+              {files.length > 0 && (
+                <ul className="file-list" aria-label="Selected evidence">
+                  {files.map((file, idx) => (
+                    <li key={`${file.name}-${idx}`}>
+                      <span className="file-name">{file.name}</span>
+                      <button
+                        type="button"
+                        className="file-remove-btn"
+                        onClick={() => removeFile(idx)}
+                        aria-label={`Remove file ${file.name}`}
+                      >
+                        <X size={14} aria-hidden="true" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Section 04: Complainant verification */}
+            <section
+              className="form-section"
+              id="verification"
+              data-report-section
+            >
+              <div className="section-heading">
+                <h3>Complainant verification</h3>
+                <p>Confirm your relationship to the person affected.</p>
+              </div>
+
+              <div className="field-grid">
+                <div className="field">
+                  <div className="field-label">
+                    <span>RELATIONSHIP TO THE VICTIM *</span>
+                  </div>
+                  <select
+                    id="relationship"
+                    value={relationshipWithVictim}
+                    onChange={(e) => setRelationshipWithVictim(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>Select a relationship</option>
+                    <option value="Self">I am the victim</option>
+                    <option value="Family member">Family member</option>
+                    <option value="Authorized representative">Authorized representative</option>
+                    <option value="Employer or organization">Employer or organization</option>
+                    <option value="Witness">Witness</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="field">
+                  <div className="field-label">
+                    <span>NATIONAL ID VERIFICATION</span>
+                    <span className="optional">OPTIONAL</span>
+                  </div>
+                  <div className="compact-upload">
+                    <label className="secondary-button compact-upload-btn">
+                      UPLOAD ID
+                      <input
+                        type="file"
+                        className="visually-hidden"
+                        accept="image/*,.pdf"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) {
+                            if (files.length >= 5) {
+                              toast.error('Maximum 5 total files allowed. Please remove an attached evidence file first.');
+                              return;
+                            }
+                            setNationalIdFile(f);
+                            toast.success(`ID attached: ${f.name}`);
+                          }
+                        }}
+                      />
+                    </label>
+                    <span className="compact-upload-name">
+                      {nationalIdFile ? nationalIdFile.name : 'No document selected'}
+                    </span>
+                    {nationalIdFile && (
+                      <button
+                        type="button"
+                        className="file-remove-btn"
+                        onClick={() => setNationalIdFile(null)}
+                        aria-label="Remove national ID"
+                      >
+                        <X size={14} aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                  <span className="field-hint">
+                    Aadhaar, PAN, passport, or corporate ID · Maximum 5 MB
                   </span>
                 </div>
-                <div style={{ color: '#A855F7', fontSize: '12px', marginTop: '8px' }}>Aadhaar / PAN / Passport / Corporate ID (Max 5MB)</div>
               </div>
-            </div>
-          </div>
 
-          {/* SUBMIT BUTTON */}
-          <div style={{ marginTop: '10px' }}>
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              style={{
-                width: '100%',
-                background: 'linear-gradient(135deg, #00B4FF 0%, #A855F7 100%)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '20px',
-                padding: '20px',
-                fontSize: '18px',
-                fontWeight: 800,
-                letterSpacing: '1px',
-                cursor: 'pointer',
-                transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                boxShadow: '0 15px 35px rgba(0, 180, 255, 0.3)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-              onMouseOver={e => {
-                if (!isSubmitting) {
-                  e.currentTarget.style.transform = 'translateY(-4px) scale(1.01)';
-                  e.currentTarget.style.boxShadow = '0 20px 45px rgba(0, 180, 255, 0.5)';
-                }
-              }}
-              onMouseOut={e => {
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                e.currentTarget.style.boxShadow = '0 15px 35px rgba(0, 180, 255, 0.3)';
-              }}
-            >
-              {isSubmitting ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-                  <div style={{ width: '20px', height: '20px', border: '3px solid rgba(255,255,255,0.3)', borderTop: '3px solid #fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                  {t('REPORT.SUBMITTING', 'ANALYZING & FILING CASE ON CHAIN...')}
-                </div>
-              ) : t('REPORT.SUBMIT', 'AUTHENTICATE & SUBMIT COMPLAINT')}
+              <label className="consent" htmlFor="consent-check" data-onee-target="review-declaration">
+                <input
+                  id="consent-check"
+                  type="checkbox"
+                  checked={consentAgreed}
+                  onChange={(e) => setConsentAgreed(e.target.checked)}
+                  required
+                />
+                <span>
+                  I confirm that the information in this report is accurate to the best of my knowledge. *
+                </span>
+              </label>
+            </section>
 
-              {/* Shine effect */}
-              <div style={{ position: 'absolute', top: 0, left: '-100%', width: '50%', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)', animation: 'shine 3s infinite' }}></div>
-            </button>
-          </div>
+            {/* Form Footer */}
+            <footer className="form-footer">
+              <div className="footer-security-note">
+                <Lock size={17} aria-hidden="true" />
+                <p>
+                  <strong>Your report is handled securely.</strong>
+                  <span>Review your information before submitting.</span>
+                </p>
+              </div>
+              <button
+                type="submit"
+                className="primary-button"
+                data-onee-target="submit-button"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT INCIDENT REPORT'}
+              </button>
+            </footer>
+          </form>
         </div>
       </div>
 
-      <style>
-        {`
-          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-          @keyframes shine { 0% { left: -100%; } 100% { left: 200%; } }
-
-          .liquid-input:focus {
-            background: rgba(255,255,255,0.06) !important;
-            border-color: rgba(0, 180, 255, 0.5) !important;
-            box-shadow: 0 0 0 4px rgba(0, 180, 255, 0.15), inset 0 2px 4px rgba(0,0,0,0.2) !important;
-          }
-
-          input[type="date"]::-webkit-calendar-picker-indicator,
-          input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            opacity: 0.5;
-            cursor: pointer;
-          }
-        `}
-      </style>
-    </section>
+      {/* Onee Interactive Citizen Guide Companion */}
+      <OneeCompanion
+        step={oneeGuide.currentStep}
+        stepIndex={oneeGuide.currentStepIndex}
+        totalSteps={oneeGuide.totalSteps}
+        targetRect={oneeGuide.targetRect}
+        isStepCompleted={oneeGuide.isCurrentStepCompleted}
+        isValidationError={oneeGuide.isValidationError}
+        validationMessage={oneeGuide.validationMessage}
+        prefersReducedMotion={oneeGuide.prefersReducedMotion}
+        isActive={oneeGuide.isActive}
+        onNext={oneeGuide.onNext}
+        onSkip={oneeGuide.stopGuide}
+        onStart={oneeGuide.startGuide}
+        onOpenDraftHelper={() => setShowTranscribeModal(true)}
+      />
+    </main>
   );
 };
 

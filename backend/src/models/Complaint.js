@@ -7,13 +7,25 @@ const timelineSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
+const custodyEventSchema = new mongoose.Schema({
+  action: { type: String, required: true },
+  actor: { type: String, default: 'System' },
+  actorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  actorRole: { type: String },
+  details: { type: String },
+  evidenceHash: { type: String },
+  timestamp: { type: Date, default: Date.now }
+});
+
 const evidenceSchema = new mongoose.Schema({
   filename: { type: String, required: true },
   originalName: { type: String, required: true },
   mimetype: { type: String, required: true },
+  verifiedMime: { type: String },
   size: { type: Number, required: true },
+  sha256: { type: String },
   url: { type: String, required: true },
-  uploadedAt: { type: Date, default: Date.now },
+  uploadedAt: { type: Date, default: Date.now }
 });
 
 const complaintSchema = new mongoose.Schema({
@@ -157,12 +169,119 @@ const complaintSchema = new mongoose.Schema({
       phones: [String],
       upis: [String],
       accounts: [String],
+      utrs: [String],
+      amounts: [Number],
+      detectedApps: [String],
+      forgeryAnalysis: Object,
     },
     analyzedAt: Date
   },
   isViewed: {
     type: Boolean,
     default: false
+  },
+  chainOfCustody: [custodyEventSchema],
+  moneyTrail: [{
+    hopNumber: { type: Number, default: 1 },
+    fromAccountOrUpi: String,
+    toBankName: String,
+    toAccountOrUpi: String,
+    ifsc: String,
+    amount: Number,
+    utrOrRef: String,
+    status: {
+      type: String,
+      enum: ['TRANSFER_RECORDED', 'FREEZE_NOTICE_ISSUED', 'FUNDS_SECURED', 'CASHED_OUT_ATM', 'CRYPTO_CONVERTED'],
+      default: 'TRANSFER_RECORDED'
+    },
+    freezeNoticeRef: String,
+    timestamp: { type: Date, default: Date.now },
+    notes: String
+  }],
+  telecomNotices: [{
+    noticeNumber: String,
+    targetProvider: String,
+    requisitionType: String,
+    targetIdentifier: String,
+    targetTimeWindow: String,
+    sha256Digest: String,
+    dispatchedAt: { type: Date, default: Date.now },
+    dispatchedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  }],
+  takedownNotices: [{
+    noticeNumber: String,
+    targetPlatform: String,
+    offenceCategory: String,
+    contentUrls: [String],
+    sha256Digest: String,
+    dispatchedAt: { type: Date, default: Date.now },
+    dispatchedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  }],
+  zeroFIRTransfer: {
+    docketNumber: String,
+    destinationPoliceStation: String,
+    destinationDistrict: String,
+    transferredAt: Date,
+    transferredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    sha256Digest: String
+  },
+  affidavits65B: [{
+    certificateNumber: String,
+    deponentName: String,
+    deponentDesignation: String,
+    deponentAddress: String,
+    deviceDetails: {
+      makeModel: String,
+      osVersion: String,
+      deviceIdentifier: String,
+      custodyPeriod: String
+    },
+    exhibits: [{
+      exhibitId: String,
+      filename: String,
+      sha256: String,
+      description: String
+    }],
+    legalAct: { type: String, default: 'Section 65B(4) IEA 1872 & Section 63(4) BSA 2023' },
+    sha256Digest: String,
+    generatedAt: { type: Date, default: Date.now },
+    generatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  }],
+  forensicArtifacts: [{
+    certificateNumber: String,
+    artifactName: String,
+    artifactType: String,
+    md5: String,
+    sha1: String,
+    sha256: String,
+    entropy: Number,
+    threatScore: Number,
+    verdict: String,
+    indicators: [String],
+    extractedUrls: [String],
+    extractedIps: [String],
+    permissions: [String],
+    sanitizedSummary: String,
+    quarantinedAt: { type: Date, default: Date.now }
+  }],
+  restitutionStatus: {
+    currentStage: {
+      type: String,
+      enum: ['FUNDS_DEBIT_FREEZED', 'MAGISTRATE_PETITION_FILED', 'COURT_RELEASE_ORDERED', 'INDEMNITY_BOND_EXECUTED', 'ESCROW_REMITTED_SUCCESSFULLY'],
+      default: 'FUNDS_DEBIT_FREEZED'
+    },
+    courtOrderNumber: String,
+    settlementUtr: String,
+    amountRestored: { type: Number, default: 0 },
+    remittanceBank: String,
+    remittedAt: Date,
+    updatedAt: { type: Date, default: Date.now },
+    milestones: [{
+      stage: String,
+      notes: String,
+      updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      timestamp: { type: Date, default: Date.now }
+    }]
   }
 }, { timestamps: true });
 

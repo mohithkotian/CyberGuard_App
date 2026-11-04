@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useNotificationStore from '../hooks/useNotificationStore';
 import { formatDistanceToNow } from 'date-fns';
@@ -108,8 +108,8 @@ const styles = {
     justifyContent: 'center',
     background: 'rgba(255, 255, 255, 0.03)',
     '&:hover': {
-      color: '#00B4FF',
-      background: 'rgba(0, 180, 255, 0.1)',
+      color: '#EFEDE8',
+      background: 'rgba(255, 255, 255, 0.06)',
     }
   },
   badge: {
@@ -138,7 +138,7 @@ const styles = {
     background: '#111827',
     border: '1px solid rgba(0, 180, 255, 0.15)',
     borderRadius: '12px',
-    boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+    boxShadow: 'var(--shadow)',
     display: 'flex',
     flexDirection: 'column',
     zIndex: 1000,
@@ -155,7 +155,7 @@ const styles = {
   title: {
     fontSize: '12px',
     fontWeight: '700',
-    color: '#00B4FF',
+    color: '#EFEDE8',
     textTransform: 'uppercase',
     letterSpacing: '1px',
   },
@@ -215,9 +215,10 @@ const styles = {
     right: '8px',
     width: '6px',
     height: '6px',
-    background: '#00B4FF',
+    background: '#3DF5C0',
     borderRadius: '50%',
   }
 };
 
 export default NotificationCenter;
+

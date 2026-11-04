@@ -60,8 +60,8 @@ export default function SubmitComplaintScreen({ route, navigation }) {
     }
   };
 
-  const validateStep = () => {
-    if (step === 0) {
+  const validateStep = (currentStep = step) => {
+    if (currentStep === 0) {
       if (!form.title || form.title.trim().length < 8) {
         Alert.alert('Validation Error', 'Title requires at least 8 characters describing the incident.');
         return false;
@@ -79,6 +79,29 @@ export default function SubmitComplaintScreen({ route, navigation }) {
   };
 
   const handleSubmit = async () => {
+    // Strictly prevent submission before the final Review & File step
+    if (step < STEPS.length - 1) {
+      if (validateStep(step)) {
+        setStep(s => s + 1);
+      }
+      return;
+    }
+
+    if (!form.title || form.title.trim().length < 8) {
+      Alert.alert('Validation Error', 'Title requires at least 8 characters describing the incident.');
+      setStep(0);
+      return;
+    }
+    if (!form.description || form.description.trim().length < 30) {
+      Alert.alert('Validation Error', 'Description requires at least 30 characters for AI classification.');
+      setStep(0);
+      return;
+    }
+    if (!form.incidentDate) {
+      Alert.alert('Validation Error', 'Incident date is mandatory.');
+      setStep(0);
+      return;
+    }
     setLoading(true);
     try {
       const fd = new FormData();

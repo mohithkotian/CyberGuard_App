@@ -10,7 +10,7 @@ import useAuthStore from '../hooks/useAuthStore';
 const { width } = Dimensions.get('window');
 
 export default function ComplaintDetailScreen({ route, navigation }) {
-  const { complaintId } = route.params;
+  const complaintId = route?.params?.complaintId;
   const { user } = useAuthStore();
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,6 +19,10 @@ export default function ComplaintDetailScreen({ route, navigation }) {
   const [sendingChat, setSendingChat] = useState(false);
 
   const loadData = async () => {
+    if (!complaintId) {
+      setLoading(false);
+      return;
+    }
     try {
       const request = /^[0-9a-fA-F]{24}$/.test(complaintId) 
         ? complaintsAPI.getOne(complaintId)
