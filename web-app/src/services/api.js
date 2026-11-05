@@ -1,12 +1,33 @@
 import axios from 'axios';
 
 // ── CONFIGURATION ─────────────────────────────────────────────────────────────
-// POINTING TO BACKEND (Defaults to localhost:5002/api for development)
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
+// POINTING TO BACKEND (Auto-detects Render deployment suffix and falls back to localhost)
+export const resolveBaseUrl = () => {
+  const envUrl = process.env.REACT_APP_API_URL;
+  if (typeof window !== 'undefined' && window.location) {
+    const host = window.location.hostname;
+    // If running in production on Render (e.g. cybercrime-web-buzn.onrender.com)
+    if (host.includes('.onrender.com')) {
+      const match = host.match(/cybercrime-web(-[a-z0-9]+)?\.onrender\.com/i);
+      const suffix = match && match[1] ? match[1] : '-buzn';
+      return `https://cybercrime-backend${suffix}.onrender.com/api`;
+    }
+  }
+  if (envUrl && !envUrl.includes('example.com')) {
+    // If envUrl is set to generic unsuffixed cybercrime-backend, patch to -buzn
+    if (envUrl.includes('cybercrime-backend.onrender.com')) {
+      return envUrl.replace('cybercrime-backend.onrender.com', 'cybercrime-backend-buzn.onrender.com');
+    }
+    return envUrl;
+  }
+  return 'http://localhost:5002/api';
+};
+
+export const BASE_URL = resolveBaseUrl();
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 15000
+  timeout: 60000 // 60s timeout prevents dropping connections during Render container cold starts
 });
 
 // ── INTERCEPTORS ──────────────────────────────────────────────────────────────

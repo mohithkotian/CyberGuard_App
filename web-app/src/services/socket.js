@@ -1,6 +1,18 @@
 import { io } from 'socket.io-client';
+import { BASE_URL } from './api';
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || (process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5002');
+const resolveSocketUrl = () => {
+  const envSocket = process.env.REACT_APP_SOCKET_URL;
+  if (envSocket && !envSocket.includes('example.com')) {
+    if (envSocket.includes('cybercrime-backend.onrender.com')) {
+      return envSocket.replace('cybercrime-backend.onrender.com', 'cybercrime-backend-buzn.onrender.com');
+    }
+    return envSocket;
+  }
+  return BASE_URL.replace(/\/api\/?$/, '');
+};
+
+const SOCKET_URL = resolveSocketUrl();
 
 let socket = null;
 

@@ -22,9 +22,9 @@ services:
       - key: JWT_REFRESH_SECRET
         generateValue: true
       - key: ALLOWED_ORIGINS
-        sync: false
+        value: https://cybercrime-web-buzn.onrender.com,https://cybercrime-web.onrender.com,http://localhost:3000
       - key: ML_SERVICE_URL
-        value: https://cybercrime-ml-service.onrender.com
+        value: https://cybercrime-ml-service-buzn.onrender.com
       - key: ADMIN_EMAIL
         value: admin@cybercrime.gov
       - key: ADMIN_PASSWORD
@@ -75,8 +75,8 @@ services:
       - key: CI
         value: "false"
       - key: REACT_APP_API_URL
-        value: https://cybercrime-backend.onrender.com/api
+        value: https://cybercrime-backend-buzn.onrender.com/api
       - key: REACT_APP_SOCKET_URL
-        value: https://cybercrime-backend.onrender.com
+        value: https://cybercrime-backend-buzn.onrender.com
       - key: GENERATE_SOURCEMAP
         value: "false"

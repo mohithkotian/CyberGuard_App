@@ -58,14 +58,31 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || [
   'http://localhost:19006'
 ].join(',')).split(',').map(origin => origin.trim()).filter(Boolean);
 
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // Native mobile apps or server-to-server
+  if (allowedOrigins.includes(origin)) return true;
+  // Automatically authorize any Render cloud deployment domain (e.g. cybercrime-web-buzn.onrender.com)
+  if (/^https:\/\/[a-zA-Z0-9-]+\.onrender\.com$/.test(origin)) return true;
+  return false;
+};
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Native mobile requests generally have no Origin header.
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    if (isOriginAllowed(origin)) return callback(null, true);
+    logger.warn(`CORS blocked request from origin: ${origin}`);
     return callback(new Error('Origin is not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Bypass-Tunnel-Reminder'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'Bypass-Tunnel-Reminder',
+    'X-Requested-With',
+    'Accept',
+    'Origin',
+    'X-Evidence-SHA256',
+    'X-Evidence-Integrity'
+  ],
   credentials: true
 };
 
@@ -74,7 +91,10 @@ app.options('*', cors(corsOptions)); // Required for Preflight requests
 
 const io = socketIo(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) return callback(null, true);
+      return callback(new Error('Origin not allowed by WebSocket CORS'));
+    },
     methods: ['GET', 'POST'],
     credentials: true
   }
