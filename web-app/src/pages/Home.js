@@ -263,8 +263,7 @@ function StarField({ mouseRef }) {
         height: '100%',
         zIndex: 0,
         pointerEvents: 'none',
-        display: 'block',
-        mixBlendMode: 'screen'
+        display: 'block'
       }}
     />
   );
@@ -640,16 +639,8 @@ export default function Home() {
               userSelect: 'none',
               pointerEvents: 'none',
               maxHeight: '100dvh',
-              mixBlendMode: 'screen', /* black pixels → transparent; white ridges stay visible */
             }}
           />
-          {/* Left-edge blend into left column */}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
-            background: 'linear-gradient(to right, #000 0%, transparent 12%)',
-          }} />
         </div>
 
       </main>

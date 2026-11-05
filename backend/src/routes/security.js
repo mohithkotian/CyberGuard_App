@@ -177,7 +177,7 @@ router.post('/detonate-artifact', optionalAuth, async (req, res, next) => {
 });
 
 // @desc    Public / Institutional Evidence & Statutory Notice Integrity Validator
-router.post('/verify-integrity', async (req, res, next) => {
+const verifyIntegrity = async (req, res, next) => {
   try {
     const { query } = req.body;
     if (!query || typeof query !== 'string' || !query.trim()) {
@@ -293,6 +293,9 @@ router.post('/verify-integrity', async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+};
+
+router.post('/verify-integrity', verifyIntegrity);
+router.verifyIntegrity = verifyIntegrity;
 
 module.exports = router;

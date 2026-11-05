@@ -1,0 +1,66 @@
+{
+  "model_name": "CybercrimeClassifier",
+  "architecture": "TF-IDF + Multinomial Logistic Regression",
+  "vectorizer": {
+    "type": "TfidfVectorizer",
+    "ngram_range": [
+      1,
+      3
+    ],
+    "max_features": 25000,
+    "sublinear_tf": true
+  },
+  "classifier": {
+    "type": "LogisticRegression",
+    "solver": "lbfgs",
+    "C": 4.0,
+    "class_weight": "balanced",
+    "max_iter": 2000,
+    "calibrated": false
+  },
+  "dataset": {
+    "total_samples": 257,
+    "raw_samples": 257,
+    "missing_values": {
+      "text": 0,
+      "label": 0
+    },
+    "duplicate_text_samples": 0,
+    "classes": [
+      "child_exploitation",
+      "crypto_fraud",
+      "cyberbullying",
+      "data_breach",
+      "financial_fraud",
+      "hacking",
+      "identity_theft",
+      "network_attacks",
+      "online_fraud",
+      "other",
+      "phishing",
+      "ransomware",
+      "women_child_safety"
+    ],
+    "num_classes": 13
+  },
+  "split": {
+    "train_samples": 205,
+    "test_samples": 52,
+    "test_ratio": 0.2,
+    "stratified": true,
+    "random_seed": 42
+  },
+  "evaluation_metrics": {
+    "accuracy": 0.6346,
+    "macro_precision": 0.589,
+    "macro_recall": 0.5805,
+    "macro_f1": 0.5665,
+    "weighted_f1": 0.6111,
+    "mean_confidence": 0.2047
+  },
+  "environment": {
+    "sklearn_version": "1.8.0",
+    "numpy_version": "2.4.4",
+    "pandas_version": "3.0.2"
+  }
+}

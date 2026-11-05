@@ -129,12 +129,13 @@ export function extractDomain(urlStr) {
   return clean;
 }
 
-export function isAuthorityDomain(domain) {
-  if (!domain) return false;
-  const d = domain.toLowerCase();
+export function isAuthorityDomain(domainOrUrl) {
+  if (!domainOrUrl) return false;
+  const d = extractDomain(domainOrUrl);
+  if (!d) return false;
   if (AUTHORITY_DOMAINS.has(d)) return true;
   for (const auth of AUTHORITY_DOMAINS) {
-    if (d.endsWith('.' + auth)) return true;
+    if (d === auth || d.endsWith('.' + auth)) return true;
   }
   return false;
 }
@@ -173,37 +174,32 @@ export function lookupThreatClient(query) {
 
   // 2. Check Phishing Domains (Skipping legitimate authority domains)
   if (qDomain && !isAuthorityDomain(qDomain)) {
-    if (PHISHING_SET.has(qDomain) || PHISHING_SET.has(qLower)) {
-      const domainMatch = PHISHING_SET.has(qDomain) ? qDomain : qLower;
-      matched.push({
-        complaintId: `PHISH-${domainMatch.replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 10)}`,
-        category: 'Phishing & Fake Domain',
-        severity: 'high',
-        riskLevel: 'critical',
-        identifier: domainMatch,
-        type: 'WEBSITE',
-        details: `Blacklisted phishing destination [${domainMatch}]. Reported in multiple credential harvesting and spoofing campaigns.`,
-        status: 'BLOCKED',
-        createdAt: new Date().toISOString()
-      });
+    let matchedPhishDomain = null;
+    if (PHISHING_SET.has(qDomain)) {
+      matchedPhishDomain = qDomain;
     } else {
-      // Partial domain substring check against curated phishing list
-      for (const domain of PHISHING_SET) {
-        if (domain === qDomain || domain.includes(qDomain) || (qDomain.length >= 5 && qDomain.includes(domain))) {
-          matched.push({
-            complaintId: `PHISH-${domain.replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 10)}`,
-            category: 'Phishing & Fake Domain',
-            severity: 'high',
-            riskLevel: 'critical',
-            identifier: domain,
-            type: 'WEBSITE',
-            details: `Blacklisted phishing destination [${domain}]. Reported in multiple credential harvesting and spoofing campaigns.`,
-            status: 'BLOCKED',
-            createdAt: new Date().toISOString()
-          });
+      // Boundary-aware domain and subdomain check against curated phishing list.
+      // Strictly avoid loose substring matches that incorrectly flag legitimate domains.
+      for (const phish of PHISHING_SET) {
+        if (qDomain === phish || qDomain.endsWith('.' + phish)) {
+          matchedPhishDomain = phish;
           break;
         }
       }
+    }
+
+    if (matchedPhishDomain) {
+      matched.push({
+        complaintId: `PHISH-${matchedPhishDomain.replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 10)}`,
+        category: 'Phishing & Fake Domain',
+        severity: 'high',
+        riskLevel: 'critical',
+        identifier: matchedPhishDomain,
+        type: 'WEBSITE',
+        details: `Blacklisted phishing destination [${matchedPhishDomain}]. Reported in multiple credential harvesting and spoofing campaigns.`,
+        status: 'BLOCKED',
+        createdAt: new Date().toISOString()
+      });
     }
   }
 

@@ -108,6 +108,35 @@ exports.getEvidence = async (req, res, next) => {
       return next(new AppError('Invalid evidence path.', 400));
     }
 
+    // Cryptographic SHA-256 integrity verification before evidence release
+    const { computeFileSha256 } = require('../utils/evidenceSecurity');
+    let currentHash = null;
+    try {
+      currentHash = await computeFileSha256(filePath);
+    } catch (readErr) {
+      return next(new AppError('Evidence file is missing or unreadable on disk.', 404));
+    }
+
+    if (evidence.sha256 && currentHash !== evidence.sha256) {
+      logger.error(`CRITICAL: Evidence hash mismatch for ${evidence.filename}. Stored: ${evidence.sha256}, disk: ${currentHash}`);
+      try {
+        if (!complaint.chainOfCustody) complaint.chainOfCustody = [];
+        complaint.chainOfCustody.push({
+          action: 'EVIDENCE_INTEGRITY_VIOLATION',
+          actor: req.user.name || req.user.role,
+          actorId: req.user._id,
+          actorRole: req.user.role,
+          details: `CRITICAL INTEGRITY VIOLATION: Evidence file [${evidence.originalName || evidence.filename}] tampered with or corrupted. Expected SHA-256: ${evidence.sha256}, Actual: ${currentHash}`,
+          evidenceHash: currentHash,
+          timestamp: new Date()
+        });
+        await complaint.save();
+      } catch (custodyErr) {
+        logger.warn(`Failed to record custody violation log: ${custodyErr.message}`);
+      }
+      return next(new AppError('Evidence file integrity check failed: cryptographic hash mismatch detected.', 409));
+    }
+
     // Log chain-of-custody access event
     try {
       if (!complaint.chainOfCustody) complaint.chainOfCustody = [];
@@ -116,14 +145,17 @@ exports.getEvidence = async (req, res, next) => {
         actor: req.user.name || req.user.role,
         actorId: req.user._id,
         actorRole: req.user.role,
-        details: `Evidence file [${evidence.originalName || evidence.filename}] accessed and downloaded.`,
-        evidenceHash: evidence.sha256,
+        details: `Evidence file [${evidence.originalName || evidence.filename}] verified (SHA-256: ${(currentHash || evidence.sha256 || '').substring(0, 16)}...) and retrieved.`,
+        evidenceHash: currentHash || evidence.sha256,
         timestamp: new Date()
       });
       await complaint.save();
     } catch (custodyErr) {
       logger.warn(`Failed to record custody access log: ${custodyErr.message}`);
     }
+
+    res.setHeader('X-Evidence-SHA256', currentHash || evidence.sha256 || '');
+    res.setHeader('X-Evidence-Integrity', 'verified');
 
     return res.sendFile(filePath, (error) => {
       if (error && !res.headersSent) next(error);

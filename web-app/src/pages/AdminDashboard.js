@@ -161,18 +161,8 @@ export default function AdminDashboard() {
       fetchAll();
     };
     init();
-    const interval = setInterval(() => {
-      setLiveStats(prev => ({
-        uptime: 99.8 + Math.random() * 0.2,
-        accuracy: (mlStatus?.modelInfo?.accuracy || 94.8) - 0.5 + Math.random()
-      }));
-      setSystemHealth(prev => ({
-        ...prev,
-        cpu: Math.max(1, Math.min(100, prev.cpu + (Math.random() - 0.5) * 4)),
-        memory: Math.max(1, Math.min(100, prev.memory + (Math.random() - 0.5) * 1))
-      }));
-    }, 2000);
-    const healthPoll = setInterval(fetchHealth, 10000);
+
+    const healthPoll = setInterval(fetchHealth, 30000);
     const handler = (c) => {
       toast.success(`New Case: ${c.category || 'Incident'} reported`, {
         style: { border: '1px solid #30302d', background: '#0d0d0d', color: '#f2f0ea' }
@@ -183,10 +173,9 @@ export default function AdminDashboard() {
     onNewComplaint(handler);
     return () => {
       offNewComplaint(handler);
-      clearInterval(interval);
       clearInterval(healthPoll);
     };
-  }, [mlStatus]);
+  }, []);
 
   const handleAction = (name) => {
     toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
@@ -306,8 +295,8 @@ export default function AdminDashboard() {
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#8e8b84', fontSize: 11, fontFamily: "'IBM Plex Sans', sans-serif" }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: '#8e8b84', fontSize: 11, fontFamily: "'IBM Plex Mono', monospace" }} />
                     <Tooltip contentStyle={{ background: '#141414', border: '1px solid #3b3b38', borderRadius: '12px', color: '#f2f0ea' }} />
-                    <Area type="monotone" dataKey="total" stroke="#f2f0ea" fill="url(#colorTotalDark)" strokeWidth={2.5} />
-                    <Area type="monotone" dataKey="resolved" stroke="#3DF5C0" fill="transparent" strokeWidth={2} strokeDasharray="4 4" />
+                    <Area type="monotone" dataKey="total" stroke="#f2f0ea" fill="url(#colorTotalDark)" strokeWidth={2.5} isAnimationActive={false} />
+                    <Area type="monotone" dataKey="resolved" stroke="#3DF5C0" fill="transparent" strokeWidth={2} strokeDasharray="4 4" isAnimationActive={false} />
                   </AreaChart>
                 </ResponsiveContainer>
               </motion.div>
@@ -332,7 +321,7 @@ export default function AdminDashboard() {
                   <div style={{ position: 'relative', height: 160 }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                        <Pie data={statusDist} dataKey="value" innerRadius={55} outerRadius={75} paddingAngle={6}>
+                        <Pie data={statusDist} dataKey="value" innerRadius={55} outerRadius={75} paddingAngle={6} isAnimationActive={false}>
                           {statusDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="none" />)}
                         </Pie>
                       </PieChart>
@@ -396,16 +385,16 @@ export default function AdminDashboard() {
                  </div>
                </div>
 
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 36 }}>
-                 <div style={{ height: 300 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 36 }}>
+                 <div style={{ height: 300, minWidth: 0 }}>
                    <ResponsiveContainer width="100%" height="100%">
                      <ComposedChart data={categories}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#222220" vertical={false} />
                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#8e8b84', fontSize: 10, fontFamily: "'IBM Plex Sans', sans-serif" }} interval={0} angle={-15} textAnchor="end" />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: '#8e8b84', fontSize: 10, fontFamily: "'IBM Plex Mono', monospace" }} />
                         <Tooltip contentStyle={{ background: '#141414', border: '1px solid #3b3b38', borderRadius: '12px', color: '#f2f0ea' }} />
-                        <Bar dataKey="count" fill="#30302d" radius={[8, 8, 0, 0]} barSize={28} />
-                        <Line type="monotone" dataKey="resolveRate" stroke="#3DF5C0" strokeWidth={3} dot={{ r: 4, fill: '#3DF5C0', strokeWidth: 0 }} />
+                        <Bar dataKey="count" fill="#30302d" radius={[8, 8, 0, 0]} barSize={28} isAnimationActive={false} />
+                        <Line type="monotone" dataKey="resolveRate" stroke="#3DF5C0" strokeWidth={3} dot={{ r: 4, fill: '#3DF5C0', strokeWidth: 0 }} isAnimationActive={false} />
                      </ComposedChart>
                    </ResponsiveContainer>
                  </div>

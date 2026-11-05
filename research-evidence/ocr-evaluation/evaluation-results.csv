@@ -1,0 +1,7 @@
+field,total_ground_truth,correctly_extracted,false_positives,false_negatives,precision,recall,f1_score
+"phones",1,1,6,0,0.1429,1.0000,0.2500
+"upis",3,3,0,0,1.0000,1.0000,1.0000
+"utrs",4,4,4,0,0.5000,1.0000,0.6667
+"amounts",6,6,0,0,1.0000,1.0000,1.0000
+"detectedApps",4,4,0,0,1.0000,1.0000,1.0000
+"forgeryVerdict",6,6,0,0,1.0000,1.0000,1.0000

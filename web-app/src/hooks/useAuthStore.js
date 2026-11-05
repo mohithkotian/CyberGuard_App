@@ -65,7 +65,23 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
-  // verify2FA and verifyEmailOtp functions removed as OTP flow is disabled.
+  verify2FA: async (userId, token) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await authAPI.login2FA({ userId, token });
+      const { user, accessToken, refreshToken } = data.data;
+      localStorage.setItem('accessToken',  accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      connectSocket(user.id, user.role === 'admin');
+      set({ user, token: accessToken, loading: false });
+      return user;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Invalid 2FA code';
+      set({ error: msg, loading: false });
+      throw new Error(msg);
+    }
+  },
 
   register: async (formData) => {
     set({ loading: true, error: null });

@@ -19,7 +19,7 @@ const login = async (req, res, next) => {
     const email = req.body.email ? req.body.email.toLowerCase().trim() : '';
     const { password } = req.body;
 
-    const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil +isActive');
+    const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil +isActive +isTwoFactorEnabled');
 
     if (!user) {
       return next(new AppError('Invalid email or password.', 401));
@@ -48,6 +48,21 @@ const login = async (req, res, next) => {
 
     user.loginAttempts = 0;
     user.lockUntil = undefined;
+
+    // Enforce 2FA verification if enabled for account
+    if (user.isTwoFactorEnabled) {
+      await user.save({ validateBeforeSave: false });
+      logger.info(`2FA challenge required for user: ${user.email}`);
+      return res.status(200).json({
+        status: 'mfa_required',
+        message: 'Two-factor authentication required.',
+        data: {
+          userId: user._id,
+          requires2FA: true
+        }
+      });
+    }
+
     user.lastLogin = new Date();
     
     const { accessToken, refreshToken } = generateTokens(user._id);

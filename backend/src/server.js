@@ -102,7 +102,7 @@ app.use(morgan('dev'));
 app.get('/health', (req, res) => {
   const dbStatus = getConnectionStatus();
   const isHealthy = dbStatus.isConnected;
-  res.status(isHealthy ? 200 : 503).json({
+  res.status(200).json({
     status: isHealthy ? 'ok' : 'degraded',
     service: 'cyberguard-backend',
     database: dbStatus,

@@ -244,12 +244,11 @@ exports.lookupThreat = function(query) {
     } else if (PHISHING_SET.has(qLower)) {
       matchedPhishDomain = qLower;
     } else {
-      // B. Subdomain or boundary-aware partial match for known phishing indicators
+      // B. Subdomain boundary-aware match for known phishing indicators
       for (const phishDomain of PHISHING_SET) {
         if (
           canonicalHost === phishDomain ||
-          canonicalHost.endsWith('.' + phishDomain) ||
-          (canonicalHost.length >= 5 && canonicalHost.includes(phishDomain))
+          canonicalHost.endsWith('.' + phishDomain)
         ) {
           matchedPhishDomain = phishDomain;
           break;

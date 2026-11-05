@@ -1,0 +1,88 @@
+================================================================================
+CYBERGUARD SECURITY, BACKEND & ML TEST EXECUTION REPORT
+================================================================================
+Date: 2026-11-05
+Environment: macOS Darwin (Node.js v26.5.0, Python 3.14.4, Jest 29.7.0)
+Testing Framework: Jest, Supertest/Mock HTTP, Python Unittest, Craco Webpack
+
+SUMMARY OF TEST EXECUTION:
+--------------------------------------------------------------------------------
+Total Suites Run:      15
+Total Tests Executed:  189
+Passed:                189
+Failed:                0
+Skipped:               0
+Execution Status:      100% SUCCESS
+
+DETAILED TEST SUITE BREAKDOWN:
+--------------------------------------------------------------------------------
+1. BACKEND JEST SUITES (13 Suites, 174 Tests Passed):
+   - backend/src/utils/rbacAndSecurityAudit.test.js              [16 Passed]
+     * Citizen vs Officer vs Admin authorization boundaries
+     * Tamper protection on user role assignment during registration
+     * Cross-user complaint evidence access restrictions (IDOR prevention)
+     * Two-factor authentication (2FA) enforcement on login
+   - backend/src/utils/evidenceSecurity.test.js                   [12 Passed]
+     * SHA-256 intake checksum computation
+     * Binary magic byte verification (disguised .exe/.sh blocked)
+     * Chain-of-custody tamper-evident event logging
+     * Evidence retrieval SHA-256 re-verification against disk tampering
+   - backend/src/utils/threatIntelligence.test.js                [14 Passed]
+     * Exact hostname matching for confirmed malicious domains
+     * Dot-boundary subdomain matching (e.g., login.phishdomain.com)
+     * Authority domain protection (never flags google.com, sbi.co.in, etc.)
+     * Elimination of substring false positives (e.g., update.com)
+   - backend/src/services/breachService.test.js                  [10 Passed]
+     * Real-time DNS MX resolution verification
+     * K-anonymity SHA-1 prefix derivation
+     * Historical breach catalog matching
+   - backend/src/services/mlService.test.js                      [11 Passed]
+     * NLP fallback resilience during ML service timeout/degradation
+     * Category boost heuristics for financial fraud and phishing
+   - backend/src/utils/securityAndLegalCompliance.test.js        [15 Passed]
+     * Section 65B Indian Evidence Act electronic certificate generation
+     * BNSS Section 173 jurisdictional transfer compliance
+   - backend/src/utils/phase2Intelligence.test.js                [18 Passed]
+     * Magistrate dockets, restitution petition tracking
+   - backend/src/utils/phase3Intelligence.test.js                [16 Passed]
+     * Automated Indian payment statement normalization & UTR parsing
+   - backend/src/utils/phase4Intelligence.test.js                [15 Passed]
+     * Multi-hop money trail analysis & visual graphing
+   - backend/src/utils/phase5Intelligence.test.js                [15 Passed]
+     * Priority Zero (P0) emergency takedowns (Sec 79(3)(b) IT Act)
+     * Zero-FIR inter-state transfer notices
+     * Public cryptographic directive integrity validator
+   - backend/src/utils/phase6Intelligence.test.js                [12 Passed]
+     * Voice statement transcription sanitization
+     * Batch banking freeze generation
+   - backend/src/utils/phase7Intelligence.test.js                [10 Passed]
+     * Restitution milestone disbursement tracking
+   - backend/src/utils/phase8Intelligence.test.js                [10 Passed]
+     * Automated FIR legal drafting under Bharatiya Nyaya Sanhita (BNS) 2023
+
+2. ML SERVICE SECURITY & AUTHENTICATION (1 Suite, 8 Tests Passed):
+   - ml-service/test_security.py                                 [8 Passed]
+     * test_production_fails_closed_when_secret_missing (HTTP 500 configuration lock)
+     * test_unauthorized_when_secret_header_missing_or_wrong (HTTP 401 Unauthorized)
+     * test_authorized_request_proceeds (HTTP 200 on valid X-ML-Secret)
+     * test_public_routes_unprotected (/health and / remain open for load balancer probes)
+     * test_rate_limiting_enforcement (Flooding /batch-predict triggers HTTP 429 Too Many Requests)
+     * test_empty_and_whitespace_text_validation (HTTP 400 validation rejection)
+     * test_oversized_payload_rejection (Payloads > 100KB rejected)
+     * test_model_info_route (Verifies model metadata schema)
+
+3. ML INFERENCE CLASSIFICATION ENDPOINTS (7 Tests Passed):
+   - ml-service/test_predict.py                                  [7 Passed]
+     * Phishing (64.96% confidence)
+     * Financial Fraud (29.62% confidence)
+     * Ransomware (52.59% confidence)
+     * Cyberbullying (41.93% confidence)
+     * Identity Theft (32.33% confidence)
+     * Data Breach (35.89% confidence)
+     * Network Attacks (31.41% confidence)
+
+4. FRONTEND BUILD VERIFICATION:
+   - Command: CI=false npm --prefix web-app run build
+   - Result: Compiled successfully (0 fatal errors, 0 runtime exceptions)
+   - Asset footprint: 919.54 kB main bundle, 12.2 kB CSS bundle
+================================================================================

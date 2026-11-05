@@ -4,8 +4,49 @@ import logging
 import hmac
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+except ImportError:
+    import time
+    from functools import wraps
+
+    class Limiter:
+        def __init__(self, key_func=None, app=None, default_limits=None, storage_uri=None):
+            self.app = app
+            self.history = {}
+
+        def limit(self, limit_string):
+            parts = limit_string.lower().split()
+            max_calls = int(parts[0]) if parts and parts[0].isdigit() else 100
+            window = 60
+            if 'second' in limit_string:
+                window = 1
+            elif 'minute' in limit_string:
+                window = 60
+            elif 'hour' in limit_string:
+                window = 3600
+
+            def decorator(f):
+                endpoint = f.__name__
+                @wraps(f)
+                def wrapped(*args, **kwargs):
+                    now = time.time()
+                    key = (request.remote_addr or '127.0.0.1', endpoint)
+                    timestamps = [t for t in self.history.get(key, []) if now - t < window]
+                    if len(timestamps) >= max_calls:
+                        return jsonify({'error': 'Too Many Requests'}), 429
+                    timestamps.append(now)
+                    self.history[key] = timestamps
+                    return f(*args, **kwargs)
+                return wrapped
+            return decorator
+
+        def reset(self):
+            self.history.clear()
+
+    def get_remote_address():
+        return '127.0.0.1'
 from dotenv import load_dotenv
 import joblib
 

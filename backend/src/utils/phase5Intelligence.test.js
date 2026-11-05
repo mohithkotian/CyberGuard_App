@@ -230,25 +230,27 @@ describe('Phase 5 Intelligence Capabilities: P0 Takedowns, Zero FIR Transfers & 
         select: jest.fn().mockResolvedValue(mockComplaint)
       });
 
-      // Require the route logic or test endpoint directly
-      const request = require('supertest');
-      const express = require('express');
       const securityRoutes = require('../routes/security');
 
-      const app = express();
-      app.use(express.json());
-      app.use('/api/security', securityRoutes);
+      const req = {
+        body: { query: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08' }
+      };
+      let jsonResponse = null;
+      let statusCode = 200;
+      const res = {
+        status: jest.fn().mockImplementation(code => { statusCode = code; return res; }),
+        json: data => { jsonResponse = data; }
+      };
+      const next = jest.fn();
 
-      const res = await request(app)
-        .post('/api/security/verify-integrity')
-        .send({ query: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08' });
+      await securityRoutes.verifyIntegrity(req, res, next);
 
-      expect(res.status).toBe(200);
-      expect(res.body.status).toBe('success');
-      expect(res.body.data.verified).toBe(true);
-      expect(res.body.data.status).toBe('VERIFIED_AUTHENTIC');
-      expect(res.body.data.recordType).toBe('ELECTRONIC_EVIDENCE_FILE');
-      expect(res.body.data.complaintReference).toBe('CMP-2026-9912');
+      expect(statusCode).toBe(200);
+      expect(jsonResponse.status).toBe('success');
+      expect(jsonResponse.data.verified).toBe(true);
+      expect(jsonResponse.data.status).toBe('VERIFIED_AUTHENTIC');
+      expect(jsonResponse.data.recordType).toBe('ELECTRONIC_EVIDENCE_FILE');
+      expect(jsonResponse.data.complaintReference).toBe('CMP-2026-9912');
     });
 
     it('verifies authentic statutory notice reference (e.g. SEC106/FREEZE)', async () => {
@@ -267,22 +269,25 @@ describe('Phase 5 Intelligence Capabilities: P0 Takedowns, Zero FIR Transfers & 
         select: jest.fn().mockResolvedValue(mockComplaint)
       });
 
-      const request = require('supertest');
-      const express = require('express');
       const securityRoutes = require('../routes/security');
 
-      const app = express();
-      app.use(express.json());
-      app.use('/api/security', securityRoutes);
+      const req = {
+        body: { query: 'SEC94/REQ/2026/8819' }
+      };
+      let jsonResponse = null;
+      let statusCode = 200;
+      const res = {
+        status: jest.fn().mockImplementation(code => { statusCode = code; return res; }),
+        json: data => { jsonResponse = data; }
+      };
+      const next = jest.fn();
 
-      const res = await request(app)
-        .post('/api/security/verify-integrity')
-        .send({ query: 'SEC94/REQ/2026/8819' });
+      await securityRoutes.verifyIntegrity(req, res, next);
 
-      expect(res.status).toBe(200);
-      expect(res.body.data.verified).toBe(true);
-      expect(res.body.data.status).toBe('VERIFIED_AUTHENTIC_DIRECTIVE');
-      expect(res.body.data.recordType).toBe('STATUTORY_TELECOM_REQUISITION');
+      expect(statusCode).toBe(200);
+      expect(jsonResponse.data.verified).toBe(true);
+      expect(jsonResponse.data.status).toBe('VERIFIED_AUTHENTIC_DIRECTIVE');
+      expect(jsonResponse.data.recordType).toBe('STATUTORY_TELECOM_REQUISITION');
     });
 
     it('returns unverified status when unknown hash or notice submitted', async () => {
@@ -290,21 +295,24 @@ describe('Phase 5 Intelligence Capabilities: P0 Takedowns, Zero FIR Transfers & 
         select: jest.fn().mockResolvedValue(null)
       });
 
-      const request = require('supertest');
-      const express = require('express');
       const securityRoutes = require('../routes/security');
 
-      const app = express();
-      app.use(express.json());
-      app.use('/api/security', securityRoutes);
+      const req = {
+        body: { query: 'UNKNOWN_OR_TAMPERED_HASH_9999999999999999999999999999999999999999999' }
+      };
+      let jsonResponse = null;
+      let statusCode = 200;
+      const res = {
+        status: jest.fn().mockImplementation(code => { statusCode = code; return res; }),
+        json: data => { jsonResponse = data; }
+      };
+      const next = jest.fn();
 
-      const res = await request(app)
-        .post('/api/security/verify-integrity')
-        .send({ query: 'UNKNOWN_OR_TAMPERED_HASH_9999999999999999999999999999999999999999999' });
+      await securityRoutes.verifyIntegrity(req, res, next);
 
-      expect(res.status).toBe(200);
-      expect(res.body.data.verified).toBe(false);
-      expect(res.body.data.status).toBe('UNVERIFIED_OR_MODIFIED');
+      expect(statusCode).toBe(200);
+      expect(jsonResponse.data.verified).toBe(false);
+      expect(jsonResponse.data.status).toBe('UNVERIFIED_OR_MODIFIED');
     });
   });
 });
