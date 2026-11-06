@@ -1,5 +1,11 @@
 # CyberGuard Mobile Application Deep Audit
 
+> [!WARNING]
+> **HISTORICAL AUDIT RECORD — PRE-REMEDIATION BASELINE**  
+> **Evaluation Scope**: Pre-remediation commit `a260f55` (September 2026).  
+> **Status**: This document records historical baseline findings for the experimental mobile client.  
+> **Post-Remediation Verification**: Refer to `CYBERGUARD_AUDIT_FIXES.md`, `docs/security-evaluation.md`, and `docs/claims-audit.md` for current verified implementation status.
+
 **Repository:** `mohithkotian/CyberGuard_App`  
 **Audited branch/commit:** `main` / `a260f55`  
 **Application:** `mobile-app`  

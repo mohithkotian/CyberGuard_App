@@ -1,5 +1,11 @@
 # CyberGuard Codebase Examination
 
+> [!WARNING]
+> **HISTORICAL AUDIT RECORD — PRE-REMEDIATION BASELINE**  
+> **Evaluation Scope**: Pre-remediation commit `a260f55` (September 2026).  
+> **Status**: This document preserves historical baseline findings prior to security, legal, and architectural remediations. Deficiencies identified herein (e.g., registration role validation, IDOR boundaries, unauthenticated ML microservice access) have been resolved in subsequent commits.  
+> **Post-Remediation Verification**: Refer to `CYBERGUARD_AUDIT_FIXES.md`, `docs/security-evaluation.md`, and `docs/claims-audit.md` for current verified implementation status.
+
 **Repository:** `mohithkotian/CyberGuard_App`  
 **Branch examined:** `main` at commit `a260f55` (`origin/main`)  
 **Examination date:** 2026-09-18

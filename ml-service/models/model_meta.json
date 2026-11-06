@@ -1,0 +1,23 @@
+{
+  "trained_at": "2026-11-06 09:20:58.244516",
+  "sklearn_version": "1.8.0",
+  "samples_total": 257,
+  "samples_train": 218,
+  "samples_test": 39,
+  "categories": [
+    "child_exploitation",
+    "crypto_fraud",
+    "cyberbullying",
+    "data_breach",
+    "financial_fraud",
+    "hacking",
+    "identity_theft",
+    "network_attacks",
+    "online_fraud",
+    "other",
+    "phishing",
+    "ransomware",
+    "women_child_safety"
+  ],
+  "eval_accuracy_85pct_split": 0.7436
+}

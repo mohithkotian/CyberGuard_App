@@ -24,9 +24,9 @@ End-to-end walkthrough — incident intake → PII masking → ML classification
 
 | Service | URL |
 | :--- | :--- |
-| **Web App** | https://cybercrime-web.onrender.com |
-| **Backend API** | https://cybercrime-backend.onrender.com/api |
-| **ML Service** | https://cybercrime-ml-service.onrender.com/health |
+| **Web App** | https://cybercrime-web-buzn.onrender.com |
+| **Backend API** | https://cybercrime-backend-buzn.onrender.com/api |
+| **ML Service** | https://cybercrime-ml-service-buzn.onrender.com/health |
 
 > Render free-tier services spin down after inactivity. The first request after a cold start may take 15–30 seconds.
 
@@ -161,7 +161,7 @@ stateDiagram-v2
 | **Frontend Web** | React 18, Framer Motion, Recharts, Axios, Socket.IO Client |
 | **Frontend Mobile** | React Native, Expo SDK 54, React Navigation _(not production-ready — see below)_ |
 | **Backend Core** | Node.js, Express.js, MongoDB, Mongoose, Socket.IO |
-| **AI / ML Service** | Python 3.10, Flask, scikit-learn, TF-IDF + Calibrated Logistic Regression, Flask-Limiter |
+| **AI / ML Service** | Python 3.14, Flask, scikit-learn, TF-IDF + Multinomial Logistic Regression, Flask-Limiter |
 | **Forensics & OCR** | Tesseract.js / Tesseract OCR, Sharp |
 | **Security & Auth** | JWT, bcryptjs, Helmet, Express Rate Limit, PII Masking Shield, X-ML-Secret internal auth |
 | **Deployment** | Render (web + backend + ML service), render.yaml infrastructure-as-code |

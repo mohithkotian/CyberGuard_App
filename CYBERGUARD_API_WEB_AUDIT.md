@@ -1,5 +1,11 @@
 # CyberGuard Backend API and Web Application Audit
 
+> [!WARNING]
+> **HISTORICAL AUDIT RECORD — PRE-REMEDIATION BASELINE**  
+> **Evaluation Scope**: Pre-remediation commit `a260f55` (September 2026).  
+> **Status**: This document records historical baseline findings prior to security remediations. Identified vulnerabilities (such as registration role elevation, lack of complaint authorization boundaries, and unauthenticated endpoints) have been remediated.  
+> **Post-Remediation Verification**: Refer to `CYBERGUARD_AUDIT_FIXES.md`, `docs/security-evaluation.md`, and `docs/claims-audit.md` for current verified implementation status.
+
 **Repository:** `mohithkotian/CyberGuard_App`  
 **Branch/commit:** `main` / `a260f55`  
 **Scope:** Every mounted Express route and the complete React web application under `web-app/src`.

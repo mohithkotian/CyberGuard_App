@@ -62,5 +62,19 @@
     "sklearn_version": "1.8.0",
     "numpy_version": "2.4.4",
     "pandas_version": "3.0.2"
+  },
+  "cross_validation_5fold": {
+    "n_splits": 5,
+    "strategy": "StratifiedKFold",
+    "random_seed": 42,
+    "mean_accuracy": 0.6962,
+    "std_accuracy": 0.0802,
+    "mean_macro_f1": 0.6263,
+    "std_macro_f1": 0.0964,
+    "mean_weighted_f1": 0.6704,
+    "std_weighted_f1": 0.0869,
+    "oof_accuracy": 0.6965,
+    "oof_macro_f1": 0.6435,
+    "oof_weighted_f1": 0.6844
   }
 }
