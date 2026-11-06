@@ -209,7 +209,7 @@ const predict = async (text) => {
       confidence: data.confidence || 0.85,
       severity: severity,
       scores: data.scores || {},
-      modelVersion: data.model_version || '2.0.0-PRO',
+      modelVersion: data.model_version || '3.0.0-PRO',
       source: 'ml_microservice'
     };
   } catch (error) {
@@ -219,7 +219,7 @@ const predict = async (text) => {
       status: 'success',
       ...localRes,
       scores: {},
-      modelVersion: '2.0.0-PRO-FALLBACK',
+      modelVersion: 'local-heuristic-fallback',
       source: 'nlp_rule_engine'
     };
   }
@@ -228,9 +228,26 @@ const predict = async (text) => {
 const getModelInfo = async () => {
   try {
     const response = await mlClient.get('/model-info');
-    return response.data || { version: '2.0.0-PRO', accuracy: 96.5 };
-  } catch {
-    return { version: '2.0.0-PRO', accuracy: 96.5 };
+    if (response && response.data) {
+      return {
+        available: true,
+        version: response.data.model_version || response.data.version || '3.0.0-PRO',
+        ...response.data
+      };
+    }
+    return {
+      available: false,
+      status: 'unavailable',
+      version: null,
+      error: 'Empty response from ML service'
+    };
+  } catch (error) {
+    return {
+      available: false,
+      status: 'unavailable',
+      version: null,
+      error: error.message || 'ML service unreachable'
+    };
   }
 };
 

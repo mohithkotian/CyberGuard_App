@@ -27,6 +27,16 @@ describe('ML Service - Client Security & Fallback', () => {
     expect(result.status).toBe('success');
     expect(result.category).toBe('Financial Fraud');
     expect(result.subcategory).toBe('UPI / Banking & Card Fraud');
+    expect(result.modelVersion).toBe('local-heuristic-fallback');
+    expect(result.source).toBe('nlp_rule_engine');
+  });
+
+  it('getModelInfo returns safe unavailable payload without fabricated accuracy when offline', async () => {
+    const info = await mlService.getModelInfo();
+    expect(info.available).toBe(false);
+    expect(info.status).toBe('unavailable');
+    expect(info.version).toBeNull();
+    expect(info.accuracy).toBeUndefined();
   });
 
   it('provides category display and subcategory mappings', () => {

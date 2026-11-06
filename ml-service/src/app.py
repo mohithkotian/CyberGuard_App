@@ -209,8 +209,9 @@ def model_info():
     return jsonify({
         'model_version': MODEL_VERSION,
         'categories': classifier.CATEGORIES,
-        'algorithm': 'N-Gram TF-IDF + Calibrated Balanced Logistic Ensemble',
+        'algorithm': 'TF-IDF (1-2 ngrams, sublinear_tf=True, max_features=10000) + LogisticRegression (C=2.0, class_weight=balanced)',
         'preprocessing': 'Domain Regex Normalization, Entity Tokenization, Stopwords Filtering',
+        'confidence_threshold': classifier.CONFIDENCE_THRESHOLD,
         'model_loaded': model_loaded,
     })
 
