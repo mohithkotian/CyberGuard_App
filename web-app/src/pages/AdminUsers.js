@@ -934,7 +934,7 @@ export default function AdminUsers() {
                                 )}
                               </div>
                               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '3px' }}>
-                                ID: {u._id?.substring(0, 10)}... • Joined {format(new Date(u.createdAt), 'dd MMM yyyy')}
+                                ID: {u._id?.substring(0, 10)}... | Joined {format(new Date(u.createdAt), 'dd MMM yyyy')}
                               </div>
                             </div>
                           </div>
@@ -1322,7 +1322,7 @@ export default function AdminUsers() {
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'rgba(255,255,255,0.4)' }}>Security:</span>
                         <span style={{ color: u.isTwoFactorEnabled ? '#FF2D55' : '#3DF5C0', fontWeight: 600 }}>
-                          {u.isTwoFactorEnabled ? '2FA Enabled' : 'Standard Auth'} {u.isVerified && '• Verified'}
+                          {u.isTwoFactorEnabled ? '2FA Enabled' : 'Standard Auth'} {u.isVerified && '| Verified'}
                         </span>
                       </div>
                     </div>
@@ -2097,7 +2097,7 @@ export default function AdminUsers() {
                       {selectedUser.name}
                     </h2>
                     <span style={{ fontSize: '12px', color: '#EFEDE8', fontWeight: 700 }}>
-                      CLEARANCE: {selectedUser.role?.toUpperCase()} • {selectedUser.isActive ? 'ACTIVE' : 'SUSPENDED'}
+                      CLEARANCE: {selectedUser.role?.toUpperCase()} | {selectedUser.isActive ? 'ACTIVE' : 'SUSPENDED'}
                     </span>
                   </div>
                 </div>
@@ -2181,7 +2181,7 @@ export default function AdminUsers() {
                                 {c.title || c.category}
                               </div>
                               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '3px' }}>
-                                ID: {c.complaintId || c._id} • {format(new Date(c.createdAt), 'dd MMM yyyy')} • Loss: ₹{c.estimatedLoss || 0}
+                                ID: {c.complaintId || c._id} | {format(new Date(c.createdAt), 'dd MMM yyyy')} | Loss: ₹{c.estimatedLoss || 0}
                               </div>
                             </div>
 

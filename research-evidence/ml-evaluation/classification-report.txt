@@ -1,40 +1,48 @@
 ======================================================================
-CYBERGUARD IEEE RESEARCH BENCHMARK: PRIMARY HELD-OUT CLASSIFICATION REPORT
+CYBERGUARD IEEE RESEARCH BENCHMARK: HELD-OUT TEST REPORT (80/20 GROUP SPLIT)
 ======================================================================
 
-Evaluation Design: Held-Out Single Split (Primary Benchmark)
-Scikit-Learn Version: 1.8.0
-Random Seed: 42
-Dataset Size: 257 samples across 13 categories
-Train/Test Split: 218 train (85%), 39 test (15%), Stratified
-Feature Extraction: TF-IDF (1-3 ngrams, max_features=25000, sublinear_tf=True)
-Model: Multiclass Logistic Regression (solver='lbfgs', C=4.0, class_weight='balanced')
+Scikit-Learn Version   : 1.8.0
+Dataset Version        : 3.0-group-aware
+Dataset SHA-256        : 3426ec7b81cfec76845439e7138780df4b808811f68d184b4918aadb22ee84ac
+Random Seed            : 42
+Total Dataset Size     : 1950 samples across 13 categories
+Split Configuration    : Group-Aware (Families 0-7 Dev, Families 8-9 Test)
+Development Set        : 1560 samples across 104 scenario families
+Held-Out Test Set      : 390 samples across 26 scenario families
+Group Leakage Overlap  : 0 groups
+Feature Configuration  : TF-IDF (1-2 ngrams, sublinear_tf=True, max_features=10000)
+Classifier Algorithm   : LogisticRegression (solver=lbfgs, C=2.0, class_weight='balanced')
 
-OVERALL EVALUATION METRICS (TEST SET, N=39):
-  Accuracy:          0.7436 (74.36%)
-  Macro Precision:   0.6582
-  Macro Recall:      0.6808
-  Macro F1-Score:    0.6543
-  Weighted F1-Score: 0.7189
+HELD-OUT TEST AGGREGATED METRICS (390 SAMPLES):
+  Accuracy             : 0.8897
+  Macro Precision      : 0.9016
+  Macro Recall         : 0.8897
+  Macro F1-Score       : 0.8896
+  Weighted F1-Score    : 0.8896
 
-PER-CLASS CLASSIFICATION BREAKDOWN:
+SUBSET EVALUATION BREAKDOWN:
+  Clean Subset (377 samples) : Accuracy = 0.8886, Macro-F1 = 0.8882
+  Noisy Subset (13 samples) : Accuracy = 0.9231, Macro-F1 = 0.9405
+
+PER-CLASS CLASSIFICATION REPORT:
                     precision    recall  f1-score   support
 
-child_exploitation       1.00      1.00      1.00         2
-      crypto_fraud       0.00      0.00      0.00         1
-     cyberbullying       0.50      0.50      0.50         4
-       data_breach       0.60      1.00      0.75         3
-   financial_fraud       0.75      0.60      0.67         5
-           hacking       1.00      0.50      0.67         4
-    identity_theft       0.75      0.75      0.75         4
-   network_attacks       1.00      1.00      1.00         1
-      online_fraud       0.60      1.00      0.75         3
-             other       0.00      0.00      0.00         1
-          phishing       0.86      1.00      0.92         6
-        ransomware       1.00      1.00      1.00         3
-women_child_safety       0.50      0.50      0.50         2
+child_exploitation     0.9286    0.8667    0.8966        30
+      crypto_fraud     1.0000    0.9667    0.9831        30
+     cyberbullying     0.9583    0.7667    0.8519        30
+       data_breach     0.7368    0.9333    0.8235        30
+   financial_fraud     0.8710    0.9000    0.8852        30
+           hacking     0.7692    0.6667    0.7143        30
+    identity_theft     0.9062    0.9667    0.9355        30
+   network_attacks     0.9677    1.0000    0.9836        30
+      online_fraud     0.8929    0.8333    0.8621        30
+             other     1.0000    0.7000    0.8235        30
+          phishing     1.0000    1.0000    1.0000        30
+        ransomware     1.0000    1.0000    1.0000        30
+women_child_safety     0.6905    0.9667    0.8056        30
 
-          accuracy                           0.74        39
-         macro avg       0.66      0.68      0.65        39
-      weighted avg       0.73      0.74      0.72        39
+          accuracy                         0.8897       390
+         macro avg     0.9016    0.8897    0.8896       390
+      weighted avg     0.9016    0.8897    0.8896       390
 

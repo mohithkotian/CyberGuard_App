@@ -1,0 +1,54 @@
+======================================================================
+CYBERGUARD IEEE RESEARCH BENCHMARK: 5-FOLD CROSS-VALIDATION REPORT
+======================================================================
+
+Scikit-Learn Version   : 1.8.0
+Dataset Version        : 2.0-canonical
+Dataset SHA-256        : 3bb95f9b47ff0ccf9a90510eb3c13735bbbcd16295fa20b30014f7f52d24332a
+Random Seed            : 42
+Cross-Validation Design: StratifiedKFold (n_splits=5, shuffle=True)
+Feature Extraction     : TF-IDF (1-2 ngrams, sublinear_tf=True, max_features=10000, in-fold)
+Classifier             : LogisticRegression (lbfgs, C=2.0, class_weight='balanced')
+Dataset Size           : 1950 samples, 13 categories (balanced 150/class)
+
+FOLD-BY-FOLD METRICS:
+ fold  train_size  val_size  accuracy  macro_precision  macro_recall  macro_f1  weighted_precision  weighted_recall  weighted_f1
+    1        1560       390  0.984615         0.985101      0.984615  0.984653            0.985101         0.984615     0.984653
+    2        1560       390  0.982051         0.982111      0.982051  0.981872            0.982111         0.982051     0.981872
+    3        1560       390  0.994872         0.995037      0.994872  0.994870            0.995037         0.994872     0.994870
+    4        1560       390  0.987179         0.987339      0.987179  0.987177            0.987339         0.987179     0.987177
+    5        1560       390  0.979487         0.979967      0.979487  0.979524            0.979967         0.979487     0.979524
+
+CROSS-VALIDATION SUMMARY (MEAN ± STD):
+  Accuracy           : 0.9856 ± 0.0059
+  Macro Precision    : 0.9859 ± 0.0058
+  Macro Recall       : 0.9856 ± 0.0059
+  Macro F1-Score     : 0.9856 ± 0.0059
+  Weighted F1-Score  : 0.9856 ± 0.0059
+
+OUT-OF-FOLD (OOF) POOLED EVALUATION (ALL 1950 SAMPLES):
+  OOF Accuracy       : 0.9856
+  OOF Macro F1       : 0.9856
+  OOF Weighted F1    : 0.9856
+
+PER-CLASS OUT-OF-FOLD BREAKDOWN:
+                    precision    recall  f1-score   support
+
+child_exploitation     0.9669    0.9733    0.9701       150
+      crypto_fraud     0.9868    0.9933    0.9900       150
+     cyberbullying     0.9866    0.9800    0.9833       150
+       data_breach     1.0000    0.9867    0.9933       150
+   financial_fraud     0.9933    0.9933    0.9933       150
+           hacking     0.9868    0.9933    0.9900       150
+    identity_theft     0.9867    0.9867    0.9867       150
+   network_attacks     1.0000    1.0000    1.0000       150
+      online_fraud     0.9735    0.9800    0.9767       150
+             other     0.9932    0.9800    0.9866       150
+          phishing     0.9737    0.9867    0.9801       150
+        ransomware     1.0000    1.0000    1.0000       150
+women_child_safety     0.9664    0.9600    0.9632       150
+
+          accuracy                         0.9856      1950
+         macro avg     0.9857    0.9856    0.9856      1950
+      weighted avg     0.9857    0.9856    0.9856      1950
+

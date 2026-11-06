@@ -1,95 +1,61 @@
 {
-  "model_name": "CybercrimeClassifier",
-  "architecture": "TF-IDF + Multinomial Logistic Regression",
-  "vectorizer": {
-    "type": "TfidfVectorizer",
-    "ngram_range": [
-      1,
-      3
-    ],
-    "max_features": 25000,
-    "sublinear_tf": true
-  },
-  "classifier": {
-    "type": "LogisticRegression",
-    "solver": "lbfgs",
-    "C": 4.0,
-    "class_weight": "balanced",
-    "max_iter": 2000,
-    "calibrated": false
-  },
-  "dataset": {
-    "total_samples": 257,
-    "raw_samples": 257,
-    "missing_values": {
-      "text": 0,
-      "label": 0
-    },
-    "duplicate_text_samples": 0,
-    "classes": [
-      "child_exploitation",
-      "crypto_fraud",
-      "cyberbullying",
-      "data_breach",
-      "financial_fraud",
-      "hacking",
-      "identity_theft",
-      "network_attacks",
-      "online_fraud",
-      "other",
-      "phishing",
-      "ransomware",
-      "women_child_safety"
-    ],
-    "num_classes": 13
-  },
-  "split": {
-    "evaluation_type": "Primary Held-Out Benchmark (85/15)",
-    "train_samples": 218,
-    "test_samples": 39,
-    "test_ratio": 0.15,
-    "stratified": true,
-    "random_seed": 42
-  },
-  "evaluation_metrics": {
-    "accuracy": 0.7436,
-    "macro_precision": 0.6644,
-    "macro_recall": 0.6808,
-    "macro_f1": 0.6548,
-    "weighted_f1": 0.7247,
-    "artifact_file": "classification-report.txt"
-  },
-  "exploratory_evaluation_80_20": {
-    "evaluation_type": "Preliminary Exploratory Split (80/20 Historical)",
-    "train_samples": 205,
-    "test_samples": 52,
-    "test_ratio": 0.2,
-    "stratified": true,
-    "random_seed": 42,
-    "accuracy": 0.6346,
-    "macro_precision": 0.589,
-    "macro_recall": 0.5805,
-    "macro_f1": 0.5665,
-    "weighted_f1": 0.6111,
-    "artifact_file": "classification-report-80-20.txt"
-  },
-  "environment": {
-    "sklearn_version": "1.8.0",
-    "numpy_version": "2.4.4",
-    "pandas_version": "3.0.2"
+  "model_version": "3.0.0-PRO",
+  "trained_at": "2026-11-06 13:00:12.768472",
+  "python_version": "3.14.4",
+  "sklearn_version": "1.8.0",
+  "dataset_version": "3.0-group-aware",
+  "dataset_sha256": "3426ec7b81cfec76845439e7138780df4b808811f68d184b4918aadb22ee84ac",
+  "random_seed": 42,
+  "samples_total": 1950,
+  "samples_train": 1560,
+  "samples_test": 390,
+  "groups_total": 130,
+  "groups_train": 104,
+  "groups_test": 26,
+  "group_leakage": 0,
+  "categories": [
+    "child_exploitation",
+    "crypto_fraud",
+    "cyberbullying",
+    "data_breach",
+    "financial_fraud",
+    "hacking",
+    "identity_theft",
+    "network_attacks",
+    "online_fraud",
+    "other",
+    "phishing",
+    "ransomware",
+    "women_child_safety"
+  ],
+  "algorithm": "TF-IDF (1-2 ngrams, sublinear_tf=True, max_features=10000) + LogisticRegression (C=2.0, class_weight=balanced)",
+  "confidence_threshold": 0.2,
+  "held_out_test_metrics": {
+    "accuracy": 0.8897,
+    "macro_precision": 0.9016,
+    "macro_recall": 0.8897,
+    "macro_f1": 0.8896,
+    "weighted_f1": 0.8896,
+    "clean_accuracy": 0.8886,
+    "clean_macro_f1": 0.8882,
+    "noisy_accuracy": 0.9231,
+    "noisy_macro_f1": 0.9405
   },
   "cross_validation_5fold": {
     "n_splits": 5,
-    "strategy": "StratifiedKFold",
+    "strategy": "GroupKFold",
     "random_seed": 42,
-    "mean_accuracy": 0.6962,
-    "std_accuracy": 0.0802,
-    "mean_macro_f1": 0.6263,
-    "std_macro_f1": 0.0964,
-    "mean_weighted_f1": 0.6704,
-    "std_weighted_f1": 0.0869,
-    "oof_accuracy": 0.6965,
-    "oof_macro_f1": 0.6435,
-    "oof_weighted_f1": 0.6844
+    "groups": 104,
+    "mean_accuracy": 0.7948,
+    "std_accuracy": 0.0321,
+    "mean_macro_precision": 0.7883,
+    "mean_macro_recall": 0.7615,
+    "mean_macro_f1": 0.7507,
+    "std_macro_f1": 0.0383,
+    "mean_weighted_f1": 0.7984,
+    "std_weighted_f1": 0.0449,
+    "oof_accuracy": 0.7949,
+    "oof_macro_f1": 0.7948,
+    "oof_weighted_f1": 0.7948
   }
 }

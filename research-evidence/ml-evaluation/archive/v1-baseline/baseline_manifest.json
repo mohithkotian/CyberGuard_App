@@ -1,0 +1,19 @@
+{
+  "archive_version": "1.0-historical-baseline",
+  "archived_at": "2026-11-06T11:43:00+05:30",
+  "dataset_samples": 257,
+  "held_out_accuracy": 0.7436,
+  "held_out_macro_f1": 0.6548,
+  "cv_5fold_accuracy_mean": 0.6962,
+  "cv_5fold_accuracy_std": 0.0802,
+  "cv_5fold_macro_f1": 0.6263,
+  "files": [
+    "classification-report.txt",
+    "classification-report-80-20.txt",
+    "confusion-matrix.png",
+    "cv-5fold-results.csv",
+    "cv-classification-report.txt",
+    "dataset-statistics.csv",
+    "model-metadata.json"
+  ]
+}

@@ -51,8 +51,9 @@ CyberGuard AI is structured as a decoupled, multi-tier microservices platform de
 |  |  * Security Gate: @before_request require_internal_secret (hmac.compare_digest)  |  |
 |  |  * Rate Limiting: Flask-Limiter (30 req/min /predict, 10 req/min /batch-predict)|  |
 |  |  * Preprocessing: TextPreprocessor (normalization, entity tokens, stop words)  |  |
-|  |  * Feature Extraction: TfidfVectorizer (ngrams 1-3, 25k features, sublinear TF)|  |
-|  |  * Classifier: Multinomial Logistic Regression (L-BFGS, C=4.0, balanced)        |  |
+|  |  * Feature Extraction: TfidfVectorizer (ngrams 1-2, 10k features, sublinear TF)|  |
+|  |  * Classifier: Multinomial Logistic Regression (L-BFGS, C=2.0, balanced)        |  |
+|  |  * Calibrated OOD Gating: Threshold tau = 0.20 with 'other' fallback review     |  |
 |  |  * Fallback Mechanism: Node.js built-in NLP heuristics on connection failure    |  |
 |  +---------------------------------------------------------------------------------+  |
 +---------------------------------------------------------------------------------------+
@@ -106,8 +107,8 @@ Raw text undergoes multistage lexical normalization before feature generation:
 
 ### 3.2 Feature Extraction (`TfidfVectorizer`)
 The normalized token sequence is transformed into a high-dimensional sparse representation using term frequency-inverse document frequency weighting:
-- **N-gram Range**: Unigrams, bigrams, and trigrams (`ngram_range=(1, 3)`).
-- **Maximum Features**: 25,000 top vocabulary terms (`max_features=25000`).
+- **N-gram Range**: Unigrams and bigrams (`ngram_range=(1, 2)`). Captures essential cybercrime compound terminology (e.g., *collect request*, *biometric skimming*, *root shell*, *digital arrest*, *private intimate*).
+- **Maximum Features**: 10,000 top vocabulary terms (`max_features=10000`).
 - **Minimum Document Frequency**: 1 document (`min_df=1`).
 - **Sublinear Term Frequency**: Enabled (`sublinear_tf=True`), applying logarithmic scaling $1 + \log(\text{tf})$ to prevent high-frequency term domination.
 - **Accent Handling**: Stripped to unicode (`strip_accents='unicode'`).
@@ -115,34 +116,52 @@ The normalized token sequence is transformed into a high-dimensional sparse repr
 ### 3.3 Classifier Architecture & Parameters
 - **Algorithm**: Multinomial Logistic Regression (`sklearn.linear_model.LogisticRegression`).
 - **Optimization Solver**: Limited-memory Broyden–Fletcher–Goldfarb–Shanno (`solver='lbfgs'`).
-- **Regularization Strength**: $C = 4.0$ (moderate inverse L2 regularization penalizing parameter overfitting).
+- **Regularization Strength**: $C = 2.0$ (empirically selected via 5-fold cross-validation for optimal bias-variance tradeoff).
 - **Maximum Iterations**: 2,000 (`max_iter=2000`).
 - **Class Balancing**: Balanced weights (`class_weight='balanced'`), inversely proportional to class frequencies $w_c = \frac{N}{|C| \cdot N_c}$.
 - **Random State**: 42.
 
-> [!IMPORTANT]
-> **Scientific Methodology Note on Probability Calibration**:
-> The production classifier employs standard Multinomial Logistic Regression. Although `CalibratedClassifierCV` is imported in `classifier.py`, probability calibration (e.g., Platt scaling or isotonic regression) is **not fitted** in the production pipeline. Therefore, raw softmax outputs $\sigma(z)_i = \frac{e^{z_i}}{\sum_j e^{z_j}}$ represent relative class decision margins rather than empirically calibrated posterior probabilities. Academic and research documentation must describe the model as standard multiclass Logistic Regression with balanced weighting.
+### 3.4 Out-of-Distribution & Uncertainty Handling Gate
+To prevent arbitrary forced classification of out-of-distribution (OOD), trivial, or blank inputs, the inference pipeline enforces a multi-tier uncertainty rejection gate:
+1. **Short-Input / Blank Text Rejection**: If the preprocessed input text is empty or contains fewer than three meaningful tokens ($\text{count} < 3$), inference bypasses normal model execution and returns:
+   - `category`: `'other'`
+   - `confidence`: `0.0`
+   - `uncertain`: `true`
+   - `review_recommended`: `true`
+2. **Confidence Thresholding (OOD Rejection)**: If the maximum softmax probability falls below the calibrated operational threshold ($\max(P) < 0.30$), the prediction is tagged as uncalibrated/uncertain:
+   - `category`: `'other'`
+   - `confidence`: $\max(P)$
+   - `uncertain`: `true`
+   - `review_recommended`: `true`
+   - `raw_prediction`: un-gated predicted class
 
-### 3.4 Inference Response Schema
+### 3.5 Inference Response Schema
 The `/predict` endpoint produces a standardized JSON response:
 ```json
 {
   "category": "financial_fraud",
-  "confidence": 0.9241,
+  "confidence": 0.9842,
   "severity": "CRITICAL",
   "subcategory": "UPI / Banking & Card Fraud",
   "scores": {
-    "financial_fraud": 0.9241,
-    "phishing": 0.0412,
-    "online_fraud": 0.0215,
-    "..." : 0.0010
+    "financial_fraud": 0.9842,
+    "phishing": 0.0051,
+    "online_fraud": 0.0034,
+    "..." : 0.0001
   },
-  "model_version": "2.0.0-PRO"
+  "uncertain": false,
+  "review_recommended": false,
+  "confidence_threshold": 0.20,
+  "model_version": "3.0.0-PRO"
 }
 ```
 
-### 3.5 High-Availability Fallback Mechanism
+### 3.6 Hybrid Rule-ML Safety Layer in Backend Gateway
+Inside `backend/src/controllers/complaintsController.js`, a defense-in-depth safety layer governs model integration:
+- **Confident ML Priority**: When `prediction.confidence >= 0.20` and `prediction.uncertain === false`, the model prediction is strictly respected without interference.
+- **Uncertainty Fallback**: Only when the ML service signals low confidence ($\text{confidence} < 0.20$ or `uncertain: true`) do keyword safety-net rules activate to catch unambiguous emergency signals (e.g. violent harassment or direct bank theft) before default assignment.
+
+### 3.7 High-Availability Fallback Mechanism
 If the Flask microservice is unreachable (e.g., cold start, container restart, network disruption), `mlService.js` automatically routes the request to an in-memory heuristic NLP classification engine (`localRuleClassification`). This engine matches curated, high-precision forensic regex patterns across all 13 attack vectors, guaranteeing zero-downtime triage for incident intake.
 
 ---

@@ -121,7 +121,7 @@ def require_internal_secret():
                     return jsonify({'error': 'Unauthorized'}), 401
             # Development bypass permitted only when secret is explicitly unset locally
 
-MODEL_VERSION = '2.0.0-PRO'
+MODEL_VERSION = '3.0.0-PRO'
 classifier = CybercrimeClassifier()
 preprocessor = TextPreprocessor()
 

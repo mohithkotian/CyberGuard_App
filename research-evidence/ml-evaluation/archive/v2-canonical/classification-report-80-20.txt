@@ -1,0 +1,19 @@
+                    precision    recall  f1-score   support
+
+child_exploitation     0.9643    0.9000    0.9310        30
+      crypto_fraud     1.0000    0.9667    0.9831        30
+     cyberbullying     0.9310    0.9000    0.9153        30
+       data_breach     1.0000    1.0000    1.0000        30
+   financial_fraud     1.0000    1.0000    1.0000        30
+           hacking     1.0000    1.0000    1.0000        30
+    identity_theft     1.0000    1.0000    1.0000        30
+   network_attacks     1.0000    1.0000    1.0000        30
+      online_fraud     1.0000    0.9667    0.9831        30
+             other     1.0000    1.0000    1.0000        30
+          phishing     0.9091    1.0000    0.9524        30
+        ransomware     1.0000    1.0000    1.0000        30
+women_child_safety     0.9062    0.9667    0.9355        30
+
+          accuracy                         0.9769       390
+         macro avg     0.9777    0.9769    0.9769       390
+      weighted avg     0.9777    0.9769    0.9769       390

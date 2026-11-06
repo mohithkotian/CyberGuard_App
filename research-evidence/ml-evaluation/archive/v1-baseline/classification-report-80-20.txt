@@ -1,0 +1,40 @@
+======================================================================
+CYBERGUARD PRELIMINARY EXPLORATORY REPORT: 80/20 SPLIT (HISTORICAL)
+======================================================================
+
+Evaluation Design: Exploratory Held-Out Split
+Scikit-Learn Version: 1.8.0
+Random Seed: 42
+Dataset Size: 257 samples across 13 categories
+Train/Test Split: 205 train (80%), 52 test (20%), Stratified
+Feature Extraction: TF-IDF (1-3 ngrams, max_features=25000, sublinear_tf=True)
+Model: Multiclass Logistic Regression (solver='lbfgs', C=4.0, class_weight='balanced')
+
+OVERALL EVALUATION METRICS (TEST SET, N=52):
+  Accuracy:          0.6346 (63.46%)
+  Macro Precision:   0.5890
+  Macro Recall:      0.5805
+  Macro F1-Score:    0.5665
+  Weighted F1-Score: 0.6111
+
+PER-CLASS CLASSIFICATION BREAKDOWN:
+                    precision    recall  f1-score   support
+
+child_exploitation       1.00      1.00      1.00         2
+      crypto_fraud       0.00      0.00      0.00         2
+     cyberbullying       0.60      0.60      0.60         5
+       data_breach       0.67      1.00      0.80         4
+   financial_fraud       0.57      0.57      0.57         7
+           hacking       0.67      0.40      0.50         5
+    identity_theft       0.50      0.60      0.55         5
+   network_attacks       1.00      0.50      0.67         2
+      online_fraud       0.38      0.75      0.50         4
+             other       0.00      0.00      0.00         2
+          phishing       0.78      0.88      0.82         8
+        ransomware       1.00      0.75      0.86         4
+women_child_safety       0.50      0.50      0.50         2
+
+          accuracy                           0.63        52
+         macro avg       0.59      0.58      0.57        52
+      weighted avg       0.62      0.63      0.61        52
+

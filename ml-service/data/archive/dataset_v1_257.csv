@@ -1,0 +1,258 @@
+text,label
+"Infostealer malware (RedLine / Vidar) extracted saved passwords, browser cookies, and crypto wallet private keys.",ransomware
+Confidential patient test results and biometric records leaked online from diagnostic lab cloud server.,data_breach
+Someone opened a credit line and e-commerce account in my name using leaked KYC documents.,identity_theft
+Spear phishing campaign targeted company CFO requesting invoice payment to attacker offshore bank account.,phishing
+I got a WhatsApp message with a lottery link that asked for my bank account information and debit card PIN.,phishing
+A fake Google login page stole my credentials when I clicked a link in a suspicious email.,phishing
+Bought event concert tickets from seller on Twitter/Reddit who sent duplicate fake barcode tickets.,online_fraud
+Fake Instagram copyright infringement notice in DM containing a phishing link to steal account credentials.,phishing
+"Continuous abusive comments, slurs, and cyber harassment targeted at my teen daughter on TikTok.",cyberbullying
+A stalker is tracking my location and sending threatening messages on WhatsApp from burner numbers.,cyberbullying
+A stalker created multiple fake profiles to bypass my blocks and sends vulgar messages every day.,cyberbullying
+Unauthorized IMPS fund transfer executed from my savings account while I was sleeping.,financial_fraud
+Fake Zoom invite link in calendar appointment directed attendees to fake login harvesting page.,phishing
+Botnet malware infected 50 office computers turning them into zombies for launching DDoS attacks.,ransomware
+Impersonation of high-ranking military officer on Facebook to scam people seeking defense canteen cards.,identity_theft
+BGP route hijacking incident rerouted our company IP prefix through rogue autonomous systems.,network_attacks
+"Scammer called offering credit card reward points redemption and tricked me into sharing my OTP, resulting in funds transfer.",financial_fraud
+My PAN card was duplicated and used to take multiple personal loans from lending apps without my knowledge.,identity_theft
+Printer is not connecting to my office desktop computer over USB cable.,other
+Distress alert: Single mother being harassed and extorted with threats of kidnapping her child.,women_child_safety
+A fraudulent SMS claiming my electricity bill is unpaid and power will be disconnected unless I click the link and enter card info.,phishing
+Identity thief filed a fake income tax return in my name to divert my legitimate refund to their bank.,identity_theft
+Domestic violence distress call: Abusive spouse confiscated all devices and is monitoring internet activity.,women_child_safety
+Victim of a decentralized finance (DeFi) liquidity rugpull where founders minted trillions of tokens and dumped liquidity.,crypto_fraud
+Adult stranger lured a 14-year-old child on Instagram into sharing private pictures and is now blackmailing them.,child_exploitation
+Voice phishing (vishing) call claiming to be bank manager asking for my OTP and online banking password.,phishing
+Ransomware payload delivered via infected USB flash drive inserted into control room workstation.,ransomware
+"Fake job portal charged 5,000 INR registration fee for government job and provided counterfeit appointment letters.",online_fraud
+Looking for cyber safety guidelines and pamphlets to distribute in our apartment society.,other
+Telecom company data breach exposed call detail records (CDR) and customer geolocation data.,data_breach
+"Cryptocurrency pump-and-dump scheme promoted by fake influencers on Twitter cost investors 50,000 USD.",crypto_fraud
+University student portal database hacked and academic records with personal identification leaked online.,data_breach
+Someone created a fake SBI bank website and tricked me into entering my net banking credentials and OTP.,phishing
+Confidential merger and acquisition financial documents leaked to competitors via unauthorized cloud sharing.,data_breach
+Unauthorized wire transfer via RTGS sent to an unknown beneficiary account in another state.,financial_fraud
+My digital signature certificate (DSC) was fraudulently acquired and used to sign commercial contracts.,identity_theft
+Someone is distributing child sexual abuse material (CSAM) in a public Telegram channel.,child_exploitation
+Received an email regarding tax refund with a link to a fake government portal asking for debit card and ATM pin.,phishing
+Attackers exploited a zero-day vulnerability in our WordPress plugins and defaced our corporate homepage.,hacking
+Smishing attack: SMS claiming my SIM card will be deactivated unless I click the link and provide KYC documents.,phishing
+Phishing airdrop token sent to my wallet contained a malicious smart contract function that drained my tokens.,crypto_fraud
+Corporate email server compromised by APT group via Exchange ProxyLogon vulnerability.,hacking
+Online predator contacting 12-year-old on TikTok and demanding secret meetings.,child_exploitation
+Fraudsters used fake POS terminal to clone my credit card during restaurant payment.,financial_fraud
+Cyberstalker installed spyware on my phone and is monitoring my private calls and text messages.,cyberbullying
+Impersonator used deepfake voice of our company director to authorize fraudulent operations.,identity_theft
+Unauthorized root shell opened on our production Kubernetes cluster via container breakout exploit.,hacking
+Third-party payment vendor suffered a security breach resulting in exposure of customer credit card numbers.,data_breach
+Got an email with an invoice attached that opened a fake Adobe Acrobat login page requesting office 365 credentials.,phishing
+A Trojan horse disguised as an invoice PDF was downloaded and encrypted all local hard drives in our office.,ransomware
+Former employee downloaded client database and proprietary pricing algorithms to personal Google Drive before resigning.,data_breach
+"Cheated in an online travel booking scam where fake hotel website took 40,000 for holiday package that didn't exist.",online_fraud
+Someone created fake social media profiles using my photos and name and is messaging my friends asking for emergency money.,identity_theft
+Healthcare provider database dumped on cybercrime forum with patient diagnostic histories and insurance IDs.,data_breach
+"I received a call from someone posing as bank customer service who asked for OTP and drained 50,000 from my savings account.",financial_fraud
+Hacker changed the DNS records of our domain at the registrar and redirected user traffic to a malicious server.,hacking
+"Unauthorized debit of 35,000 rupees via micro-ATM AEPS biometric fraud without my consent.",financial_fraud
+Stalker constantly creating new phone numbers to harass a woman after she broke off engagement.,women_child_safety
+E-commerce website took payment for iPhone 15 Pro Max and delivered a soap bar inside the sealed parcel.,online_fraud
+Immediate safety emergency: A woman is being followed by an unknown stalker who is threatening her over phone.,women_child_safety
+A website hosting illegal child exploitation content and trading explicit videos of minors.,child_exploitation
+Our e-commerce checkout script was injected with Magecart skimming malware that steals customer payment card data.,hacking
+Bank balance zeroed out after giving remote desktop access to someone claiming to fix broadband internet.,financial_fraud
+"Cryptojacking malware secretly running on our cloud instances, consuming 100% CPU to mine Monero.",ransomware
+Identity theft: Someone took out a car loan of 8 Lakhs in my name using forged documents and stolen PAN.,identity_theft
+Malicious software loader downloaded remote access trojan (RAT) and executed file encryption script.,ransomware
+"Our corporate database containing 1 million customer records with email, phone, and hashed passwords was leaked on dark web.",data_breach
+SYN flood attack overwhelmed our web servers causing complete outage for all legitimate customers.,network_attacks
+Anonymous accounts posting defamatory allegations and fabricated chat screenshots about me.,cyberbullying
+Our GitHub organization repositories were hacked and proprietary source code was cloned by unknown adversaries.,hacking
+Group of online trolls organized targeted harassment campaign tagging my employer to get me fired.,cyberbullying
+Online hate speech and communal abuse targeted against my family on social media channels.,cyberbullying
+"My Instagram and Facebook accounts were hijacked, email and phone numbers were changed by the attacker.",hacking
+Session hijacking attack allowed unauthorized intruder to impersonate admin user and alter database permissions.,hacking
+"Fake electricity bill payment scam debited 40,000 rupees from victim Axis bank account.",financial_fraud
+"Someone broke into our cloud AWS infrastructure, deleted production databases, and left a hacker signature.",hacking
+My passport details were stolen and used to apply for international visas and illegal travel documents.,identity_theft
+Malicious browser extension swapped recipient cryptocurrency wallet address during clipboard copy paste.,crypto_fraud
+Our company web server was hacked via SQL injection and the attackers gained root administrative access.,hacking
+Banking Trojan (such as Emotet or Trickbot) intercepted browser sessions and altered wire transfer recipient details.,ransomware
+Bitcoin investment doubling scam on YouTube live stream pretending to be Elon Musk stole 0.5 BTC.,crypto_fraud
+Emergency SOS: Stalker followed victim home from subway station and posted threats online.,women_child_safety
+Phishing SMS asking to update KYC by clicking bit.ly link or account will be blocked within 24 hours.,phishing
+Inquiry regarding general cyber security awareness workshops for our high school.,other
+I am receiving constant rape and death threats on Twitter after posting my opinion.,cyberbullying
+General feedback on the website interface and color theme.,other
+I got an SMS with a bit.ly link saying I won a lottery prize and it asked for my credit card number and CVV.,phishing
+ATM skimming device installed at local kiosk captured my card magnetic stripe and PIN number.,financial_fraud
+API security flaw allowed unauthenticated users to scrape entire user database including phone numbers and home addresses.,data_breach
+"Keylogger malware detected on executive laptop recording all keystrokes, master passwords, and bank logins.",ransomware
+Someone created an obscene Telegram bot that morphs pictures of women from my college into nude images.,cyberbullying
+Cheated of 1.5 Lakhs by fake forex trading app on Telegram that showed fake profits but stopped withdrawals.,financial_fraud
+Backdoor trojan found installed inside our core billing application server.,hacking
+Someone stole my voter ID and forged rent agreements to rent apartments for illegal call centers.,identity_theft
+Emergency domestic abuse: Partner is threatening to post intimate photos online and physically assault me.,women_child_safety
+"BlackCat ransomware encrypted our VMware ESXi virtual machine hosts, bringing entire infrastructure down.",ransomware
+Fake Facebook security checkpoint page captured victim email and password via phishing redirect.,phishing
+Fake IRCTC website collected my username and password when I tried to book train tickets.,phishing
+Fake WhatsApp Web login QR code on third-party blog hijacked user WhatsApp session.,phishing
+Fake banking portal created by fraudsters to steal customer netbanking credentials and login passwords.,phishing
+A fraudulent instant loan app charged 300% interest and harassed my family contacts after gaining access to my phone.,financial_fraud
+Sextortion scam: Scammer lured victim into a video call and now demands 1 Lakh rupees to delete the recording.,cyberbullying
+Fake DHL tracking link asked for credit card verification to deliver a package I never ordered.,phishing
+Distributed denial of service attack took down our critical payment API endpoint during holiday sale.,network_attacks
+Impersonator created a WhatsApp account with my photo and requested urgent money from my colleagues.,identity_theft
+Exfiltration of 200GB of customer financial records found offered for sale on BreachForums.,data_breach
+Persistent abusive comments and cyber defamation ruining my professional reputation on LinkedIn.,cyberbullying
+Fake insurance policy refund scam cheated senior citizen of 5 lakhs through fraudulent NEFT transfers.,financial_fraud
+Anonymous Reddit user posted my private medical records and personal phone number on a public subreddit.,cyberbullying
+Fraudulent mobile connection activated under my name without my knowledge or biometric approval.,identity_theft
+Web server database dumped and defaced with hacker crew logo and political slogans.,hacking
+Cheated by fake overseas job recruiter who promised visa in Canada and took 2 Lakhs processing fee.,online_fraud
+My identity was stolen and used to register a fraudulent shell company and commit tax evasion.,identity_theft
+Someone cloned my debit card at an ATM and withdrew cash in another city.,financial_fraud
+Active Directory domain controller compromised with Golden Ticket Kerberos attack.,hacking
+"NTP and DNS amplification attack targeting our domain name servers, causing 100% packet loss.",network_attacks
+Someone impersonated a police commissioner using fake display picture on WhatsApp and demanded extortion money.,identity_theft
+Connected MetaMask wallet to a fake NFT minting website that executed a malicious permit approval and drained 5 ETH.,crypto_fraud
+Phishing page mimicking Amazon sign-in prompt captured my email address and payment details.,phishing
+My computer is running slow and I need help updating my Windows operating system.,other
+A stalker is waiting outside my apartment and sending live photos of my balcony to my WhatsApp.,women_child_safety
+Cyberbullying leading to severe mental trauma and distress due to continuous viral meme defamation.,cyberbullying
+"Paid advance token amount for rented apartment listed on NoBroker/MagicBricks, but owner was a fraudster with fake photos.",online_fraud
+Web application firewall bypassed and internal microservices compromised via SSRF (Server-Side Request Forgery).,hacking
+A corporate employee received a spoofed email disguised as a Microsoft 365 Security Alert claiming unauthorized login attempt from foreign IP required immediate password verification.,phishing
+"Unaware of the spoofed URL, the employee entered their corporate credentials and completed a multi-factor authentication (MFA) prompt triggered by the attacker, resulting in a full takeover of the employee's mailbox.",phishing
+Fraudsters used my stolen driving license to purchase vehicle and register SIM cards involved in criminal activities.,identity_theft
+A fake Paytm KYC representative asked me to install AnyDesk app and transferred all money from my linked bank account.,financial_fraud
+Someone is spreading morphed obscene photos of me on Telegram groups and demanding ransom.,cyberbullying
+Cloud database Elasticsearch cluster was left open to internet without password authentication exposing audit logs.,data_breach
+"Customer service portal compromised, allowing attackers to view and export customer support tickets and PII.",data_breach
+Stolen biometric Aadhaar fingerprints used to siphon money via AEPS banking terminals.,identity_theft
+Phishing email pretending to be Federal Express demanding customs duty payment via fraudulent link.,phishing
+Fraudulent payment gateway deducted money from my account twice during checkout and refused chargeback.,financial_fraud
+Ransomware attack encrypted our municipal water treatment plant control systems and locked SCADA HMIs.,ransomware
+Unauthorized API endpoint manipulation allowed attackers to modify account balances and bypass payment gateway.,hacking
+I received a phishing email disguised as an express courier delivery notification asking for my personal details to reschedule shipment.,phishing
+Forgot my email password and need instructions on standard password recovery steps.,other
+"Seller on Facebook Marketplace took 10,000 advance for used motorbike and blocked my number.",online_fraud
+Received a malicious Outlook Web Access login prompt designed to steal employee active directory credentials.,phishing
+WannaCry-style worm spreading through SMB port 445 across entire internal local area network.,ransomware
+Someone sent me a fake PayPal email saying my account was suspended and I need to verify my details immediately.,phishing
+Defamatory videos containing false criminal accusations published on YouTube by cyberbully.,cyberbullying
+Quishing attack where malicious QR code on parking meter redirected motorists to credential theft website.,phishing
+All files on our enterprise file server were encrypted with extension .locked and a ransom note demanding 5 Bitcoins appeared.,ransomware
+"Government department public welfare portal leaked Aadhaar numbers and bank accounts of 500,000 beneficiaries.",data_breach
+Privilege escalation exploit used by standard user to obtain root superuser rights on internal ERP system.,hacking
+Money was debited from my HDFC bank account via fraudulent UPI VPA handle without my authorization.,financial_fraud
+Remote code execution (RCE) vulnerability exploited on our Apache web server.,hacking
+Unauthorized SSH logins detected on our production Linux servers from Russian and Chinese IP addresses.,hacking
+Layer 7 HTTP flood attack generating millions of fake checkout requests and exhausting database connection pool.,network_attacks
+Fake cryptocurrency investment platform simulated high profits on dashboard but demanded 50% tax to withdraw funds.,online_fraud
+Scammed in a task based telegram group where I was asked to complete prepaid merchant tasks to earn commission.,financial_fraud
+"Fake courier service website asked for 5 INR update fee to deliver parcel, which stole my card details and charged 45,000.",online_fraud
+A fake loan recovery agent is threatening me and demanding repayment for a loan I never applied for.,financial_fraud
+Unauthorized international credit card transactions were made on my card while I still had physical possession of it.,financial_fraud
+Fake customs agent scam: Caller claimed a parcel with illegal narcotics in my name was seized at Mumbai airport.,online_fraud
+Spyware application hidden in a mobile utility app was secretly recording microphone audio and uploading GPS tracking.,ransomware
+"I scanned a QR code sent by an OLX buyer who told me scanning it would credit money, but 25,000 was debited instead.",financial_fraud
+Stalker sending dozens of threatening emails per day from encrypted ProtonMail accounts.,cyberbullying
+Malware infected our billing workstations and began exfiltrating confidential files before triggering disk encryption.,ransomware
+Received an urgent email from support@apple-verify-service.com stating my Apple ID is locked and needs immediate password entry.,phishing
+"OLX scammer agreed to buy my old furniture, sent a QR code claiming to pay, and debited money from my account instead.",online_fraud
+Minor student was coerced into sharing intimate images via Snapchat and is being extorted for money.,child_exploitation
+An impostor created a fake LinkedIn profile pretending to be me and offered fraudulent job contracts to students.,identity_theft
+Unauthorized UPI transactions happened on my Google Pay without my knowledge or approval.,financial_fraud
+Illegal darknet marketplace trading CSAM and non-consensual images of children.,child_exploitation
+I was promised a work-from-home YouTube video liking job where they asked for deposit money and then blocked me.,financial_fraud
+Someone used my KYC documents and national ID card to buy ten burner SIM cards for scam operations.,identity_theft
+Online lottery scam email claimed I won 1 Crore in UK Lottery and demanded advance clearance processing fees.,online_fraud
+Rootkit installed in operating system kernel hiding malicious processes and establishing persistent reverse shells.,ransomware
+"I invested money in an online high-yield trading scheme via Telegram that promised 50% daily returns, but lost 2 Lakhs.",financial_fraud
+My personal Gmail and YouTube channel were hacked and used to livestream crypto scam videos.,hacking
+"Our HR software database was breached, leaking salary details, social security numbers, and bank account info of all staff.",data_breach
+I received an email from my bank asking me to click a link and enter my password and netbanking account details.,phishing
+An ex-partner is threatening to release private intimate videos on adult websites unless I meet them.,cyberbullying
+A fraudulent caller claiming to be from customs department threatened arrest and extorted 1 Lakh via bank transfer.,financial_fraud
+Brute force dictionary attack compromised employee VPN passwords and penetrated our internal subnet.,hacking
+Man-in-the-Middle (MitM) SSL stripping attack executed on unsecured public Wi-Fi access point.,network_attacks
+Fraudulent pet adoption website took advance money for puppy vaccination and transportation and became unreachable.,online_fraud
+Fake Telegram crypto trading bot stole my private seed phrase and transferred all USDT from my TrustWallet.,crypto_fraud
+"Fraudulent transaction of 75,000 INR done through netbanking after someone did unauthorized SIM swap.",financial_fraud
+Double extortion ransomware: Attacker stole 500GB of client files and encrypted production storage arrays.,ransomware
+Fake recruitment agency used my resume and identity documents to commit job scams against other applicants.,identity_theft
+Received an email warning about suspicious login from Russia and asking me to click verify to secure account.,phishing
+Report of online grooming network operating in gaming voice chat lobbies targeting young teenagers.,child_exploitation
+I received an email pretending to be from the income tax department asking me to submit my PAN and Aadhaar on a cloned portal.,phishing
+A misconfigured Amazon S3 bucket exposed confidential medical records and patient health information publicly.,data_breach
+Suspicious online group sharing illicit non-consensual media involving high school students.,child_exploitation
+Blackmailer on Snapchat recorded our video call and is threatening to send it to all my Facebook friends.,cyberbullying
+Scammer forged my signature on land registry documents and mortgaged my ancestral property.,identity_theft
+Identity thief applied for multiple credit cards using my forged salary slips and utility bills.,identity_theft
+DNS spoofing attack poisoned local DNS cache and redirected banking clients to attacker-controlled proxy.,network_attacks
+Smurf ICMP broadcast flood attack saturated our perimeter firewall bandwidth.,network_attacks
+A stranger used my identity to buy air tickets and stay in luxury hotels on fraudulent chargebacks.,identity_theft
+My email account was hijacked after I clicked a suspicious link that looked like Gmail login page.,phishing
+Received a spear phishing email pretending to be from our CEO asking for urgent wire transfer and gift card codes.,phishing
+Loan shark app disbursed unauthorized money into my bank and is now threatening me with fake legal warrants.,financial_fraud
+Threatening physical harm and acid attack messages sent to a female student on Instagram.,women_child_safety
+Cross-site scripting (XSS) attack exploited on our portal allowing session cookie theft and account takeover.,hacking
+Fake Netflix subscription renewal email directed me to a clone website that captured my credit card numbers.,phishing
+All accounting files encrypted by Ryuk ransomware with README instructions demanding payment to Bitcoin address.,ransomware
+Someone stole my Aadhaar card details and used them to open a bank account in my name without my authorization.,identity_theft
+Woman receiving constant violent intimidation and acid attack threats from ex-boyfriend across social platforms.,women_child_safety
+Attacker performed ARP spoofing and Man-in-the-Middle attack on our corporate Wi-Fi network.,hacking
+Fake crypto exchange website refused withdrawal of Bitcoin and demanded 30% advance tax deposit.,crypto_fraud
+Attacker launching volumetric packet flood targeting our cloud load balancers causing severe latency.,network_attacks
+Someone authorized fraudulent charges on my credit card using stolen CVV and card details.,financial_fraud
+Fake stock market advisory group tricked me into depositing 3 lakhs into private accounts for fake pre-IPO shares.,financial_fraud
+Someone is creating fake dating profiles with my phone number resulting in hundreds of obscene calls per day.,cyberbullying
+I was charged unauthorized subscriptions and recurring payments on my credit card without OTP verification.,financial_fraud
+Pedophile created fake teen profile on social media to solicit explicit media from underage students.,child_exploitation
+Credential stuffing attack exposed thousands of user accounts due to leaked password dumps from other platforms.,data_breach
+Smart contract reentrancy vulnerability exploit drained 2 million dollars from automated market maker pool.,crypto_fraud
+"Ordered branded shoes from an Instagram seller, paid in advance via UPI, but received fake torn clothes and got blocked.",online_fraud
+Where can I find the official government cyber security helpline number?,other
+An online predator on Roblox / Discord was grooming an underage minor and asking for inappropriate photographs.,child_exploitation
+Our e-commerce portal is under massive Distributed Denial of Service (DDoS) attack with 50Gbps UDP flood traffic.,network_attacks
+"CryptoWall ransomware encrypted all company shared drives, backups, and network attached storage (NAS).",ransomware
+"I lost 80,000 rupees in a task-based investment scam where initial small profits were paid before taking large deposits.",financial_fraud
+Urgent: Ex-husband is stalking my live location using hidden airtag/spyware and sending violent threats to kill me.,women_child_safety
+Someone created a fake merchant UPI ID and redirected payments from my shop customers to their personal account.,financial_fraud
+Someone cloned my WhatsApp account by tricking me into forwarding a 6-digit verification code.,identity_theft
+"Scammers sent a WhatsApp message pretending to be HR department offering remote job, directing to a malicious login link.",phishing
+Fraudsters manipulated my banking app session by tricking me into sharing screen via TeamViewer.,financial_fraud
+Fake Flipkart festive sale portal took online payment but never dispatched products.,online_fraud
+Ransomware gang published proof of stolen employee data on their darknet leak portal after company refused payment.,ransomware
+How do I change my Wi-Fi router password at home for better speed?,other
+Employee leaked confidential customer master file containing credit limits and tax identification numbers.,data_breach
+"Matrimonial scam: Scammer met victim on Shaadi.com, promised marriage, claimed to be stuck at customs with gifts, stole 3 Lakhs.",online_fraud
+Our company router and firewall were compromised via default credential brute force attack.,hacking
+Scam SMS regarding courier package address confirmation leading to credit card credential harvesting form.,phishing
+Adware and browser hijacker constantly injecting popups and redirecting user searches to malicious search engines.,ransomware
+Fake Binance support agent on Discord convinced me to share screen and export my wallet recovery keys.,crypto_fraud
+The email used a high-urgency tone and a fraudulent 'Review Activity' button that redirected the user to a pixel-perfect imitation of the company's Single Sign-On (SSO) portal.,phishing
+"Scammer convinced me to send money via PhonePe promising double refund in 10 minutes, but kept the funds.",financial_fraud
+"LockBit ransomware infected our hospital network, locking medical records and demanding cryptocurrency payment.",ransomware
+An intruder gained unauthorized access to our internal API keys and downloaded sensitive user records.,hacking
+Our database server was attacked by ransomware that deleted backup files and left README_RESTORE_FILES.txt instructions.,ransomware
+"Classmates created a hate page on Instagram specifically to mock, insult, and bully my child.",cyberbullying
+I am being harassed and threatened online by an anonymous user on Instagram with abusive messages.,cyberbullying
+Repeated abusive voice notes and threatening calls sent to my elderly parents on WhatsApp.,cyberbullying
+Criminal impersonated a doctor and used my medical registration credentials to sell prescription drugs online.,identity_theft
+Work from home rating/review scam: Scammed into depositing funds into recharge wallets for completing product reviews.,online_fraud
+Fraudsters used my personal documents to issue a fraudulent duplicate SIM card and intercepted my bank OTPs.,identity_theft
+Threats and predatory sexual advances sent to minor child through multiplayer mobile game chat.,child_exploitation
+Cyberbullying and online predator targeting middle school children with explicit sexual messages.,child_exploitation
+Online blackmailer threatens to share private photos with my family unless I pay 500 dollars.,cyberbullying
+How do I set up two factor authentication on my smartphone for basic security?,other
+Received a deceptive DocuSign notification link that opened a credential harvesting prompt.,phishing
+"I paid 15,000 INR for a laptop on a fake online shopping website but never received the item and seller disappeared.",online_fraud
+"Fraudulent chargeback claim made by buyer after receiving digital goods, stealing both money and product.",financial_fraud
+"Doxxing attack: Someone published my home address, phone number, and workplace online encouraging mob harassment.",cyberbullying
+"Scammer sent a QR code via email asking me to scan to receive payment, which redirected to a credential harvesting site.",phishing
+Fake Instagram profile created with my pictures and name sending inappropriate messages to my contacts.,identity_theft
+Internal source code repositories containing hardcoded database credentials were leaked on public GitHub repository.,data_breach
+My private photos were leaked and shared in a public Discord group without my consent.,cyberbullying

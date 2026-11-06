@@ -1,0 +1,36 @@
+{
+  "dataset_version": "1.0-historical",
+  "archived_at": "2026-11-06T11:42:00+05:30",
+  "original_file": "ml-service/data/dataset.csv",
+  "archived_file": "ml-service/data/archive/dataset_v1_257.csv",
+  "sha256": "aa797c032592bee543cd1f235437ea941722eb3a0ac5338a742508c343a3248c",
+  "total_records": 257,
+  "columns": [
+    "text",
+    "label"
+  ],
+  "category_count": 13,
+  "category_distribution": {
+    "phishing": 38,
+    "financial_fraud": 34,
+    "identity_theft": 27,
+    "cyberbullying": 25,
+    "hacking": 24,
+    "ransomware": 22,
+    "data_breach": 18,
+    "online_fraud": 18,
+    "child_exploitation": 12,
+    "network_attacks": 10,
+    "women_child_safety": 10,
+    "crypto_fraud": 10,
+    "other": 9
+  },
+  "provenance": "Synthetic, hand-authored single-sentence examples from CyberGuard prototype baseline",
+  "historical_baseline_metrics": {
+    "held_out_accuracy": 0.7436,
+    "held_out_macro_f1": 0.6548,
+    "cv_5fold_accuracy_mean": 0.6962,
+    "cv_5fold_accuracy_std": 0.0802,
+    "cv_5fold_macro_f1": 0.6263
+  }
+}

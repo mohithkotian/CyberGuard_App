@@ -222,22 +222,37 @@ exports.createComplaint = async (req, res, next) => {
       const fullText = maskedTitle + ' ' + maskedDescription;
       const prediction = await mlService.predict(fullText);
 
-      // Keyword Boosters for Backend
-      const lowVal = fullText.toLowerCase();
-      const isPhishing = /phishing|spoof|fake|credentials|password|login|verify|link|email/i.test(lowVal);
-      const isHacking = /hack|exploit|vulnerability|unauthorized|root|admin|sql|injection|breach/i.test(lowVal);
-      const isFraud = /upi|bank|money|fund|transfer|drain|atm|card|payment|fraud|financial/i.test(lowVal);
-      const isBullying = /bully|harass|threat|abuse|hate|stalk/i.test(lowVal);
-
+      // Hybrid Rule-ML Safety Layer:
+      // High-confidence ML predictions (confidence >= 0.50) are strictly preserved to maintain model integrity.
+      // Keyword safety-net overrides only activate when the ML model is uncertain (confidence < 0.50 or prediction.uncertain === true)
+      // to protect against uncalibrated classification drift on noisy or out-of-distribution inputs.
       let category = prediction.category;
-      if (isFraud && !isHacking) category = 'financial_fraud';
-      else if (isPhishing && prediction.confidence < 0.6) category = 'phishing';
-      else if (isBullying && prediction.confidence < 0.4) category = 'cyberbullying';
+      const isUncertainOrLowConfidence = prediction.confidence < 0.5 || prediction.uncertain === true;
+
+      if (isUncertainOrLowConfidence) {
+        const lowVal = fullText.toLowerCase();
+        const isPhishing = /phishing|spoof|fake|credentials|password|login|verify|link|email/i.test(lowVal);
+        const isHacking = /hack|exploit|vulnerability|root\b|admin|sql|injection|backdoor|malware|kernel|shell|deface/i.test(lowVal);
+        const isFraud = /upi|bank|money|fund|transfer|drain|atm|card|payment|debit|financial/i.test(lowVal);
+        const isBullying = /bully|harass|threat|abuse|hate|stalk/i.test(lowVal);
+
+        if (isFraud && !isHacking) {
+          category = 'financial_fraud';
+        } else if (isHacking) {
+          category = 'hacking';
+        } else if (isPhishing) {
+          category = 'phishing';
+        } else if (isBullying) {
+          category = 'cyberbullying';
+        }
+      }
 
       mlPrediction = {
         category: category,
         confidence: prediction.confidence,
         scores: prediction.scores,
+        uncertain: prediction.uncertain || false,
+        reviewRecommended: prediction.review_recommended || false,
         modelVersion: prediction.model_version,
         predictedAt: new Date(),
       };

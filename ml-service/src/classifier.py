@@ -2,7 +2,6 @@ import joblib
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.calibration import CalibratedClassifierCV
 
 class CybercrimeClassifier:
     CATEGORIES = [
@@ -53,17 +52,20 @@ class CybercrimeClassifier:
         'other': 'General Inquiry'
     }
 
+    CONFIDENCE_THRESHOLD = 0.20
+    MIN_TOKEN_COUNT = 3
+
     def __init__(self):
         self.vectorizer = TfidfVectorizer(
-            max_features=25000,
-            ngram_range=(1, 3),
+            max_features=10000,
+            ngram_range=(1, 2),
             min_df=1,
             sublinear_tf=True,
             strip_accents='unicode'
         )
         base_model = LogisticRegression(
             max_iter=2000,
-            C=4.0,
+            C=2.0,
             solver='lbfgs',
             class_weight='balanced',
             random_state=42
@@ -79,22 +81,69 @@ class CybercrimeClassifier:
     def predict(self, text: str) -> dict:
         if not self._fitted:
             raise RuntimeError('Model not fitted. Call fit() or load() first.')
+
+        # 1. Short-input / empty text handling
+        if not text or not isinstance(text, str):
+            return self._build_uncertain_response(
+                confidence=0.0,
+                reason='Input text is empty or null.'
+            )
+
+        tokens = [t for t in text.split() if len(t) > 1]
+        if len(tokens) < self.MIN_TOKEN_COUNT:
+            return self._build_uncertain_response(
+                confidence=0.0,
+                reason=f'Insufficient meaningful tokens ({len(tokens)} found, minimum {self.MIN_TOKEN_COUNT} required).'
+            )
+
+        # 2. Vectorization and model inference
         X = self.vectorizer.transform([text])
-        category = self.model.predict(X)[0]
         proba = self.model.predict_proba(X)[0]
         scores = {cat: round(float(p), 4) for cat, p in zip(self.model.classes_, proba)}
         confidence = float(max(proba))
-        
-        severity = self.SEVERITY_MAP.get(category, 'MEDIUM')
-        subcategory = self.SUBCATEGORY_MAP.get(category, 'General Cybercrime')
+        raw_category = self.model.classes_[np.argmax(proba)]
+
+        # 3. Confidence thresholding (OOD rejection)
+        if confidence < self.CONFIDENCE_THRESHOLD:
+            return self._build_uncertain_response(
+                confidence=round(confidence, 4),
+                scores=scores,
+                raw_prediction=raw_category,
+                reason=f'Prediction confidence ({confidence:.4f}) is below operational threshold ({self.CONFIDENCE_THRESHOLD}).'
+            )
+
+        # 4. Standard confident prediction
+        severity = self.SEVERITY_MAP.get(raw_category, 'MEDIUM')
+        subcategory = self.SUBCATEGORY_MAP.get(raw_category, 'General Cybercrime')
 
         return {
-            'category': category,
+            'category': raw_category,
             'confidence': round(confidence, 4),
             'severity': severity,
             'subcategory': subcategory,
-            'scores': scores
+            'scores': scores,
+            'uncertain': False,
+            'review_recommended': False
         }
+
+    def _build_uncertain_response(self, confidence=0.0, scores=None, raw_prediction=None, reason=''):
+        if scores is None:
+            uniform_p = round(1.0 / len(self.CATEGORIES), 4)
+            scores = {cat: uniform_p for cat in self.CATEGORIES}
+
+        res = {
+            'category': 'other',
+            'confidence': confidence,
+            'severity': 'LOW',
+            'subcategory': self.SUBCATEGORY_MAP.get('other', 'General Inquiry'),
+            'scores': scores,
+            'uncertain': True,
+            'review_recommended': True,
+            'reason': reason
+        }
+        if raw_prediction:
+            res['raw_prediction'] = raw_prediction
+        return res
 
     def save(self, model_path: str, vectorizer_path: str):
         joblib.dump(self.model, model_path)

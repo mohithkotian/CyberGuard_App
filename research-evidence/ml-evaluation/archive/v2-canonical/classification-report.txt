@@ -1,0 +1,45 @@
+======================================================================
+CYBERGUARD IEEE RESEARCH BENCHMARK: HELD-OUT TEST REPORT (80/20 SPLIT)
+======================================================================
+
+Scikit-Learn Version   : 1.8.0
+Dataset Version        : 2.0-canonical
+Dataset SHA-256        : 3bb95f9b47ff0ccf9a90510eb3c13735bbbcd16295fa20b30014f7f52d24332a
+Random Seed            : 42
+Total Dataset Size     : 1950 samples across 13 categories
+Split Configuration    : 80% Development (1560 samples) / 20% Held-Out (390 samples)
+Feature Configuration  : TF-IDF (1-2 ngrams, sublinear_tf=True, max_features=10000)
+Classifier Algorithm   : LogisticRegression (solver=lbfgs, C=2.0, class_weight='balanced')
+
+HELD-OUT TEST AGGREGATED METRICS (390 SAMPLES):
+  Accuracy             : 0.9769
+  Macro Precision      : 0.9777
+  Macro Recall         : 0.9769
+  Macro F1-Score       : 0.9769
+  Weighted F1-Score    : 0.9769
+
+SUBSET EVALUATION BREAKDOWN:
+  Clean Subset (368 samples) : Accuracy = 0.9783, Macro-F1 = 0.9780
+  Noisy Subset (22 samples) : Accuracy = 0.9545, Macro-F1 = 0.9556
+
+PER-CLASS CLASSIFICATION REPORT:
+                    precision    recall  f1-score   support
+
+child_exploitation     0.9643    0.9000    0.9310        30
+      crypto_fraud     1.0000    0.9667    0.9831        30
+     cyberbullying     0.9310    0.9000    0.9153        30
+       data_breach     1.0000    1.0000    1.0000        30
+   financial_fraud     1.0000    1.0000    1.0000        30
+           hacking     1.0000    1.0000    1.0000        30
+    identity_theft     1.0000    1.0000    1.0000        30
+   network_attacks     1.0000    1.0000    1.0000        30
+      online_fraud     1.0000    0.9667    0.9831        30
+             other     1.0000    1.0000    1.0000        30
+          phishing     0.9091    1.0000    0.9524        30
+        ransomware     1.0000    1.0000    1.0000        30
+women_child_safety     0.9062    0.9667    0.9355        30
+
+          accuracy                         0.9769       390
+         macro avg     0.9777    0.9769    0.9769       390
+      weighted avg     0.9777    0.9769    0.9769       390
+
