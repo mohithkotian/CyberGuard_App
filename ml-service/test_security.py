@@ -121,6 +121,25 @@ class TestMLSecurityAndAuth(unittest.TestCase):
         index_resp = self.client.get('/')
         self.assertEqual(index_resp.status_code, 200)
 
+    def test_model_info_endpoint_metadata(self):
+        """Model info endpoint must return verified algorithm metadata and schema."""
+        resp = self.client.get('/model-info')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertIn('model_version', data)
+        self.assertEqual(data['model_version'], '3.0.0-PRO')
+        self.assertIn('categories', data)
+        self.assertEqual(len(data['categories']), 13)
+        self.assertIn('algorithm', data)
+        self.assertEqual(
+            data['algorithm'],
+            'TF-IDF (1-2 ngrams, sublinear_tf=True, max_features=10000) + LogisticRegression (C=2.0, class_weight=balanced)'
+        )
+        self.assertNotIn('Ensemble', data['algorithm'])
+        self.assertNotIn('Calibrated', data['algorithm'])
+        self.assertEqual(data.get('confidence_threshold'), 0.20)
+        self.assertTrue(data.get('model_loaded'))
+
     def test_rate_limiting_enforcement(self):
         """Flooding requests beyond rate limit must return 429 Too Many Requests."""
         # Rate limit on /batch-predict is 10 per minute

@@ -128,7 +128,7 @@ To prevent arbitrary forced classification of out-of-distribution (OOD), trivial
    - `confidence`: `0.0`
    - `uncertain`: `true`
    - `review_recommended`: `true`
-2. **Confidence Thresholding (OOD Rejection)**: If the maximum softmax probability falls below the calibrated operational threshold ($\max(P) < 0.30$), the prediction is tagged as uncalibrated/uncertain:
+2. **Confidence Thresholding (ML OOD Rejection)**: If the maximum softmax probability falls below the calibrated operational threshold ($\max(P) < 0.20$), the prediction is tagged as uncalibrated/uncertain:
    - `category`: `'other'`
    - `confidence`: $\max(P)$
    - `uncertain`: `true`
@@ -157,9 +157,10 @@ The `/predict` endpoint produces a standardized JSON response:
 ```
 
 ### 3.6 Hybrid Rule-ML Safety Layer in Backend Gateway
-Inside `backend/src/controllers/complaintsController.js`, a defense-in-depth safety layer governs model integration:
-- **Confident ML Priority**: When `prediction.confidence >= 0.20` and `prediction.uncertain === false`, the model prediction is strictly respected without interference.
-- **Uncertainty Fallback**: Only when the ML service signals low confidence ($\text{confidence} < 0.20$ or `uncertain: true`) do keyword safety-net rules activate to catch unambiguous emergency signals (e.g. violent harassment or direct bank theft) before default assignment.
+Inside `backend/src/controllers/complaintsController.js`, a distinct defense-in-depth safety layer governs model integration at the application gateway level, operating independently from the ML service's internal OOD rejection gate:
+- **Confident ML Priority**: When `prediction.confidence >= 0.50` and `prediction.uncertain === false`, the model prediction is strictly respected without rule interference.
+- **Uncertainty & Low-Confidence Keyword Safety Net**: When the ML service signals low confidence ($\text{confidence} < 0.50$ or `prediction.uncertain === true`), keyword safety-net rules activate to catch unambiguous emergency signals (e.g. violent harassment, extortion, or direct bank theft) before default assignment. If no high-precision keywords match, the ML service's prediction is preserved.
+- **Independence of Thresholds**: The ML service threshold ($\tau = 0.20$) governs model-internal OOD rejection and uncertainty flagging, whereas the backend threshold ($0.50$) governs application-level heuristic verification before intake routing.
 
 ### 3.7 High-Availability Fallback Mechanism
 If the Flask microservice is unreachable (e.g., cold start, container restart, network disruption), `mlService.js` automatically routes the request to an in-memory heuristic NLP classification engine (`localRuleClassification`). This engine matches curated, high-precision forensic regex patterns across all 13 attack vectors, guaranteeing zero-downtime triage for incident intake.
