@@ -215,9 +215,10 @@ export default function Register() {
       <style>
         {`
           .liquid-input:focus {
-            background: var(--auth-btn-hover-bg) !important;
+            background: var(--auth-input-bg) !important;
             border-color: var(--auth-input-border-focus) !important;
-            box-shadow: none !important;
+            box-shadow: var(--focus-ring) !important;
+            color: var(--auth-input-text) !important;
           }
           button:active { transform: scale(0.96) !important; }
         `}

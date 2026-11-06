@@ -146,6 +146,17 @@ button:hover:not(:disabled) { filter: brightness(1.06); }
 .input-cyber:focus,
 .liquid-input:focus { border-color: var(--primary) !important; box-shadow: var(--focus-ring) !important; }
 
+/* WebKit / Safari / Chrome Autofill Dark Theme Normalization */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #141414 inset !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+  caret-color: #f1f5f9 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
