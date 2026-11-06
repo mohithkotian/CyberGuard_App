@@ -87,11 +87,11 @@ export default function AdminMap() {
                   <Popup>
                     <div style={{ minWidth: '200px', color: '#fff', background: '#0d0d0d', padding: '6px' }}>
                       <div style={{ fontSize: '10px', color: pColor, marginBottom: '4px', fontWeight: 'bold', fontFamily: 'var(--font-sans)' }}>
-                        {p.complaintId} â€¢ {(p.severity || 'HIGH').toUpperCase()}
+                        {p.complaintId} • {(p.severity || 'HIGH').toUpperCase()}
                       </div>
                       <div style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#fff' }}>{p.title}</div>
                       <div style={{ fontSize: '11px', color: '#EFEDE8', marginBottom: '4px' }}>
-                        Type: {p.category} {p.subCategory ? `â€¢ ${p.subCategory}` : ''}
+                        Type: {p.category} {p.subCategory ? `• ${p.subCategory}` : ''}
                       </div>
                       <div style={{ fontSize: '10px', color: '#8892B0', marginBottom: '8px' }}>
                         Status: <span style={{ textTransform: 'capitalize', color: p.status === 'resolved' ? '#00ffaa' : '#ffcc00' }}>{p.status}</span>
@@ -106,7 +106,7 @@ export default function AdminMap() {
                           rel="noreferrer"
                           style={{ fontSize: '10px', color: '#00ffaa', textDecoration: 'none', fontWeight: 'bold' }}
                         >
-                          OPEN DOSSIER â†’
+                          OPEN DOSSIER →
                         </a>
                       </div>
                     </div>

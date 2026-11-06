@@ -107,7 +107,7 @@ export default function AdminSafety() {
           location: prev.location || `${data.city || 'Detected Location'}, ${data.region || ''}`,
           pincode: prev.pincode || (data.postal ? String(data.postal).slice(0, 6) : '')
         }));
-        toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''} â—‰`, { id: toastId });
+        toast.success(`Network location locked: ${data.city || 'Detected'}, ${data.region || ''} ✓`, { id: toastId });
         return true;
       }
     } catch (e) {
@@ -153,7 +153,7 @@ export default function AdminSafety() {
           location: placeName || prev.location,
           pincode: pin || prev.pincode
         }));
-        toast.success(`âŒ– GPS locked: ${placeName}`, { id: toastId });
+        toast.success(`📍 GPS locked: ${placeName}`, { id: toastId });
       },
       (error) => {
         console.warn('GPS unavailable, falling back to IP geolocation:', error.message);

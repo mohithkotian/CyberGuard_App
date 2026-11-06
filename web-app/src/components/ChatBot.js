@@ -94,7 +94,7 @@ const ChatBot = () => {
                 <span style={styles.onlineDot} />
                 Help assistant
               </div>
-              <IconButton label="Close help" size="sm" onClick={() => setIsOpen(false)}>Ã—</IconButton>
+              <IconButton label="Close help" size="sm" onClick={() => setIsOpen(false)}>×</IconButton>
             </div>
 
             <div style={styles.messagesContainer}>

@@ -62,7 +62,7 @@ export default function CommunityComplaints() {
         page,
         limit: 12,
       };
-      // â”€â”€ DEBUG: confirm what we are actually sending â”€â”€
+      // ── DEBUG: confirm what we are actually sending ──
       console.log('[CommunityComplaints] calling getAll with params:', params);
       const { data } = await complaintsAPI.getAll(params);
       console.log('[CommunityComplaints] received', data.data.complaints.length, 'complaints');

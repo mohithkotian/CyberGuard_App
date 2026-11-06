@@ -42,7 +42,7 @@ export default function JarvisAssistant({ dbData }) {
     }
   }, [dbData]);
 
-  // â”€â”€â”€ CINEMATIC AUDIO ENGINE â”€â”€â”€
+  // ─── CINEMATIC AUDIO ENGINE ───
   const playAudio = (filename) => {
     const audio = new Audio(`/voices/${filename}`);
     audio.volume = 0.8;
@@ -133,7 +133,7 @@ export default function JarvisAssistant({ dbData }) {
       pulse = 1.04 - 0.04 * Math.sin(((progress - 0.42) / 0.28) * Math.PI / 2);
     }
 
-    // â”€â”€â”€ HIGH PERFORMANCE AUTOMATIC DRIFT & TILT SYSTEM â”€â”€â”€
+    // ─── HIGH PERFORMANCE AUTOMATIC DRIFT & TILT SYSTEM ───
     // Medium and soft drift oscillation to mimic slow cinematic floating
     const autoX = 12 * Math.sin(t * 0.6); // slower, softer frequency
     const autoY = 16 * Math.cos(t * 0.45); // slower, softer frequency
@@ -179,7 +179,7 @@ export default function JarvisAssistant({ dbData }) {
     ctx.stroke();
     ctx.restore();
 
-    // â”€â”€â”€ DYNAMIC ORBITING NODES â”€â”€â”€
+    // ─── DYNAMIC ORBITING NODES ───
     nodes.forEach((n, i) => {
       const angle = n.angle + t * n.speed;
       const x = cx + Math.cos(angle) * n.orbitR * pulse;
@@ -199,7 +199,7 @@ export default function JarvisAssistant({ dbData }) {
       ctx.stroke();
     });
 
-    // â”€â”€â”€ OUTER SPARKS â”€â”€â”€
+    // ─── OUTER SPARKS ───
     sparks.forEach((sp, i) => {
       const life = (sp.life + t * 0.03) % 1;
       const r = life * sp.maxR * pulse;
@@ -214,7 +214,7 @@ export default function JarvisAssistant({ dbData }) {
       ctx.fill();
     });
 
-    // â”€â”€â”€ INTERACTIVE AUDIO WAVEFORM sweep on listening â”€â”€â”€
+    // ─── INTERACTIVE AUDIO WAVEFORM sweep on listening ───
     if (listening) {
       ctx.strokeStyle = 'rgba(255, 180, 50, 0.25)';
       ctx.lineWidth = 1.5;

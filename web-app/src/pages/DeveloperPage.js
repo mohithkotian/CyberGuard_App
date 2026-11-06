@@ -78,7 +78,7 @@ toast.error(msg);
       <div key={node.name + i} style={{ paddingLeft: pad, marginBottom: 5 }}>
         {node.type === 'directory' ? (
           <div>
-            <span style={{ color: '#EFEDE8', marginRight: 5 }}>â–¤</span>
+            <span style={{ color: '#EFEDE8', marginRight: 5 }}>📁</span>
             <span style={{ color: '#A9B1D6', fontFamily: 'monospace', fontSize: 13 }}>{node.name}</span>
             <div>{renderFileTree(node.children, pad + 15)}</div>
           </div>
@@ -91,7 +91,7 @@ toast.error(msg);
               padding: '2px 5px', borderRadius: 4
             }}
           >
-            <span style={{ color: '#00FF88', marginRight: 5 }}>â–¤</span>
+            <span style={{ color: '#00FF88', marginRight: 5 }}>📄</span>
             <span style={{ color: selectedFile?.name === node.name ? '#00FF88' : '#888', fontFamily: 'monospace', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{node.name}</span>
           </div>
         )}

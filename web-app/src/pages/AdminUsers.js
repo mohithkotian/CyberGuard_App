@@ -494,7 +494,7 @@ export default function AdminUsers() {
                 transition: '0.2s'
               }}
             >
-              â†» REFRESH
+              ↻ REFRESH
             </button>
 
             <button
@@ -514,7 +514,7 @@ export default function AdminUsers() {
                 gap: '8px'
               }}
             >
-              â‡© CSV EXPORT
+              ⤓ CSV EXPORT
             </button>
 
             <button
@@ -533,7 +533,7 @@ export default function AdminUsers() {
                 gap: '8px'
               }}
             >
-              â–¤ JSON
+              ▤ JSON
             </button>
 
             <button
@@ -601,8 +601,8 @@ export default function AdminUsers() {
             {
               title: 'ACTIVE CITIZENS',
               value: stats ? stats.citizens : users.filter(u => u.role === 'user').length,
-              sub: `${stats ? stats.active : 'â€”'} active in network`,
-              icon: 'â—ˆ',
+              sub: `${stats ? stats.active : '—'} active in network`,
+              icon: <img src="/icons/cyberguard/admin/admin-protected-account.svg" alt="" style={{ width: 22, height: 22, objectFit: "contain", verticalAlign: "middle" }} />,
               color: '#EFEDE8',
               bg: 'rgba(0, 255, 136, 0.05)',
               border: 'rgba(0, 255, 136, 0.2)'
@@ -611,7 +611,7 @@ export default function AdminUsers() {
               title: 'FIELD OFFICERS',
               value: stats ? stats.officers : users.filter(u => u.role === 'officer').length,
               sub: 'Law enforcement agents',
-              icon: 'â—†',
+              icon: <img src="/icons/cyberguard/admin/admin-officer-filter.svg" alt="" style={{ width: 22, height: 22, objectFit: "contain", verticalAlign: "middle" }} />,
               color: '#FFB800',
               bg: 'rgba(255, 184, 0, 0.05)',
               border: 'rgba(255, 184, 0, 0.2)'
@@ -620,7 +620,7 @@ export default function AdminUsers() {
               title: 'ADMINISTRATORS',
               value: stats ? stats.admins : users.filter(u => u.role === 'admin').length,
               sub: 'Command level access',
-              icon: 'Â»',
+              icon: <img src="/icons/cyberguard/admin/admin-administrator-filter.svg" alt="" style={{ width: 22, height: 22, objectFit: "contain", verticalAlign: "middle" }} />,
               color: '#AF52DE',
               bg: 'rgba(175, 82, 222, 0.05)',
               border: 'rgba(175, 82, 222, 0.2)'
@@ -629,7 +629,7 @@ export default function AdminUsers() {
               title: '2FA SHIELDED',
               value: stats ? stats.twoFactor : users.filter(u => u.isTwoFactorEnabled).length,
               sub: 'Multi-factor protected',
-              icon: 'â—‡',
+              icon: <img src="/icons/cyberguard/admin/admin-two-factor-filter.svg" alt="" style={{ width: 22, height: 22, objectFit: "contain", verticalAlign: "middle" }} />,
               color: '#FF2D55',
               bg: 'rgba(255, 45, 85, 0.05)',
               border: 'rgba(255, 45, 85, 0.2)'
@@ -687,8 +687,8 @@ export default function AdminUsers() {
         }}>
           {/* Search bar */}
           <div style={{ flex: '1 1 320px', position: 'relative' }}>
-            <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>
-              âŒ•
+            <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, display: 'flex', alignItems: 'center' }}>
+              <img src="/icons/cyberguard/admin/admin-user-search.svg" alt="" style={{ width: 16, height: 16, objectFit: "contain" }} />
             </span>
             <input
               placeholder="Search by name, email, mobile phone, city, state..."
@@ -772,10 +772,13 @@ export default function AdminUsers() {
                   borderRadius: '12px',
                   fontSize: '12px',
                   fontWeight: 700,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
                 }}
               >
-                â–¤ TABLE
+                <img src="/icons/cyberguard/admin/admin-table-view.svg" alt="" style={{ width: 14, height: 14, objectFit: "contain" }} /> TABLE
               </button>
               <button
                 onClick={() => setViewMode('cards')}
@@ -787,10 +790,13 @@ export default function AdminUsers() {
                   borderRadius: '12px',
                   fontSize: '12px',
                   fontWeight: 700,
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
                 }}
               >
-                â–¤ CARDS
+                <img src="/icons/cyberguard/admin/admin-card-view.svg" alt="" style={{ width: 14, height: 14, objectFit: "contain" }} /> CARDS
               </button>
             </div>
           </div>
@@ -805,7 +811,7 @@ export default function AdminUsers() {
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.06)'
           }}>
-            <div style={{ fontSize: '32px', marginBottom: '16px' }}>â€¦</div>
+            <div style={{ fontSize: '32px', marginBottom: '16px' }}>...</div>
             <div style={{ color: '#EFEDE8', fontSize: '15px', fontWeight: 800, letterSpacing: '2px' }}>
               QUERYING PERSONNEL SURVEILLANCE DATABASE...
             </div>
@@ -818,7 +824,9 @@ export default function AdminUsers() {
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.06)'
           }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>âŒ•</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <img src="/icons/cyberguard/admin/admin-user-search.svg" alt="" style={{ width: 40, height: 40, opacity: 0.4 }} />
+            </div>
             <h3 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 8px 0' }}>No Personnel Records Found</h3>
             <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', margin: 0 }}>
               No matches found for "{search}". Try adjusting your search query or clearance filter.
@@ -926,7 +934,7 @@ export default function AdminUsers() {
                                 )}
                               </div>
                               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '3px' }}>
-                                ID: {u._id?.substring(0, 10)}... â€¢ Joined {format(new Date(u.createdAt), 'dd MMM yyyy')}
+                                ID: {u._id?.substring(0, 10)}... • Joined {format(new Date(u.createdAt), 'dd MMM yyyy')}
                               </div>
                             </div>
                           </div>
@@ -938,8 +946,9 @@ export default function AdminUsers() {
                             {u.email}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                            <span style={{ fontSize: '12px', color: u.phone ? '#EFEDE8' : 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
-                              âŒ• {u.phone || 'No Mobile Registered'}
+                            <span style={{ fontSize: '12px', color: u.phone ? '#EFEDE8' : 'rgba(255,255,255,0.3)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <img src="/icons/cyberguard/admin/admin-registered-phone.svg" alt="" style={{ width: 12, height: 12, objectFit: "contain" }} />
+                              {u.phone || 'No Mobile Registered'}
                             </span>
                             {u.phone && (
                               <button
@@ -950,11 +959,13 @@ export default function AdminUsers() {
                                   cursor: 'pointer',
                                   padding: 0,
                                   fontSize: '11px',
-                                  opacity: 0.6
+                                  opacity: 0.6,
+                                  display: 'flex',
+                                  alignItems: 'center'
                                 }}
                                 title="Copy Phone"
                               >
-                                â§‰
+                                <img src="/icons/cyberguard/admin/admin-copy-credentials.svg" alt="Copy" style={{ width: 12, height: 12, objectFit: "contain" }} />
                               </button>
                             )}
                           </div>
@@ -1034,8 +1045,9 @@ export default function AdminUsers() {
                             </div>
 
                             {u.isTwoFactorEnabled && (
-                              <span style={{ fontSize: '10px', color: '#FF2D55', fontWeight: 700 }}>
-                                â—‡ 2FA Protected
+                              <span style={{ fontSize: '10px', color: '#FF2D55', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                <img src="/icons/cyberguard/admin/admin-two-factor-filter.svg" alt="" style={{ width: 10, height: 10, objectFit: "contain" }} />
+                                2FA Protected
                               </span>
                             )}
                           </div>
@@ -1069,10 +1081,13 @@ export default function AdminUsers() {
                                 fontSize: '12px',
                                 fontWeight: 700,
                                 cursor: 'pointer',
-                                transition: '0.2s'
+                                transition: '0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                               }}
                             >
-                              â—‰
+                              <img src="/icons/cyberguard/admin/admin-view-dossier.svg" alt="Dossier" style={{ width: 14, height: 14, objectFit: "contain" }} />
                             </button>
 
                             {/* Edit Profile */}
@@ -1088,10 +1103,13 @@ export default function AdminUsers() {
                                 fontSize: '12px',
                                 fontWeight: 700,
                                 cursor: 'pointer',
-                                transition: '0.2s'
+                                transition: '0.2s',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
                               }}
                             >
-                              EDIT
+                              <img src="/icons/cyberguard/admin/admin-edit-profile.svg" alt="" style={{ width: 12, height: 12, objectFit: "contain" }} /> EDIT
                             </button>
 
                             {/* Reset Password */}
@@ -1107,10 +1125,13 @@ export default function AdminUsers() {
                                 fontSize: '12px',
                                 fontWeight: 700,
                                 cursor: 'pointer',
-                                transition: '0.2s'
+                                transition: '0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                               }}
                             >
-                              â—‡
+                              <img src="/icons/cyberguard/admin/admin-password-override.svg" alt="Password" style={{ width: 14, height: 14, objectFit: "contain" }} />
                             </button>
 
                             {/* Terminate / Restore Status */}
@@ -1148,10 +1169,13 @@ export default function AdminUsers() {
                                   fontSize: '12px',
                                   fontWeight: 700,
                                   cursor: 'pointer',
-                                  transition: '0.2s'
+                                  transition: '0.2s',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
                                 }}
                               >
-                                âŒ«
+                                <img src="/icons/cyberguard/admin/admin-revoke-user.svg" alt="Delete" style={{ width: 14, height: 14, objectFit: "contain" }} />
                               </button>
                             )}
                           </div>
@@ -1298,7 +1322,7 @@ export default function AdminUsers() {
                       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ color: 'rgba(255,255,255,0.4)' }}>Security:</span>
                         <span style={{ color: u.isTwoFactorEnabled ? '#FF2D55' : '#3DF5C0', fontWeight: 600 }}>
-                          {u.isTwoFactorEnabled ? '2FA Enabled' : 'Standard Auth'} {u.isVerified && 'â€¢ Verified'}
+                          {u.isTwoFactorEnabled ? '2FA Enabled' : 'Standard Auth'} {u.isVerified && '• Verified'}
                         </span>
                       </div>
                     </div>
@@ -1316,10 +1340,14 @@ export default function AdminUsers() {
                         padding: '10px',
                         fontSize: '12px',
                         fontWeight: 800,
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
                       }}
                     >
-                      EDIT INFO
+                      <img src="/icons/cyberguard/admin/admin-edit-profile.svg" alt="" style={{ width: 13, height: 13, objectFit: "contain" }} /> EDIT INFO
                     </button>
 
                     <button
@@ -1332,10 +1360,14 @@ export default function AdminUsers() {
                         padding: '10px',
                         fontSize: '12px',
                         fontWeight: 800,
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
                       }}
                     >
-                      â—‡ PASSWORD
+                      <img src="/icons/cyberguard/admin/admin-password-override.svg" alt="" style={{ width: 13, height: 13, objectFit: "contain" }} /> PASSWORD
                     </button>
 
                     <button
@@ -1348,10 +1380,14 @@ export default function AdminUsers() {
                         padding: '10px',
                         fontSize: '12px',
                         fontWeight: 700,
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px'
                       }}
                     >
-                      â—‰ DOSSIER
+                      <img src="/icons/cyberguard/admin/admin-view-dossier.svg" alt="" style={{ width: 13, height: 13, objectFit: "contain" }} /> DOSSIER
                     </button>
 
                     {!isOwner ? (
@@ -1392,7 +1428,7 @@ export default function AdminUsers() {
         )}
       </div>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 1: EDIT USER INFO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ──────────────── MODAL 1: EDIT USER INFO ──────────────── */}
       <AnimatePresence>
         {editModalOpen && selectedUser && (
           <div style={{
@@ -1823,7 +1859,7 @@ export default function AdminUsers() {
         )}
       </AnimatePresence>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 2: PASSWORD OVERRIDE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ──────────────── MODAL 2: PASSWORD OVERRIDE ──────────────── */}
       <AnimatePresence>
         {passwordModalOpen && selectedUser && (
           <div style={{
@@ -1854,8 +1890,9 @@ export default function AdminUsers() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <div>
-                  <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#FFB800' }}>
-                    â—‡ PASSWORD OVERRIDE
+                  <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#FFB800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <img src="/icons/cyberguard/admin/admin-password-override.svg" alt="" style={{ width: 20, height: 20, objectFit: "contain" }} />
+                    PASSWORD OVERRIDE
                   </h2>
                   <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
                     Target: {selectedUser.name} ({selectedUser.email})
@@ -1908,7 +1945,7 @@ export default function AdminUsers() {
                         fontSize: '14px'
                       }}
                     >
-                      {showPassword ? 'â—‰' : 'â—‰'}
+                      {showPassword ? '👁' : '👁‍🗨'}
                     </button>
                   </div>
                 </div>
@@ -1929,7 +1966,7 @@ export default function AdminUsers() {
                       cursor: 'pointer'
                     }}
                   >
-                    Â» GENERATE SECURE
+                    ⚡ GENERATE SECURE
                   </button>
 
                   {newPassword && (
@@ -1944,10 +1981,13 @@ export default function AdminUsers() {
                         borderRadius: '12px',
                         fontSize: '12px',
                         fontWeight: 700,
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
                       }}
                     >
-                      â§‰ COPY
+                      <img src="/icons/cyberguard/admin/admin-copy-credentials.svg" alt="" style={{ width: 13, height: 13, objectFit: "contain" }} /> COPY
                     </button>
                   )}
                 </div>
@@ -1994,7 +2034,7 @@ export default function AdminUsers() {
         )}
       </AnimatePresence>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 3: USER DOSSIER & COMPLAINTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ──────────────── MODAL 3: USER DOSSIER & COMPLAINTS ──────────────── */}
       <AnimatePresence>
         {dossierModalOpen && selectedUser && (
           <div style={{
@@ -2057,7 +2097,7 @@ export default function AdminUsers() {
                       {selectedUser.name}
                     </h2>
                     <span style={{ fontSize: '12px', color: '#EFEDE8', fontWeight: 700 }}>
-                      CLEARANCE: {selectedUser.role?.toUpperCase()} â€¢ {selectedUser.isActive ? 'ACTIVE' : 'SUSPENDED'}
+                      CLEARANCE: {selectedUser.role?.toUpperCase()} • {selectedUser.isActive ? 'ACTIVE' : 'SUSPENDED'}
                     </span>
                   </div>
                 </div>
@@ -2141,7 +2181,7 @@ export default function AdminUsers() {
                                 {c.title || c.category}
                               </div>
                               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '3px' }}>
-                                ID: {c.complaintId || c._id} â€¢ {format(new Date(c.createdAt), 'dd MMM yyyy')} â€¢ Loss: â‚¹{c.estimatedLoss || 0}
+                                ID: {c.complaintId || c._id} • {format(new Date(c.createdAt), 'dd MMM yyyy')} • Loss: ₹{c.estimatedLoss || 0}
                               </div>
                             </div>
 
@@ -2213,7 +2253,7 @@ export default function AdminUsers() {
         )}
       </AnimatePresence>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 4: ENROLL NEW PERSONNEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ──────────────── MODAL 4: ENROLL NEW PERSONNEL ──────────────── */}
       <AnimatePresence>
         {createModalOpen && (
           <div style={{
@@ -2377,7 +2417,7 @@ export default function AdminUsers() {
                       }}
                       style={{ background: 'transparent', border: 'none', color: '#EFEDE8', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
                     >
-                      Â» AUTO GENERATE
+                      ⚡ AUTO GENERATE
                     </button>
                   </div>
                   <input
@@ -2502,7 +2542,7 @@ export default function AdminUsers() {
         )}
       </AnimatePresence>
 
-      {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MODAL 5: DELETE CONFIRMATION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ──────────────── MODAL 5: DELETE CONFIRMATION ──────────────── */}
       <AnimatePresence>
         {deleteConfirmUser && (
           <div style={{

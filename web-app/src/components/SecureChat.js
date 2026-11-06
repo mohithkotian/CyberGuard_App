@@ -141,7 +141,7 @@ export default function SecureChat({ complaintId }) {
           <h3 style={{ margin: 0, fontSize: '14px', fontFamily: 'Inter, sans-serif', color: '#EFEDE8' }}>
             SECURE COMMS CHANNEL
           </h3>
-          <span style={{ fontSize: '10px', color: '#00ffaa' }}>â— E2EE ENCRYPTION ACTIVE</span>
+          <span style={{ fontSize: '10px', color: '#00ffaa' }}>● E2EE ENCRYPTION ACTIVE</span>
         </div>
       </div>
 

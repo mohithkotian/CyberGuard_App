@@ -143,7 +143,9 @@ export default function AdminMails() {
         }}>
           {/* Search Box */}
           <div style={{ position: 'relative', flex: 1, minWidth: '280px' }}>
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', fontSize: '14px' }}>âŒ•</span>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+              <img src="/icons/cyberguard/admin/admin-user-search.svg" alt="" aria-hidden="true" style={{ width: 14, height: 14, opacity: 0.5 }} />
+            </span>
             <input
               type="text"
               placeholder="Search by recipient, phone, complaint ID or message..."
@@ -277,8 +279,8 @@ export default function AdminMails() {
                           {mail.recipient}
                         </div>
                         {hasPhone ? (
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px', background: 'rgba(0,255,170,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', color: '#00FFAA', fontWeight: 600 }}>
-                            <span>âŒ•</span> {mail.recipientPhone}
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '4px', background: 'rgba(0,255,170,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', color: '#00FFAA', fontWeight: 600 }}>
+                            <img src="/icons/cyberguard/admin/admin-registered-phone.svg" alt="" aria-hidden="true" style={{ width: 12, height: 12 }} /> {mail.recipientPhone}
                           </div>
                         ) : (
                           <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '4px' }}>
@@ -381,7 +383,7 @@ export default function AdminMails() {
                               }}
                               title="Copy SMS text"
                             >
-                              {copiedId === mail._id ? 'v COPIED' : 'â§‰ COPY'}
+                              {copiedId === mail._id ? '✓ COPIED' : '📋 COPY'}
                             </button>
                           </div>
 
@@ -620,7 +622,7 @@ export default function AdminMails() {
                           cursor: 'pointer'
                         }}
                       >
-                        {copiedId === 'modal' ? 'v Copied SMS' : 'â§‰ Copy SMS Text'}
+                        {copiedId === 'modal' ? '✓ Copied SMS' : '📋 Copy SMS Text'}
                       </button>
                     </div>
                   </div>
