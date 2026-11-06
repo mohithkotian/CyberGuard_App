@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { detectMagicType, computeFileSha256, processUploadedEvidence } = require('./evidenceSecurity');
+const { detectMagicType, computeFileSha256, processUploadedEvidence, evaluateIntegrityStatus } = require('./evidenceSecurity');
 
 describe('Evidence Security & Magic Byte Verification', () => {
   test('detects valid JPEG magic bytes', () => {
@@ -114,6 +114,26 @@ describe('Evidence Security & Magic Byte Verification', () => {
     await expect(processUploadedEvidence(fileObj)).rejects.toThrow(/Evidence validation failed/);
     // Verify file was unlinked/cleaned up
     expect(fs.existsSync(tmpFile)).toBe(false);
+  });
+
+  describe('evaluateIntegrityStatus (Issue #27)', () => {
+    test('returns "verified" when stored hash matches disk hash', () => {
+      const hash = 'a'.repeat(64);
+      expect(evaluateIntegrityStatus(hash, hash)).toBe('verified');
+    });
+
+    test('returns "unverified_legacy" when stored hash is null, undefined, or empty', () => {
+      const currentHash = 'b'.repeat(64);
+      expect(evaluateIntegrityStatus(null, currentHash)).toBe('unverified_legacy');
+      expect(evaluateIntegrityStatus(undefined, currentHash)).toBe('unverified_legacy');
+      expect(evaluateIntegrityStatus('', currentHash)).toBe('unverified_legacy');
+    });
+
+    test('returns "integrity_mismatch" when stored hash differs from disk hash', () => {
+      const storedHash = 'a'.repeat(64);
+      const tamperedHash = 'b'.repeat(64);
+      expect(evaluateIntegrityStatus(storedHash, tamperedHash)).toBe('integrity_mismatch');
+    });
   });
 });
 

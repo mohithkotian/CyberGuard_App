@@ -192,11 +192,12 @@ The generated confusion matrix is persisted at `research-evidence/ml-evaluation/
 
 All raw outputs and visualizations are recorded in `research-evidence/ml-evaluation/`:
 
-| Artifact File | Description | Checksum / Status |
-| :--- | :--- | :--- |
-| `dataset-statistics.csv` | Class-wise distribution and percentages ($N=257$) | Verified |
-| `classification-report.txt` | Held-out 80/20 test split report | Verified |
-| `cv-5fold-results.csv` | Per-fold metrics across 5 cross-validation folds | Verified |
-| `cv-classification-report.txt` | Full 5-fold cross-validation report and OOF breakdown | Verified |
-| `confusion-matrix.png` | Labeled 13x13 heatmap of Out-of-Fold predictions | Generated (300 DPI) |
-| `model-metadata.json` | JSON metadata of model parameters, split, and metrics | Verified |
+| Artifact File | Description | Split Configuration & Metrics | Checksum / Status |
+| :--- | :--- | :--- | :--- |
+| `dataset-statistics.csv` | Class-wise distribution and percentages ($N=257$) | 13 categories, max 38, min 9 | Verified |
+| `classification-report.txt` | **Primary Held-Out Test Report** (IEEE Benchmark) | 85/15 split ($N_{\text{train}}=218, N_{\text{test}}=39$), Acc: 74.36%, Macro-F1: 0.6548 | Verified |
+| `classification-report-80-20.txt`| **Preliminary Exploratory Test Report** (Historical) | 80/20 split ($N_{\text{train}}=205, N_{\text{test}}=52$), Acc: 63.46%, Macro-F1: 0.5665 | Archived / Verified |
+| `cv-5fold-results.csv` | Per-fold metrics across 5 cross-validation folds | Stratified 5-Fold, Mean Acc: $69.62 \pm 8.02\%$ | Verified |
+| `cv-classification-report.txt` | Full 5-fold cross-validation report and OOF breakdown | Pooled OOF ($N=257$), OOF Acc: 69.65%, OOF Macro-F1: 0.6435 | Verified |
+| `confusion-matrix.png` | Labeled 13x13 heatmap of Out-of-Fold predictions | $257 \times 257$ pooled OOF evaluation | Generated (300 DPI) |
+| `model-metadata.json` | JSON metadata of model parameters, splits, and metrics | Primary 85/15, Exploratory 80/20, and 5-Fold CV blocks | Verified |

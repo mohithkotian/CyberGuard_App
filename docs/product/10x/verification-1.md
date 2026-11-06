@@ -1,5 +1,17 @@
 # CyberGuard 10x Audit Verification
 
+> [!WARNING]
+> ### HISTORICAL PRE-REMEDIATION AUDIT NOTICE
+> 
+> The vulnerability observations and risk evaluations recorded in this document represent **pre-remediation baselines** identified during early architectural audits (prior to commits `a260f55` / `6d6fa1e`).
+> 
+> - **Pre-Remediation Evidence Only**: These findings reflect legacy code flaws (e.g., broad domain blacklisting false positives, unrestricted codebase source dumping, and unvalidated client MIME headers) that were subsequently remediated.
+> - **Not Reflective of Current Production Code**: This document must not be construed as describing active vulnerabilities in the current codebase.
+> - **No Implied Blanket Assurance**: Conversely, remediation of these historical findings must not be interpreted as mathematical proof that all application components are immune to risk. For current post-remediation controls, see `docs/security-evaluation.md`.
+> - **Archived for Verification Provenance**: This record is preserved strictly for historical continuity and research audit trail integrity.
+
+---
+
 ## 1. Threat Intelligence
 Status: VERIFIED
 Evidence:

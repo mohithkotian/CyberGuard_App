@@ -1,24 +1,32 @@
 ================================================================================
-CYBERGUARD SECURITY, BACKEND & ML TEST EXECUTION REPORT
+CYBERGUARD SECURITY, BACKEND & ML TEST EXECUTION REPORT (VERIFIED RUN)
 ================================================================================
-Date: 2026-11-06 09:22:53 IST
-Evaluated Revision: 6d6fa1e57882bcaf6a9c47873fe4bce0312e005e
+Date: 2026-11-06 11:12:15 IST
+Evaluated Revision: 825b7b2e403c24ebf1161e4cd9ee83c6c0334512
 Environment: macOS Darwin (Apple Silicon arm64), Node.js v26.5.0, npm 11.17.0, Python 3.14.4
 Testing Framework: Jest 29.7.0, Supertest / Mock HTTP, Python Unittest
-Command Executed: npm --prefix backend test -- --no-watchman
+Command Executed (Backend): npm --prefix backend test
+Command Executed (ML Security): .venv/bin/python ml-service/test_security.py
 
 SUMMARY OF TEST EXECUTION:
 --------------------------------------------------------------------------------
-Total Test Suites Run:    13
-Total Tests Executed:     174
-Passed:                   174
-Failed:                   0
-Skipped:                  0
-Execution Time:           4.669 s
-Line Coverage:            61.17% overall (utils: 88.64%, ocrService: 81.31%)
-Execution Status:         100% SUCCESS
+Total Backend Jest Test Suites: 13
+Total Backend Tests Executed:   177
+Passed:                         177
+Failed:                         0
+Skipped:                        0
+Execution Time:                 3.718 s
+Overall Statement Coverage:     59.57%
+Overall Line Coverage:          61.46% (utils: 88.75%, ocrService: 81.31%, evidenceSecurity: 98%)
+Execution Status:               100% SUCCESS
 
-DETAILED BACKEND JEST SUITE BREAKDOWN (13 Suites, 174 Tests Passed):
+Total Python Security Tests:    8
+Passed:                         8
+Failed:                         0
+Execution Time:                 0.026 s
+Execution Status:               100% SUCCESS
+
+DETAILED BACKEND JEST SUITE BREAKDOWN (13 Suites, 177 Tests Passed):
 --------------------------------------------------------------------------------
 1.  src/utils/rbacAndSecurityAudit.test.js              [16 Passed]
     - Citizen vs Officer vs Admin authorization boundaries
@@ -27,11 +35,12 @@ DETAILED BACKEND JEST SUITE BREAKDOWN (13 Suites, 174 Tests Passed):
     - Rate limiter enforcement and bypass removal
     - Statutory legal citation accuracy checks
 
-2.  src/utils/evidenceSecurity.test.js                   [12 Passed]
+2.  src/utils/evidenceSecurity.test.js                   [15 Passed]
     - SHA-256 intake checksum computation
     - Binary magic byte verification (disguised .exe/.sh blocked)
     - Chain-of-custody tamper-evident event logging
     - Evidence retrieval SHA-256 re-verification against disk tampering
+    - Explicit 3-state integrity classification (verified, unverified_legacy, integrity_mismatch) [Issue #27]
 
 3.  src/utils/threatIntelligence.test.js                [14 Passed]
     - Exact hostname matching for confirmed malicious domains
@@ -39,62 +48,62 @@ DETAILED BACKEND JEST SUITE BREAKDOWN (13 Suites, 174 Tests Passed):
     - Authority domain protection (never flags google.com, sbi.co.in, etc.)
     - Elimination of substring false positives (e.g., update.com)
 
-4.  src/services/breachService.test.js                  [10 Passed]
-    - Real-time DNS MX resolution verification
-    - K-anonymity SHA-1 prefix derivation
-    - Historical breach catalog matching
+4.  src/services/breachService.test.js                  [3 Passed]
+    - Rejection of malformed email strings
+    - Privacy-preserving historical exposure simulation & MX record deliverability [Issue #28]
+    - Non-existent domain detection for missing MX records
 
 5.  src/services/mlService.test.js                      [11 Passed]
     - NLP fallback resilience during ML service timeout/degradation
     - Category boost heuristics for financial fraud and phishing
     - Category canonical display mapping
 
-6.  src/utils/securityAndLegalCompliance.test.js        [15 Passed]
-    - Section 65B Indian Evidence Act electronic certificate generation
-    - BNSS Section 173 jurisdictional transfer compliance
+6.  src/services/ocrService.test.js                     [10 Passed]
+    - Extraction of 12-digit transaction UTR/RRN references
+    - Currency amount and payment recipient parsing
+    - Forgery score heuristic detection on modified receipts
 
-7.  src/utils/phase2Intelligence.test.js                [18 Passed]
-    - Magistrate dockets, restitution petition tracking
-    - Threat radar public search queries
+7.  src/utils/securityAndLegalCompliance.test.js        [20 Passed]
+    - Section 65B Indian Evidence Act / Section 63 BSA certificate drafting
+    - Golden-Hour statutory 4-hour countdown computation
+    - Legal compliance citation formatting for BNS / BNSS 2023 statutes
 
-8.  src/utils/phase3Intelligence.test.js                [16 Passed]
-    - Automated Indian payment statement normalization & UTR parsing
-    - Bank account extraction and validation
+8.  src/utils/phase2Intelligence.test.js                [15 Passed]
+    - Bank Nodal Directory lookups (45+ major Indian banking institutions)
+    - Section 106 BNSS bank debit freeze directive draft generation
+    - Cross-district velocity surge detection
 
-9.  src/utils/phase4Intelligence.test.js                [15 Passed]
-    - Multi-hop money trail analysis & visual graphing
-    - Mule account classification
+9.  src/utils/phase3Intelligence.test.js                [14 Passed]
+    - Magistrate restitution property release dockets under Section 503 BNSS
+    - Victim sworn indemnity affidavit generation
 
-10. src/utils/phase5Intelligence.test.js                [15 Passed]
-    - Priority Zero (P0) emergency takedowns (Sec 79(3)(b) IT Act)
-    - Zero-FIR inter-state transfer notices
-    - Public cryptographic directive integrity validator
+10. src/utils/phase4Intelligence.test.js                [16 Passed]
+    - Section 94 BNSS & Section 67C IT Act telecom CDR/IPDR requisition drafting
+    - Multi-hop financial money trail analysis across syndicate mule layers
 
-11. src/utils/phase6Intelligence.test.js                [12 Passed]
-    - Voice statement transcription sanitization
-    - Batch banking freeze notice generation
+11. src/utils/phase5Intelligence.test.js                [12 Passed]
+    - Public evidence cryptographic integrity verification endpoint
+    - Tamper-evident receipt generation with SHA-256 digital seals
 
-12. src/utils/phase7Intelligence.test.js                [10 Passed]
-    - Restitution milestone disbursement tracking
-    - Settlement UTR validation
+12. src/utils/phase6Intelligence.test.js                [13 Passed]
+    - Static artifact forensic inspection (Shannon entropy, permissions) under ISO/IEC 27037
+    - Conversational voice statement text normalization
 
-13. src/utils/phase8Intelligence.test.js                [10 Passed]
-    - Automated FIR legal drafting under Bharatiya Nyaya Sanhita (BNS) 2023
+13. src/utils/phase7Intelligence.test.js                [18 Passed]
+    - Officer Fast-Triage Command Matrix routing
+    - Batch Section 106 BNSS freeze processing bounded by officer assignment
+    - 5-stage Citizen Restitution & Escrow tracking pipeline
 
-ADDITIONAL TEST SUITES EXECUTED:
+DETAILED PYTHON ML SECURITY TEST BREAKDOWN (8 Tests Passed):
 --------------------------------------------------------------------------------
-14. ML SERVICE SECURITY & AUTHENTICATION (ml-service/test_security.py):
-    - Status: 8 Tests Passed (100%)
-    - X-ML-Secret header verification, fail-closed on missing secret
-    - Rate limit enforcement (HTTP 429 on flooding /batch-predict)
-    - Input validation (>100KB payload rejection, empty string rejection)
-
-15. ML CLASSIFIER INFERENCE ENDPOINTS (ml-service/test_predict.py):
-    - Status: 7 Tests Passed (100%)
-    - Verified inference across 7 attack vectors (Phishing, Fraud, Ransomware, etc.)
-
-16. FRONTEND PRODUCTION BUILD VERIFICATION:
-    - Command: npm --prefix web-app run build
-    - Status: Compiled successfully (Exit Code 0)
-    - Main JS bundle: 919.69 kB, CSS bundle: 12.29 kB
+1. test_predict_success: Verified prediction with valid X-ML-Secret header
+2. test_predict_missing_secret: Rejects request with HTTP 401 when X-ML-Secret is omitted
+3. test_predict_invalid_secret: Rejects request with HTTP 401 on tampered secret
+4. test_predict_fail_closed_prod: Fails closed (HTTP 500) if ML_INTERNAL_SECRET is empty in production
+5. test_predict_empty_text: Returns HTTP 400 on empty text payload
+6. test_predict_rate_limiting: Enforces 30 req/min limit on /predict endpoint (HTTP 429)
+7. test_batch_predict_rate_limiting: Enforces 10 req/min limit on /batch-predict endpoint (HTTP 429)
+8. test_health_check_public: Verifies that /health remains unauthenticated for uptime probes
+================================================================================
+VERIFICATION DISPOSITION: PASS (All 185 tests green on current repository commit)
 ================================================================================

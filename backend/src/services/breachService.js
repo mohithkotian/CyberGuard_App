@@ -1,7 +1,17 @@
 const crypto = require('crypto');
 const dns = require('dns').promises;
-const https = require('https');
 const logger = require('../utils/logger');
+
+/**
+ * Historical Breach Exposure & Domain Delivery Audit Service
+ *
+ * NOTE (Issue #28): Real-time per-account compromise detection requires an authorized
+ * commercial HaveIBeenPwned (HIBP) v3 subscription key (`HIBP-API-Key`) and domain-level verification.
+ * In this deployment, the service operates as a privacy-preserving historical risk assessment engine:
+ * 1. Analyzes real-time domain deliverability via DNS MX server record resolution.
+ * 2. Cross-references the account domain against a curated catalog of confirmed historical platform breaches.
+ * 3. Clearly labels telemetry as historical/simulated to prevent unsubstantiated claims of live dark-web surveillance.
+ */
 
 // Known corporate & platform breaches catalog with confirmed historical breach data
 const HISTORICAL_BREACH_CATALOG = [
@@ -64,41 +74,8 @@ const HISTORICAL_BREACH_CATALOG = [
 ];
 
 /**
- * Checks HaveIBeenPwned k-Anonymity API using SHA-1 prefix (zero-knowledge)
- * @param {string} email
- * @returns {Promise<Array>}
- */
-async function queryHibpRange(sha1Prefix) {
-  // If external network is unreachable or rate limited, gracefully falls back to deterministic analysis
-  return new Promise((resolve) => {
-    const timeout = setTimeout(() => resolve(null), 2500);
-
-    const req = https.get(
-      `https://api.pwnedpasswords.com/range/${sha1Prefix}`,
-      { headers: { 'User-Agent': 'CyberGuard-Security-Auditor/2.0' } },
-      (res) => {
-        let raw = '';
-        res.on('data', chunk => raw += chunk);
-        res.on('end', () => {
-          clearTimeout(timeout);
-          if (res.statusCode === 200) {
-            resolve(raw);
-          } else {
-            resolve(null);
-          }
-        });
-      }
-    );
-
-    req.on('error', () => {
-      clearTimeout(timeout);
-      resolve(null);
-    });
-  });
-}
-
-/**
- * Performs a comprehensive, privacy-preserving credential & domain exposure audit.
+ * Performs a privacy-preserving historical credential & domain exposure audit.
+ * Note: Clearly labeled as simulated/historical per Issue #28.
  *
  * @param {string} email
  * @returns {Promise<object>}
@@ -186,6 +163,11 @@ async function auditCredentialExposure(email) {
     breachCount: potentialBreaches.length,
     breaches: potentialBreaches,
     recommendations,
+    mode: 'historical_catalog_simulation',
+    isSimulated: true,
+    liveApiVerified: false,
+    catalogType: 'Curated Historical Platform Incidents',
+    disclaimer: 'Exposure analysis is performed using a curated catalog of historical corporate breach incidents and DNS MX mail server verification. Real-time live email breach surveillance requires an authorized commercial HaveIBeenPwned (HIBP) v3 subscription with an authenticated API key (HIBP-API-Key).',
     auditedAt: new Date().toISOString()
   };
 }

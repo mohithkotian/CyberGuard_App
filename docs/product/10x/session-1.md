@@ -150,7 +150,7 @@ Below are transformative, domain-authentic product capabilities designed specifi
   - Upon submitting a complaint involving financial loss with transaction details (UTR, Bank Name, Beneficiary UPI), the system immediately generates a standardized **CFCFRMS (Citizen Financial Cyber Fraud Reporting and Management System)** freeze packet.
   - Automatically triggers an authenticated API webhook or encrypted SMTP alert to the designated Nodal Fraud Officers at the recipient bank/payment gateway (SBI, HDFC, ICICI, Paytm, PhonePe, Razorpay) with standard freeze mandates.
   - Displays a real-time countdown clock to the citizen showing the "Golden Hour" remaining window.
-* **Existing Code It Builds On**: [`CyberReport.js`](file:///c:/Users/Mohith/CyberGuard_App/web-app/src/components/CyberReport.js), [`complaintsController.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/controllers/complaintsController.js), [`emailAgentService.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/services/emailAgentService.js).
+* **Existing Code It Builds On**: [`CyberReport.js`](web-app/src/components/CyberReport.js), [`complaintsController.js`](backend/src/controllers/complaintsController.js), [`emailAgentService.js`](backend/src/services/emailAgentService.js).
 * **Effort**: **Large (L)**.
 * **Security & Compliance Impact**: Extremely positive; requires cryptographic signing of dispatch packets to prevent fraudulent freeze requests.
 * **Files Touched**:
@@ -164,7 +164,7 @@ Below are transformative, domain-authentic product capabilities designed specifi
 * **What It Does**:
   - Automatically runs an entity resolution pipeline across MongoDB complaints: matches identical suspect phone numbers, IMEI numbers, destination bank accounts, IFSC codes, Telegram handles, and IP subnets.
   - When 3 or more complaints link to the same entity, the system automatically elevates the cluster to a **"National Organized Cyber Syndicate"**, aggregates the total collective financial loss (e.g. ₹45,00,000), and generates a unified multi-victim dossier for State Cyber Cells and CBI.
-* **Existing Code It Builds On**: [`AdminLinkAnalysis.js`](file:///c:/Users/Mohith/CyberGuard_App/web-app/src/pages/AdminLinkAnalysis.js), [`threatIntelligence.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/utils/threatIntelligence.js), [`Complaint.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/models/Complaint.js).
+* **Existing Code It Builds On**: [`AdminLinkAnalysis.js`](web-app/src/pages/AdminLinkAnalysis.js), [`threatIntelligence.js`](backend/src/utils/threatIntelligence.js), [`Complaint.js`](backend/src/models/Complaint.js).
 * **Effort**: **Large (L)**.
 * **Security & Compliance Impact**: High operational value; enables law enforcement to take down entire scam hubs rather than chasing individual small transactions.
 * **Files Touched**:
@@ -179,7 +179,7 @@ Below are transformative, domain-authentic product capabilities designed specifi
   - Generates a tamper-evident, court-ready PDF dossier.
   - Automatically computes and prints SHA-256 cryptographic hashes for every uploaded screenshot, audio message, and chat export.
   - Includes an embedded RFC 3161 cryptographic timestamp and digital certificate signed with the platform's private key certifying that the evidence remained immutable from the second of user submission.
-* **Existing Code It Builds On**: [`ComplaintDetails.js`](file:///c:/Users/Mohith/CyberGuard_App/web-app/src/pages/ComplaintDetails.js), [`complaintsController.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/controllers/complaintsController.js).
+* **Existing Code It Builds On**: [`ComplaintDetails.js`](web-app/src/pages/ComplaintDetails.js), [`complaintsController.js`](backend/src/controllers/complaintsController.js).
 * **Effort**: **Medium (M)**.
 * **Security & Compliance Impact**: Guarantees legal evidentiary admissibility in judicial trials and police chargesheets.
 * **Files Touched**:
@@ -195,7 +195,7 @@ Below are transformative, domain-authentic product capabilities designed specifi
 * **The User Problem**: When a new phishing domain or spoofed APK is deployed, thousands of victims receive links simultaneously. Currently, no mechanism alerts telecom operators (DoT / TRAI) or banks in real time before widespread damage occurs.
 * **What It Does**:
   - Telemetry service monitoring complaint velocity. If an indicator (e.g. `power-bill.top` or `9800000001`) appears in more than 3 distinct complaints within 60 minutes, the firehose auto-dispatches automated blocking telemetry to the DoT **TAFCOP / Sanchar Saathi** API for SIM deactivation and domain registrar takedowns.
-* **Existing Code It Builds On**: [`threatIntelligence.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/utils/threatIntelligence.js), [`complaintsController.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/controllers/complaintsController.js).
+* **Existing Code It Builds On**: [`threatIntelligence.js`](backend/src/utils/threatIntelligence.js), [`complaintsController.js`](backend/src/controllers/complaintsController.js).
 * **Effort**: **Medium (M)**.
 * **Security & Compliance Impact**: Active threat disruption stopping ongoing campaigns in their tracks.
 * **Files Touched**:
@@ -208,7 +208,7 @@ Below are transformative, domain-authentic product capabilities designed specifi
   - Isolates all uploaded evidence files in an isolated object storage quarantine bucket.
   - Runs automated static inspection via ClamAV and extracts package info from Android APKs (permissions, C2 domains, package names) without executing the code.
   - Generates safe HTML preview renderings and sanitized PDFs for investigating officers so they never need to run untrusted binaries locally.
-* **Existing Code It Builds On**: [`complaintsController.js:upload`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/controllers/complaintsController.js#L16-L43), [`ocrService.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/services/ocrService.js).
+* **Existing Code It Builds On**: [`complaintsController.js:upload`](backend/src/controllers/complaintsController.js#L16-L43), [`ocrService.js`](backend/src/services/ocrService.js).
 * **Effort**: **Medium (M)**.
 * **Security & Compliance Impact**: Protects law enforcement network perimeter from lateral malware movements.
 * **Files Touched**:
@@ -221,7 +221,7 @@ Below are transformative, domain-authentic product capabilities designed specifi
 * **What It Does**:
   - Connects `LeakMonitor.js` to the live HaveIBeenPwned API using privacy-preserving k-Anonymity (submitting only the first 5 characters of SHA-1 hash).
   - Cross-references reported victim corporate domains against CISA Known Exploited Vulnerabilities (KEV) to alert organizations if their incident stemmed from an unpatched enterprise gateway.
-* **Existing Code It Builds On**: [`LeakMonitor.js`](file:///c:/Users/Mohith/CyberGuard_App/web-app/src/pages/LeakMonitor.js), [`analyticsController.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/controllers/analyticsController.js).
+* **Existing Code It Builds On**: [`LeakMonitor.js`](web-app/src/pages/LeakMonitor.js), [`analyticsController.js`](backend/src/controllers/analyticsController.js).
 * **Effort**: **Small (S)**.
 * **Security & Compliance Impact**: High; turns a fake mock page into an authentic intelligence tool.
 * **Files Touched**:
@@ -233,7 +233,7 @@ Below are transformative, domain-authentic product capabilities designed specifi
 * **The User Problem**: Junior police officers spend hours manually typing out formal First Information Reports (FIRs), translating citizen complaint descriptions into specific legal legal codes under the **Information Technology Act, 2000** (Sec 66C Identity Theft, Sec 66D Cheating by Personation) and the **Bharatiya Nyaya Sanhita (BNS)** (Sec 318 Cheating, Sec 319 Extortion).
 * **What It Does**:
   - An intelligent officer-assist utility that analyzes the structured complaint, extracted OCR data, and financial loss, and auto-drafts the exact legal FIR summary with pre-mapped penal sections ready for an investigating officer to review, adjust, and sign.
-* **Existing Code It Builds On**: [`OfficerDashboard.js`](file:///c:/Users/Mohith/CyberGuard_App/web-app/src/pages/OfficerDashboard.js), [`ComplaintDetails.js`](file:///c:/Users/Mohith/CyberGuard_App/web-app/src/pages/ComplaintDetails.js), [`mlService.js`](file:///c:/Users/Mohith/CyberGuard_App/backend/src/services/mlService.js).
+* **Existing Code It Builds On**: [`OfficerDashboard.js`](web-app/src/pages/OfficerDashboard.js), [`ComplaintDetails.js`](web-app/src/pages/ComplaintDetails.js), [`mlService.js`](backend/src/services/mlService.js).
 * **Effort**: **Medium (M)**.
 * **Security & Compliance Impact**: Drastically reduces administrative turnaround time for formal police case registration.
 * **Files Touched**:
@@ -247,7 +247,7 @@ Below are transformative, domain-authentic product capabilities designed specifi
 #### 8. One-Tap Emergency "Bank Freeze Memo" for Victim Call Centers
 * **The User Problem**: Immediately after being scammed, the victim is panicking while on the phone with their bank's customer support representative. Banks demand exact details: *"What was the 12-digit UTR? What was the beneficiary VPA? What was the debit timestamp down to the minute?"* Victims struggle to find this in SMS logs while under extreme stress.
 * **What It Does**:
-  - On the post-submission screen of [`CyberReport.js`](file:///c:/Users/Mohith/CyberGuard_App/web-app/src/components/CyberReport.js) and on [`Dashboard.js`](file:///c:/Users/Mohith/CyberGuard_App/web-app/src/pages/Dashboard.js), provides a prominent button: **"Copy Bank Fraud Freeze Memo"**.
+  - On the post-submission screen of [`CyberReport.js`](web-app/src/components/CyberReport.js) and on [`Dashboard.js`](web-app/src/pages/Dashboard.js), provides a prominent button: **"Copy Bank Fraud Freeze Memo"**.
   - Formats all critical transaction tokens into a clean text block that the victim can read out or WhatsApp/email directly to their bank manager:
     ```
     CYBERCRIME FREEZE REQUEST

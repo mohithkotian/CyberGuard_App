@@ -13,10 +13,19 @@
 
 This security evaluation details the threat assessment, vulnerability audit, and post-remediation verification performed across the CyberGuard platform. All testing was executed within an authorized, non-destructive sandbox environment. No denial-of-service, destructive payload injection, or production system probing was performed.
 
-### Testing Overview
+### 1.1 Testing Overview
 - **Backend Test Suite**: 13 Jest test suites, 174 automated security & functional tests (100% passing).
 - **ML Security Suite**: 8 automated Python test cases in `ml-service/test_security.py` (100% passing).
 - **Vulnerability Remediation Status**: 6 critical/high vulnerabilities discovered during prior code audits were remediated and verified through regression tests on the current revision.
+
+### 1.2 Assurance Scope & Non-Overstatement Boundary (Issue #23)
+> [!IMPORTANT]
+> **SCOPED VERIFICATION ASSURANCE NOTICE**
+> 
+> The evidence documented herein certifies the remediation and regression prevention of **specific identified vulnerability vectors**. 
+> - Each passing test serves as empirical evidence that the corresponding code path is protected against the evaluated attack vector under documented configurations.
+> - **No Blanket Infallibility Guarantee**: These targeted regression verifications must **not** be extrapolated as proof that the entire application is universally secure, bug-free, or immune to novel zero-day exploits, infrastructure compromise, or host misconfiguration.
+> - Security remains an ongoing operational lifecycle involving defense-in-depth, continuous monitoring, and periodic independent penetration testing.
 
 ---
 
@@ -68,17 +77,37 @@ This security evaluation details the threat assessment, vulnerability audit, and
 - **Affected Component**: `backend/src/utils/evidenceSecurity.js`
 - **Historical Root Cause**: Upload verification relied solely on the client-supplied MIME type (`file.mimetype`) and file extension, allowing attackers to upload shell scripts or executable binaries renamed to `.jpg` or `.png`.
 - **Remediation**: Implemented `detectMagicType(buffer)` inspecting binary header magic numbers (e.g., `FF D8 FF` for JPEG, `89 50 4E 47` for PNG, `%PDF` for PDF). Files failing magic number checks are unlinked immediately and rejected with `HTTP 400`.
-- **Verification Evidence**: Automated tests in `backend/src/utils/evidenceSecurity.test.js` (12 passing tests) verify that disguised shell scripts and executables are rejected. Status: **VERIFIED REMEDIATED**.
+- **Verification Evidence**: Automated tests in `backend/src/utils/evidenceSecurity.test.js` (15 passing tests) verify that disguised shell scripts and executables are rejected, valid formats pass, and SHA-256 hashes are computed. Status: **VERIFIED REMEDIATED**.
 
 ---
 
 ### Finding 6: Unauthenticated Internal ML Microservice Access
 - **Vulnerability ID**: SEC-2026-006
 - **Severity**: High (CVSS 7.5 - `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N`)
-- **Affected Component**: `ml-service/src/app.py`
+- **Affected Component**: `ml-service/src/app.py` lines 99–123
 - **Historical Root Cause**: The Flask ML microservice had no server-to-server authentication, permitting direct access to `/predict` and `/batch-predict` if network boundaries were misconfigured.
 - **Remediation**: Implemented a mandatory `@app.before_request` hook validating `X-ML-Secret` using constant-time `hmac.compare_digest`. Production mode fails closed (HTTP 500) if the secret is unconfigured. Added in-memory rate limiting (30 req/min).
 - **Verification Evidence**: Automated test suite `ml-service/test_security.py` (8 passing tests) verifies unauthorized rejection (HTTP 401), missing secret fail-closed (HTTP 500), and rate-limit enforcement (HTTP 429). Status: **VERIFIED REMEDIATED**.
+
+---
+
+### Finding 7: Misleading Integrity Verification for Legacy Evidence (Issue #27)
+- **Vulnerability ID**: SEC-2026-007
+- **Severity**: Medium (CVSS 5.3 - `CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N`)
+- **Affected Component**: `backend/src/controllers/complaintsController.js` lines 112–158, `backend/src/utils/evidenceSecurity.js`
+- **Historical Root Cause**: Legacy uploads lacking a stored intake hash (`evidence.sha256 === undefined`) returned `X-Evidence-Integrity: verified`, misleading users into believing the file had undergone baseline cryptographic comparison.
+- **Remediation**: Implemented `evaluateIntegrityStatus(storedSha256, currentDiskSha256)` establishing an explicit 3-state integrity model: `verified`, `unverified_legacy`, and `integrity_mismatch`. Legacy records without stored baselines strictly yield `unverified_legacy`.
+- **Verification Evidence**: Automated unit tests in `backend/src/utils/evidenceSecurity.test.js` (`evaluateIntegrityStatus (Issue #27)` suite, 3 tests) assert exact distinction between `verified`, `unverified_legacy`, and `integrity_mismatch`. Status: **VERIFIED REMEDIATED**.
+
+---
+
+### Finding 8: Misrepresented Live Email Breach Monitoring (Issue #28)
+- **Vulnerability ID**: SEC-2026-008
+- **Severity**: Low (CVSS 3.7 - `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N`)
+- **Affected Component**: `backend/src/services/breachService.js`
+- **Historical Root Cause**: Service claimed live credential breach monitoring while incorrectly querying password range endpoints and calculating heuristic scores without an authenticated HIBP v3 commercial API key.
+- **Remediation**: Removed the dead password endpoint, explicitly classified telemetry as historical platform breach assessment and DNS MX deliverability checking, and annotated the response with `isSimulated: true`, `mode: 'historical_catalog_simulation'`, and a prominent statutory disclaimer.
+- **Verification Evidence**: Automated tests in `backend/src/services/breachService.test.js` assert `isSimulated === true`, `mode === 'historical_catalog_simulation'`, and `liveApiVerified === false`. Status: **VERIFIED REMEDIATED**.
 
 ---
 
@@ -90,6 +119,7 @@ This security evaluation details the threat assessment, vulnerability audit, and
 | **Authorization** | Complaint access | IDOR vulnerabilities on multiple endpoints | Strict `checkComplaintAccess` RBAC enforced |
 | **Registration** | User role assignment | Unvalidated `req.body.role` accepted | Hardcoded `role: 'user'` on public signup |
 | **Evidence Intake** | File upload validation | Extension / MIME string check only | Binary magic byte validation + SHA-256 digest |
-| **Chain of Custody**| Evidence tampering | No disk re-verification | Cryptographic SHA-256 match checked on access |
+| **Chain of Custody**| Evidence tampering | Legacy uploads marked as verified | Strict 3-state model (`verified`, `unverified_legacy`, `integrity_mismatch`) |
 | **Threat Intel** | Domain matching | Substring false positives on genuine sites | Strict dot-boundary match + authority allowlist |
 | **ML Security** | Service-to-service auth | Unauthenticated endpoints | `X-ML-Secret` constant-time validation + fail-closed |
+| **Breach Monitoring**| Leak detection status | Unverified claim of live monitoring | Explicitly labeled as historical catalog simulation |

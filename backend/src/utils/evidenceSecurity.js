@@ -123,9 +123,31 @@ async function processUploadedEvidence(file) {
   };
 }
 
+/**
+ * Evaluates the evidentiary integrity state of a file against its stored intake hash.
+ * Enforces strict 3-state integrity classification:
+ * - 'verified': Stored cryptographic baseline exists and matches current file hash
+ * - 'unverified_legacy': No stored reference hash exists (uploaded prior to hashing controls)
+ * - 'integrity_mismatch': Stored reference hash differs from current file contents (tampered/corrupted)
+ *
+ * @param {string|null|undefined} storedSha256 - The recorded hash from database intake
+ * @param {string} currentDiskSha256 - The recomputed hash of the disk file
+ * @returns {'verified' | 'unverified_legacy' | 'integrity_mismatch'}
+ */
+function evaluateIntegrityStatus(storedSha256, currentDiskSha256) {
+  if (!storedSha256) {
+    return 'unverified_legacy';
+  }
+  if (storedSha256 !== currentDiskSha256) {
+    return 'integrity_mismatch';
+  }
+  return 'verified';
+}
+
 module.exports = {
   detectMagicType,
   computeFileSha256,
-  processUploadedEvidence
+  processUploadedEvidence,
+  evaluateIntegrityStatus
 };
 

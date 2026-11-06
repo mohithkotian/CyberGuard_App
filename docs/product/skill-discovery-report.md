@@ -21,7 +21,7 @@ This report is the output of a full `skill-architect` analysis pass against the 
 |---|---|
 | Frontend | React 18, CRA/CRACO, Framer Motion 10, Recharts, Zustand, React Hook Form, react-router-dom v6 |
 | Backend | Node.js, Express 4, MongoDB/Mongoose, JWT + speakeasy (TOTP), Winston, Socket.io |
-| ML Service | Python FastAPI, custom scikit-learn classifier, Gunicorn |
+| ML Service | Python Flask, custom scikit-learn classifier, Gunicorn |
 | Mobile | Expo SDK 54, React Native 0.81, Reanimated 4, React Navigation v6 |
 | Deployment | Render (free tier), Railway (ML service), Procfile |
 | CI/CD | None detected |
@@ -101,7 +101,7 @@ This report is the output of a full `skill-architect` analysis pass against the 
 | Backend | API security testing (automated) | **Not Covered** |
 | Backend | Unit + integration tests | Partially Covered |
 | ML Service | Complaint classification | Covered |
-| ML Service | FastAPI interface | Covered |
+| ML Service | Flask interface | Covered |
 | ML Service | Python code quality review | **Not Covered** |
 | Mobile | Expo, navigation, notifications | Covered |
 | Mobile | Animations (Reanimated) | Covered |
@@ -148,7 +148,7 @@ This report is the output of a full `skill-architect` analysis pass against the 
 
 **6. Python/ML Code Review**
 - Gap: `code-review` and `security-review` are Node/JS-oriented; no Python-specific skill
-- Impact: FastAPI app.py, classifier.py, preprocessor.py get no structured review guidance
+- Impact: Flask app.py, classifier.py, preprocessor.py get no structured review guidance
 
 ### P2 — Useful
 
@@ -232,7 +232,7 @@ No GitHub Actions skill in trusted registries. The `loop` built-in skill provide
 
 **Gap: Python/ML Code Review**
 
-No Python-specific skill found in emilkowalski or Leonxlnx repos. The built-in `code-review` skill is language-agnostic but JS-leaning. A custom `python-review` skill scoped to FastAPI + scikit-learn patterns would be genuinely useful.
+No Python-specific skill found in emilkowalski or Leonxlnx repos. The built-in `code-review` skill is language-agnostic but JS-leaning. A custom `python-review` skill scoped to Flask + scikit-learn patterns would be genuinely useful.
 
 ---
 
@@ -265,7 +265,7 @@ All scores ≥ 3.5 threshold. No AGPL/GPL candidates encountered.
 ### ADD — Custom skills to create (3 skills)
 1. `api-docs` — OpenAPI/Swagger annotation skill for Express routes
 2. `frontend-test` — React Testing Library + Jest DOM workflow skill
-3. `python-review` — FastAPI + scikit-learn code quality skill
+3. `python-review` — Flask + scikit-learn code quality skill
 
 ### REMOVE/IGNORE (13 skills)
 `design-taste-frontend`, `minimalist-ui`, `high-end-visual-design`, `gpt-taste`, `redesign-existing-projects`, `animation-vocabulary`, `find-animation-opportunities`, `remove-animations`, `gsap-scrolltrigger`, `gsap-webflow`, `ui-animation`, `write-swift`, `tailwind-expert`, `material-design-3-ui`, `pick-ui-library`, `ask-sonner`

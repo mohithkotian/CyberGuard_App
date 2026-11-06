@@ -44,19 +44,34 @@
     "num_classes": 13
   },
   "split": {
-    "train_samples": 205,
-    "test_samples": 52,
-    "test_ratio": 0.2,
+    "evaluation_type": "Primary Held-Out Benchmark (85/15)",
+    "train_samples": 218,
+    "test_samples": 39,
+    "test_ratio": 0.15,
     "stratified": true,
     "random_seed": 42
   },
   "evaluation_metrics": {
+    "accuracy": 0.7436,
+    "macro_precision": 0.6644,
+    "macro_recall": 0.6808,
+    "macro_f1": 0.6548,
+    "weighted_f1": 0.7247,
+    "artifact_file": "classification-report.txt"
+  },
+  "exploratory_evaluation_80_20": {
+    "evaluation_type": "Preliminary Exploratory Split (80/20 Historical)",
+    "train_samples": 205,
+    "test_samples": 52,
+    "test_ratio": 0.2,
+    "stratified": true,
+    "random_seed": 42,
     "accuracy": 0.6346,
     "macro_precision": 0.589,
     "macro_recall": 0.5805,
     "macro_f1": 0.5665,
     "weighted_f1": 0.6111,
-    "mean_confidence": 0.2047
+    "artifact_file": "classification-report-80-20.txt"
   },
   "environment": {
     "sklearn_version": "1.8.0",

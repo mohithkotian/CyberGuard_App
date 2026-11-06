@@ -109,7 +109,7 @@ exports.getEvidence = async (req, res, next) => {
     }
 
     // Cryptographic SHA-256 integrity verification before evidence release
-    const { computeFileSha256 } = require('../utils/evidenceSecurity');
+    const { computeFileSha256, evaluateIntegrityStatus } = require('../utils/evidenceSecurity');
     let currentHash = null;
     try {
       currentHash = await computeFileSha256(filePath);
@@ -117,7 +117,12 @@ exports.getEvidence = async (req, res, next) => {
       return next(new AppError('Evidence file is missing or unreadable on disk.', 404));
     }
 
-    if (evidence.sha256 && currentHash !== evidence.sha256) {
+    const integrityStatus = evaluateIntegrityStatus(evidence.sha256, currentHash);
+
+    if (integrityStatus === 'unverified_legacy') {
+      // Legacy upload without stored cryptographic baseline — cannot be certified as verified
+      logger.warn(`Evidence file [${evidence.filename}] retrieved with unverified_legacy status (no stored SHA-256 baseline).`);
+    } else if (integrityStatus === 'integrity_mismatch') {
       logger.error(`CRITICAL: Evidence hash mismatch for ${evidence.filename}. Stored: ${evidence.sha256}, disk: ${currentHash}`);
       try {
         if (!complaint.chainOfCustody) complaint.chainOfCustody = [];
@@ -134,6 +139,8 @@ exports.getEvidence = async (req, res, next) => {
       } catch (custodyErr) {
         logger.warn(`Failed to record custody violation log: ${custodyErr.message}`);
       }
+      res.setHeader('X-Evidence-SHA256', currentHash || '');
+      res.setHeader('X-Evidence-Integrity', 'integrity_mismatch');
       return next(new AppError('Evidence file integrity check failed: cryptographic hash mismatch detected.', 409));
     }
 
@@ -145,7 +152,7 @@ exports.getEvidence = async (req, res, next) => {
         actor: req.user.name || req.user.role,
         actorId: req.user._id,
         actorRole: req.user.role,
-        details: `Evidence file [${evidence.originalName || evidence.filename}] verified (SHA-256: ${(currentHash || evidence.sha256 || '').substring(0, 16)}...) and retrieved.`,
+        details: `Evidence file [${evidence.originalName || evidence.filename}] retrieved with status [${integrityStatus}] (SHA-256: ${(currentHash || evidence.sha256 || '').substring(0, 16)}...).`,
         evidenceHash: currentHash || evidence.sha256,
         timestamp: new Date()
       });
@@ -155,7 +162,7 @@ exports.getEvidence = async (req, res, next) => {
     }
 
     res.setHeader('X-Evidence-SHA256', currentHash || evidence.sha256 || '');
-    res.setHeader('X-Evidence-Integrity', 'verified');
+    res.setHeader('X-Evidence-Integrity', integrityStatus);
 
     return res.sendFile(filePath, (error) => {
       if (error && !res.headersSent) next(error);

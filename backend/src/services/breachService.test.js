@@ -16,6 +16,11 @@ describe('Credential Breach Surveillance Service', () => {
     expect(['LOW RISK', 'MODERATE RISK', 'ELEVATED EXPOSURE', 'CRITICAL EXPOSURE', 'SUSPICIOUS DOMAIN']).toContain(result.riskLevel);
     expect(Array.isArray(result.recommendations)).toBe(true);
     expect(result.recommendations.length).toBeGreaterThan(0);
+    // Issue #28 verification: Ensure simulation status is explicitly declared
+    expect(result.isSimulated).toBe(true);
+    expect(result.mode).toBe('historical_catalog_simulation');
+    expect(result.liveApiVerified).toBe(false);
+    expect(typeof result.disclaimer).toBe('string');
   });
 
   test('flags suspicious or non-existent domains lacking MX records', async () => {

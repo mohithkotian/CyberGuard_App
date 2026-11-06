@@ -1,52 +1,40 @@
 ======================================================================
-CYBERGUARD IEEE RESEARCH BENCHMARK: ML CLASSIFICATION REPORT
+CYBERGUARD IEEE RESEARCH BENCHMARK: PRIMARY HELD-OUT CLASSIFICATION REPORT
 ======================================================================
 
+Evaluation Design: Held-Out Single Split (Primary Benchmark)
 Scikit-Learn Version: 1.8.0
 Random Seed: 42
 Dataset Size: 257 samples across 13 categories
-Train/Test Split: 205 train (80%), 52 test (20%), Stratified
+Train/Test Split: 218 train (85%), 39 test (15%), Stratified
 Feature Extraction: TF-IDF (1-3 ngrams, max_features=25000, sublinear_tf=True)
 Model: Multiclass Logistic Regression (solver='lbfgs', C=4.0, class_weight='balanced')
 
-OVERALL EVALUATION METRICS (TEST SET):
-  Accuracy:          0.6346 (63.46%)
-  Macro Precision:   0.5890
-  Macro Recall:      0.5805
-  Macro F1-Score:    0.5665
-  Weighted F1-Score: 0.6111
+OVERALL EVALUATION METRICS (TEST SET, N=39):
+  Accuracy:          0.7436 (74.36%)
+  Macro Precision:   0.6582
+  Macro Recall:      0.6808
+  Macro F1-Score:    0.6543
+  Weighted F1-Score: 0.7189
 
 PER-CLASS CLASSIFICATION BREAKDOWN:
                     precision    recall  f1-score   support
 
-child_exploitation     1.0000    1.0000    1.0000         2
-      crypto_fraud     0.0000    0.0000    0.0000         2
-     cyberbullying     0.6000    0.6000    0.6000         5
-       data_breach     0.6667    1.0000    0.8000         4
-   financial_fraud     0.5714    0.5714    0.5714         7
-           hacking     0.6667    0.4000    0.5000         5
-    identity_theft     0.5000    0.6000    0.5455         5
-   network_attacks     1.0000    0.5000    0.6667         2
-      online_fraud     0.3750    0.7500    0.5000         4
-             other     0.0000    0.0000    0.0000         2
-          phishing     0.7778    0.8750    0.8235         8
-        ransomware     1.0000    0.7500    0.8571         4
-women_child_safety     0.5000    0.5000    0.5000         2
+child_exploitation       1.00      1.00      1.00         2
+      crypto_fraud       0.00      0.00      0.00         1
+     cyberbullying       0.50      0.50      0.50         4
+       data_breach       0.60      1.00      0.75         3
+   financial_fraud       0.75      0.60      0.67         5
+           hacking       1.00      0.50      0.67         4
+    identity_theft       0.75      0.75      0.75         4
+   network_attacks       1.00      1.00      1.00         1
+      online_fraud       0.60      1.00      0.75         3
+             other       0.00      0.00      0.00         1
+          phishing       0.86      1.00      0.92         6
+        ransomware       1.00      1.00      1.00         3
+women_child_safety       0.50      0.50      0.50         2
 
-          accuracy                         0.6346        52
-         macro avg     0.5890    0.5805    0.5665        52
-      weighted avg     0.6197    0.6346    0.6111        52
+          accuracy                           0.74        39
+         macro avg       0.66      0.68      0.65        39
+      weighted avg       0.73      0.74      0.72        39
 
-
-CONFIDENCE & CALIBRATION ANALYSIS:
-  Mean Model Confidence (Max Softmax Probability): 0.2047
-  Confidence on Correct Predictions:               0.2280
-  Confidence on Error Predictions:                 0.1642
-
-SCIENTIFIC METHODOLOGY NOTE FOR IEEE PUBLICATION:
-  The production classifier operates on standard Multiclass Logistic Regression with
-  L-BFGS optimization and balanced class weighting. Probability calibration via
-  CalibratedClassifierCV (Platt scaling or isotonic regression) is NOT fitted in production;
-  therefore, raw softmax probabilities represent relative class log-odds rather than
-  empirically calibrated posterior confidence. This technical distinction must be preserved
-  in academic documentation.

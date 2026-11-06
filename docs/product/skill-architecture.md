@@ -50,13 +50,13 @@ Derived from live repository inspection (November 2026).
 | Observability / tracing | Not Covered | No APM, no distributed tracing |
 | Database indexing analysis | Not Covered | No Mongoose/MongoDB query optimization skill |
 
-### ML Service (Python FastAPI, scikit-learn / custom classifier)
+### ML Service (Python Flask, scikit-learn / custom classifier)
 
 | Capability | Status | Notes |
 |---|---|---|
 | Complaint classification | Covered | classifier.py + preprocessor.py |
 | Model training pipeline | Covered | train_model.py, generate_dataset.py |
-| FastAPI REST interface | Covered | app.py |
+| Flask REST interface | Covered | app.py |
 | ML service integration | Covered | mlService.js in backend |
 | Python code review | Not Covered | No Python-specific skill |
 | ML testing / drift detection | Not Covered | No ML test skill |
@@ -242,7 +242,7 @@ Core need: Framer Motion (web) + Reanimated (mobile).
 | **API documentation generation** | Backend has 9 route files; no OpenAPI/Swagger skill. Integration with ML service and mobile app requires clear contracts. |
 | **Frontend testing** | No React Testing Library or Playwright skill. CyberReport, TwoFactorModal, and auth flows have no frontend test coverage skill. |
 | **CI/CD pipeline** | No GitHub Actions or CI skill. Render deploys manually. |
-| **Python/ML code review** | Backend ml-service is Python FastAPI; no skill covers Python-specific quality or FastAPI best practices. |
+| **Python/ML code review** | Backend ml-service is Python Flask; no skill covers Python-specific quality or Flask best practices. |
 
 ### P2 — Useful
 
