@@ -1,4 +1,5 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import useTranslationStore from '../hooks/useTranslationStore';
@@ -277,8 +278,63 @@ function StarField({ mouseRef }) {
 export default function Home() {
   const navigate = useNavigate();
   const mouseRef = useRef([0, 0]);
+  const helpBtnRef = useRef(null);
+  const helpMenuRef = useRef(null);
   const [showHelpMenu, setShowHelpMenu] = useState(false);
+  const [helpMenuPos, setHelpMenuPos] = useState({ top: 88, left: 0 });
   const { t } = useTranslationStore();
+
+  const updateHelpMenuPos = useCallback(() => {
+    if (!helpBtnRef.current) return;
+    const rect = helpBtnRef.current.getBoundingClientRect();
+    const menuHalfWidth = 90;
+    const viewportW = window.innerWidth || 1200;
+    const rawCenter = rect.left + rect.width / 2;
+    const clampedLeft = Math.max(menuHalfWidth + 12, Math.min(viewportW - menuHalfWidth - 12, rawCenter));
+    setHelpMenuPos({ top: rect.bottom + 12, left: clampedLeft });
+  }, []);
+
+  const toggleHelpMenu = () => {
+    if (!showHelpMenu) {
+      updateHelpMenuPos();
+    }
+    setShowHelpMenu((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (!showHelpMenu) return undefined;
+
+    const handleOutside = (e) => {
+      if (
+        helpBtnRef.current?.contains(e.target) ||
+        helpMenuRef.current?.contains(e.target)
+      ) {
+        return;
+      }
+      setShowHelpMenu(false);
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowHelpMenu(false);
+        helpBtnRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('mousedown', handleOutside);
+    window.addEventListener('touchstart', handleOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', updateHelpMenuPos);
+    window.addEventListener('scroll', updateHelpMenuPos, true);
+
+    return () => {
+      window.removeEventListener('mousedown', handleOutside);
+      window.removeEventListener('touchstart', handleOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', updateHelpMenuPos);
+      window.removeEventListener('scroll', updateHelpMenuPos, true);
+    };
+  }, [showHelpMenu, updateHelpMenuPos]);
 
   const handleMouseMove = useCallback((e) => {
     mouseRef.current = [
@@ -315,19 +371,16 @@ export default function Home() {
       <StarField mouseRef={mouseRef} />
 
       {/* ════════ NAVBAR ════════ */}
-      <header style={{
+      <header className="home-top-header" style={{
         position: 'fixed', top: 30, left: '50%', transform: 'translateX(-50%)',
         zIndex: 100, display: 'flex', alignItems: 'center', padding: '12px 24px',
-        /* Apple Liquid Glass Effect */
-        background: 'rgba(255, 255, 255, 0.05)',
-        backdropFilter: 'blur(30px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(30px) saturate(200%)',
-        border: '1px solid rgba(255, 255, 255, 0.15)',
-        borderTop: '1px solid rgba(255, 255, 255, 0.3)',
+        background: 'rgba(13, 13, 13, 0.92)',
+        border: '1px solid #292927',
         borderRadius: '16px', width: '90%', maxWidth: 1200,
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.45)',
+        gap: '12px',
       }}>
-        <div style={{ flex: 1 }}>
+        <div className="home-top-brand" style={{ flex: 1, minWidth: 0 }}>
           <div
             onClick={() => navigate('/')}
             style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
@@ -341,11 +394,11 @@ export default function Home() {
                   e.target.src = '/icons/cyberguard/cyberguard-white.svg';
                 }
               }}
-              style={{ width: 176, height: 44, objectFit: 'contain' }} 
+              style={{ width: 176, maxWidth: '100%', height: 44, objectFit: 'contain' }} 
             />
           </div>
         </div>
-        <nav style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(12px, 1.8vw, 28px)', position: 'relative', flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', maxWidth: '100%' }}>
+        <nav className="home-top-nav" style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(12px, 1.8vw, 28px)', position: 'relative', flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', maxWidth: '100%', minWidth: 0 }}>
           {navLinks.map(l => (
             <Link 
               key={l.name}
@@ -368,94 +421,147 @@ export default function Home() {
             </Link>
           ))}
 
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <button
+              ref={helpBtnRef}
               type="button"
-              aria-haspopup="true"
+              aria-haspopup="menu"
               aria-expanded={showHelpMenu}
-              onClick={() => setShowHelpMenu(!showHelpMenu)}
-              onMouseEnter={e => e.target.style.color = '#fff'}
-              onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.7)'}
+              aria-controls="home-help-faq-menu"
+              onClick={toggleHelpMenu}
+              onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+              onMouseLeave={e => e.currentTarget.style.color = showHelpMenu ? '#fff' : 'rgba(255,255,255,0.7)'}
               style={{
                 background: 'transparent',
                 border: 'none',
-                padding: 0,
+                padding: '4px 2px',
                 cursor: 'pointer',
                 fontSize: '11px',
                 fontWeight: 700,
-                color: 'rgba(255,255,255,0.7)',
+                color: showHelpMenu ? '#fff' : 'rgba(255,255,255,0.7)',
                 letterSpacing: '0.12em',
                 transition: 'color 0.2s',
                 whiteSpace: 'nowrap',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
                 fontFamily: "'IBM Plex Sans', sans-serif"
               }}
             >
-              HELP & FAQ
+              <span>{t('NAVBAR.HELP_FAQ', 'HELP & FAQ')}</span>
+              <span aria-hidden="true" style={{ fontSize: '9px', opacity: 0.75, transform: showHelpMenu ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}>▾</span>
             </button>
-
-            {showHelpMenu && (
-              <div style={{
-                position: 'absolute',
-                top: '30px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'rgba(20,20,20,0.95)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px',
-                padding: '10px 0',
-                display: 'flex',
-                flexDirection: 'column',
-                minWidth: '150px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-                zIndex: 200
-              }}>
-                {['Contact Us', 'Feedback', 'FAQ'].map((item) => (
-                  <div
-                    key={item}
-                    onClick={() => {
-                      setShowHelpMenu(false);
-                      if (item === 'Contact Us') window.open('/contactlist.pdf', '_blank');
-                      else if (item === 'Feedback') navigate('/feedback');
-                      else if (item === 'FAQ') navigate('/faq');
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = 'rgba(255,255,255,0.1)';
-                      e.target.style.color = '#EFEDE8';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = 'transparent';
-                      e.target.style.color = '#fff';
-                    }}
-                    style={{
-                      padding: '10px 20px',
-                      color: '#fff',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      letterSpacing: '1px',
-                      transition: 'all 0.2s',
-                      textAlign: 'center'
-                    }}
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </nav>
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+        {showHelpMenu && createPortal(
+          <div
+            ref={helpMenuRef}
+            id="home-help-faq-menu"
+            role="menu"
+            aria-label="Help and FAQ options"
+            style={{
+              position: 'fixed',
+              top: `${helpMenuPos.top}px`,
+              left: `${helpMenuPos.left}px`,
+              transform: 'translateX(-50%)',
+              background: '#0d0d0d',
+              border: '1px solid #292927',
+              borderRadius: '12px',
+              padding: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+              minWidth: '176px',
+              boxShadow: '0 12px 32px rgba(0, 0, 0, 0.65)',
+              zIndex: 99999
+            }}
+          >
+            {[
+              { label: 'Contact Us', action: () => window.open('/contactlist.pdf', '_blank', 'noopener,noreferrer') },
+              { label: 'Feedback', action: () => navigate('/feedback') },
+              { label: 'FAQ', action: () => navigate('/faq') }
+            ].map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setShowHelpMenu(false);
+                  item.action();
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#1c1c1a';
+                  e.currentTarget.style.color = '#f2f0ea';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#d8d5ce';
+                }}
+                style={{
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 16px',
+                  color: '#d8d5ce',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  letterSpacing: '0.04em',
+                  transition: 'background 0.15s ease, color 0.15s ease',
+                  textAlign: 'center',
+                  fontFamily: "'IBM Plex Sans', sans-serif"
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>,
+          document.body
+        )}
+        <div className="home-top-actions" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 12, flexShrink: 0 }}>
           <button onClick={() => navigate('/login')}
-            style={{ padding: '10px 20px', background: '#141414', border: '1px solid #242422', color: '#EFEDE8', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+            style={{ padding: '10px 20px', background: '#141414', border: '1px solid #242422', color: '#EFEDE8', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: "'IBM Plex Sans', sans-serif" }}>
             {t('NAVBAR.LOGIN', 'SIGN IN')}
           </button>
           <button onClick={() => navigate('/register-choice')}
-            style={{ padding: '10px 20px', background: '#EFEDE8', border: '1px solid #242422', color: '#0A0A0A', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', boxShadow: 'none', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+            style={{ padding: '10px 20px', background: '#EFEDE8', border: '1px solid #242422', color: '#0A0A0A', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', boxShadow: 'none', whiteSpace: 'nowrap', fontFamily: "'IBM Plex Sans', sans-serif" }}>
             {t('NAVBAR.JOIN', 'JOIN')}
           </button>
         </div>
       </header>
+      <style>{`
+        .home-top-nav::-webkit-scrollbar { display: none; }
+        @media (max-width: 960px) {
+          .home-top-header {
+            top: 12px !important;
+            width: calc(100% - 24px) !important;
+            padding: 10px 14px !important;
+            flex-wrap: wrap !important;
+          }
+          .home-top-brand {
+            flex: 1 1 auto !important;
+          }
+          .home-top-brand img {
+            width: 132px !important;
+            height: 34px !important;
+          }
+          .home-top-actions {
+            flex: 0 0 auto !important;
+            gap: 8px !important;
+          }
+          .home-top-actions button {
+            padding: 8px 12px !important;
+          }
+          .home-top-nav {
+            order: 3;
+            flex: 1 0 100% !important;
+            justify-content: flex-start !important;
+            padding-top: 8px;
+            border-top: 1px solid #242422;
+          }
+        }
+      `}</style>
 
       {/* ════════ TWO-COLUMN HERO ════════ */}
       <main style={{ flex: 1, display: 'flex', minHeight: '100dvh' }}>

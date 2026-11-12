@@ -29,6 +29,26 @@ const mailLogSchema = new mongoose.Schema({
     type: String,
     default: 'delivered',
   },
+  provider: {
+    type: String,
+    default: '',
+  },
+  errorMessage: {
+    type: String,
+    default: '',
+  },
+  smsStatus: {
+    type: String,
+    default: '',
+  },
+  smsSid: {
+    type: String,
+    default: '',
+  },
+  smsError: {
+    type: String,
+    default: '',
+  },
   sentAt: {
     type: Date,
     default: Date.now,

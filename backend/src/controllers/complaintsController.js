@@ -384,13 +384,17 @@ exports.createComplaint = async (req, res, next) => {
 
     logger.info(`Complaint created: ${complaint.complaintId} by user ${req.user._id}`);
 
-    // Dispatch email alert to admins/officers
+    // Dispatch email alert to admins/officers and acknowledgment email/SMS to complainant
     try {
       const User = require('../models/User'); // Import User model dynamically if not at top
-      const adminsAndOfficers = await User.find({ role: { $in: ['admin', 'officer', 'owner'] } }).select('email name');
-      emailAgentService.sendNewComplaintAlert(adminsAndOfficers, complaint, req.user);
+      const adminsAndOfficers = await User.find({ role: { $in: ['admin', 'officer', 'owner'] } }).select('email name phone');
+      Promise.allSettled([
+        emailAgentService.sendNewComplaintAlert(adminsAndOfficers, complaint, req.user),
+        emailAgentService.sendComplaintConfirmationEmail(req.user, complaint),
+        smsService.sendComplaintConfirmationSMS(req.user, complaint),
+      ]).catch((err) => logger.error(`Error dispatching complaint notifications: ${err.message}`));
     } catch (err) {
-      logger.error(`Error dispatching new complaint email alert: ${err.message}`);
+      logger.error(`Error dispatching new complaint notifications: ${err.message}`);
     }
 
     // Trigger OCR Background Analysis
@@ -688,11 +692,25 @@ exports.updateStatus = async (req, res, next) => {
       message,
     });
 
-    // AI Email Agent: Send State Change Email
-    emailAgentService.sendStateChangeEmail(complaint.userId, complaint, previousStatus, status, message);
-
-    // SMS Agent: Send State Change SMS
-    smsService.sendStatusUpdateSMS(complaint.userId, complaint, status, message);
+    // AI Email & Twilio SMS Agents: Send State Change Notifications (non-blocking)
+    (async () => {
+      try {
+        const [emailRes, smsRes] = await Promise.allSettled([
+          emailAgentService.sendStateChangeEmail(complaint.userId, complaint, previousStatus, status, message),
+          smsService.sendStatusUpdateSMS(complaint.userId, complaint, status, message),
+        ]);
+        const mailLog = emailRes.status === 'fulfilled' ? emailRes.value?.mailLog : null;
+        const smsResult = smsRes.status === 'fulfilled' ? smsRes.value : null;
+        if (mailLog && smsResult) {
+          mailLog.smsStatus = smsResult.success ? 'delivered' : 'failed';
+          mailLog.smsSid = smsResult.sid || '';
+          mailLog.smsError = smsResult.error || '';
+          await mailLog.save();
+        }
+      } catch (notifyErr) {
+        logger.error(`Error recording status update notification outcome: ${notifyErr.message}`);
+      }
+    })();
 
     res.json({
       status: 'success',

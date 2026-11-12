@@ -459,6 +459,75 @@ router.get('/codebase', async (req, res, next) => {
 });
 
 const MailLog = require('../models/MailLog');
+const emailAgentService = require('../services/emailAgentService');
+const smsService = require('../services/smsService');
+
+// Communication channels readiness check (Admin only, no secrets exposed)
+router.get('/communications/status', async (req, res, next) => {
+  try {
+    const verify = req.query.verify === 'true';
+    const [emailStatus, smsStatus] = await Promise.all([
+      emailAgentService.getEmailStatus({ verify }),
+      smsService.getSmsStatus({ verify }),
+    ]);
+
+    res.json({
+      status: 'success',
+      data: { email: emailStatus, sms: smsStatus },
+    });
+  } catch (error) { next(error); }
+});
+
+// Send test Email and/or Twilio SMS (Admin only)
+router.post('/communications/test', async (req, res, next) => {
+  try {
+    const { channel = 'both', email, phone, message } = req.body || {};
+    const targetEmail = (email || req.user?.email || '').trim();
+    const targetPhone = (phone || req.user?.phone || '').trim();
+    const customMsg = (message || '').trim() || `CyberGuard Test Dispatch (${new Date().toISOString()}): Email and Twilio SMS gateway verification.`;
+
+    const results = {};
+
+    if (channel === 'email' || channel === 'both') {
+      if (!targetEmail) {
+        results.email = { success: false, error: 'Recipient email is required.' };
+      } else {
+        const subject = 'CyberGuard Communication Gateway Test';
+        const delivery = await emailAgentService.sendRawEmail({
+          to: targetEmail,
+          subject,
+          text: customMsg,
+          fromName: 'CyberGuard System',
+        });
+        await MailLog.create({
+          recipient: targetEmail,
+          recipientPhone: targetPhone,
+          subject,
+          body: customMsg,
+          textMessage: customMsg,
+          status: delivery.success ? 'delivered' : delivery.notConfigured ? 'logged' : 'failed',
+          provider: delivery.provider || 'none',
+          errorMessage: delivery.error || '',
+        });
+        results.email = delivery;
+      }
+    }
+
+    if (channel === 'sms' || channel === 'both') {
+      if (!targetPhone) {
+        results.sms = { success: false, error: 'Recipient phone number is required.' };
+      } else {
+        results.sms = await smsService.sendSMS({
+          to: targetPhone,
+          body: customMsg,
+          contextLabel: 'Admin Test SMS',
+        });
+      }
+    }
+
+    res.json({ status: 'success', data: results });
+  } catch (error) { next(error); }
+});
 
 // Get sent emails and SMS dispatches
 router.get('/emails', async (req, res, next) => {

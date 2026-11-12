@@ -165,6 +165,8 @@ export const adminAPI = {
   predict: (text) => api.post('/admin/predict', { text }),
   getCodebase: () => api.get('/admin/codebase'),
   getEmails: (p) => api.get('/admin/emails', { params: p }),
+  getCommsStatus: (verify = false) => api.get('/admin/communications/status', { params: { verify } }),
+  testComms: (payload) => api.post('/admin/communications/test', payload),
 };
 
 export const chatsAPI = {
