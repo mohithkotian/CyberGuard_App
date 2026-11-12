@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, globalStyles, statusColors, severityColors } from '../utils/theme';
+import { colors, globalStyles, typography } from '../utils/theme';
 import { lookupThreatClient } from '../data/threatIntel';
 import { complaintsAPI } from '../services/api';
 import CyberBackground from '../components/CyberBackground';
-
-const { width } = Dimensions.get('window');
+import ScreenHeader from '../components/ScreenHeader';
+import IconGlyph from '../components/IconGlyph';
 
 const SAMPLE_QUERIES = [
   '+91 98000 00001',
@@ -40,15 +40,16 @@ export default function ScamSearchScreen({ navigation }) {
       let cloudMatches = [];
       try {
         const { data } = await complaintsAPI.publicSearch(q);
-        if (data?.data?.complaints) {
-          cloudMatches = data.data.complaints.map(c => ({
+        const rawList = data?.data?.results || data?.data?.complaints || [];
+        if (Array.isArray(rawList) && rawList.length > 0) {
+          cloudMatches = rawList.map(c => ({
             complaintId: c.complaintId || c._id,
             category: c.category?.replace(/_/g, ' ') || 'Incident Report',
             severity: c.severity || 'high',
             riskLevel: c.severity === 'critical' ? 'critical' : 'high',
             identifier: q,
             type: 'CLOUD_CASE',
-            details: c.description || c.title,
+            details: c.description || c.title || c.suspectInfo?.upiId || c.suspectInfo?.phone || 'Verified Threat Indicator',
             status: c.status || 'INVESTIGATING',
             createdAt: c.createdAt
           }));
@@ -68,33 +69,37 @@ export default function ScamSearchScreen({ navigation }) {
     }
   };
 
-  return (
-    <SafeAreaView style={globalStyles.screen}>
-      <CyberBackground />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          onPress={() => navigation.navigate('Home')}
-          style={styles.backBtn}
-        >
-          <Text style={{ color: colors.accent, fontSize: 18, fontWeight: '900' }}>←</Text>
-        </TouchableOpacity>
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.headerTitle}>SCAM & SUSPECT RADAR</Text>
-          <Text style={styles.headerSub}>GLOBAL THREAT INTELLIGENCE LOOKUP</Text>
-        </View>
-      </View>
+  const getResultIcon = (type) => {
+    switch (type) {
+      case 'PHONE':
+        return 'phone';
+      case 'WEBSITE':
+      case 'DOMAIN':
+        return 'globe';
+      default:
+        return 'warning';
+    }
+  };
 
-      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+  return (
+    <SafeAreaView style={globalStyles.screen} edges={['top']}>
+      <CyberBackground />
+      <ScreenHeader
+        title="Scam & Suspect Radar"
+        subtitle="Threat intelligence database lookup"
+        navigation={navigation}
+      />
+
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         {/* Search Console */}
-        <View style={globalStyles.glassCard}>
-          <Text style={globalStyles.label}>VERIFY IDENTIFIER</Text>
-          <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: 12 }}>
-            Search suspect phone numbers, UPI handles, bank accounts, or suspicious phishing links against live threat records.
+        <View style={globalStyles.card}>
+          <Text style={globalStyles.label}>Verify Identifier</Text>
+          <Text style={styles.cardSub}>
+            Search suspect phone numbers, UPI handles, bank accounts, or suspicious links against verified threat intelligence records.
           </Text>
 
           <View style={styles.inputContainer}>
+            <IconGlyph name="search" size={18} color={colors.textSecondary} />
             <TextInput
               style={styles.searchInput}
               placeholder="e.g. 9800000001, paytm@upi, fake-bank.com"
@@ -107,35 +112,42 @@ export default function ScamSearchScreen({ navigation }) {
               onSubmitEditing={() => handleSearch()}
             />
             {query.length > 0 && (
-              <TouchableOpacity onPress={() => { setQuery(''); setSearched(false); setResults([]); }} style={styles.clearBtn}>
-                <Text style={{ color: colors.muted, fontSize: 16 }}>x</Text>
+              <TouchableOpacity
+                onPress={() => { setQuery(''); setSearched(false); setResults([]); }}
+                style={styles.clearBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <IconGlyph name="close" size={16} color={colors.muted} />
               </TouchableOpacity>
             )}
           </View>
 
-          <TouchableOpacity 
-            style={[globalStyles.btnPrimary, { marginTop: 10 }]} 
+          <TouchableOpacity
+            style={[globalStyles.btnPrimary, { marginTop: 12 }]}
             onPress={() => handleSearch()}
             disabled={loading}
+            activeOpacity={0.8}
           >
             {loading ? (
-              <ActivityIndicator color="#030A14" />
+              <ActivityIndicator color="#070B12" />
             ) : (
-              <Text style={globalStyles.btnPrimaryText}>⌕ RUN THREAT SCAN</Text>
+              <>
+                <IconGlyph name="search" size={18} color="#070B12" strokeWidth={2.4} />
+                <Text style={globalStyles.btnPrimaryText}>Run Threat Scan</Text>
+              </>
             )}
           </TouchableOpacity>
 
           {/* Quick Query Pills */}
-          <View style={{ marginTop: 16 }}>
-            <Text style={{ color: colors.muted, fontSize: 10, fontWeight: '800', letterSpacing: 1, marginBottom: 8 }}>
-              DEMO THREAT SCENARIOS:
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+          <View style={styles.sampleSection}>
+            <Text style={styles.sampleHeader}>DEMO THREAT SCENARIOS</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sampleScroll}>
               {SAMPLE_QUERIES.map((sample, idx) => (
-                <TouchableOpacity 
-                  key={idx} 
+                <TouchableOpacity
+                  key={idx}
                   style={styles.samplePill}
                   onPress={() => handleSearch(sample)}
+                  activeOpacity={0.75}
                 >
                   <Text style={styles.sampleText}>{sample}</Text>
                 </TouchableOpacity>
@@ -146,29 +158,27 @@ export default function ScamSearchScreen({ navigation }) {
 
         {/* Results Stream */}
         {searched && (
-          <View style={{ marginTop: 15 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <Text style={globalStyles.sectionTitle}>
-                {results.length > 0 ? `! THREAT SIGNALS FOUND (${results.length})` : '◈ VERIFICATION RESULT'}
-              </Text>
-            </View>
+          <View style={{ marginTop: 12 }}>
+            <Text style={globalStyles.sectionTitle}>
+              {results.length > 0 ? `Threat Signals Detected (${results.length})` : 'Verification Result'}
+            </Text>
 
             {results.length === 0 ? (
-              <View style={[globalStyles.glassCard, { alignItems: 'center', padding: 24, borderColor: 'rgba(0, 200, 150, 0.3)' }]}>
-                <View style={[styles.statusIconCircle, { backgroundColor: 'rgba(0, 200, 150, 0.15)', borderColor: colors.success }]}>
-                  <Text style={{ fontSize: 32 }}>v</Text>
+              <View style={[globalStyles.card, styles.cleanRecordCard]}>
+                <View style={styles.cleanIconWrap}>
+                  <IconGlyph name="check" size={28} color={colors.success} strokeWidth={2.4} />
                 </View>
-                <Text style={{ color: colors.success, fontSize: 16, fontWeight: '900', letterSpacing: 1.5, marginTop: 12 }}>
-                  CLEAN RECORD
+                <Text style={styles.cleanTitle}>Clean Record</Text>
+                <Text style={styles.cleanDesc}>
+                  No active malicious reports or blacklist records found for "{query}". Standard vigilance is still recommended — never disclose OTPs or passwords.
                 </Text>
-                <Text style={{ color: colors.textSecondary, fontSize: 12, textAlign: 'center', marginTop: 8, lineHeight: 18 }}>
-                  No high-risk malicious records found for "{query}". Still exercise standard caution and never share OTPs or passwords.
-                </Text>
-                <TouchableOpacity 
-                  style={[globalStyles.btnOutline, { marginTop: 16, width: '100%' }]}
+                <TouchableOpacity
+                  style={[globalStyles.btnOutline, { marginTop: 18, width: '100%' }]}
                   onPress={() => navigation.navigate('Submit', { prefillSuspect: query })}
+                  activeOpacity={0.75}
                 >
-                  <Text style={globalStyles.btnOutlineText}>Report If You Suspect Fraud →</Text>
+                  <IconGlyph name="report" size={16} color={colors.text} />
+                  <Text style={globalStyles.btnOutlineText}>Report If You Suspect Fraud</Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -176,39 +186,41 @@ export default function ScamSearchScreen({ navigation }) {
                 const isCrit = r.riskLevel === 'critical' || r.severity === 'critical';
                 const badgeColor = isCrit ? colors.danger : colors.warn;
                 return (
-                  <View key={i} style={[globalStyles.glassCard, { borderColor: isCrit ? 'rgba(255, 59, 48, 0.4)' : 'rgba(255, 159, 28, 0.4)' }]}>
+                  <View key={i} style={[globalStyles.card, { borderColor: isCrit ? 'rgba(248, 113, 113, 0.4)' : 'rgba(251, 191, 36, 0.4)' }]}>
                     <View style={globalStyles.spaceBetween}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={{ fontSize: 14 }}>{r.type === 'PHONE' ? '⌕' : r.type === 'WEBSITE' ? '◉' : '!'}</Text>
-                        <Text style={[globalStyles.mono, { color: colors.cyber, fontSize: 12, fontWeight: '700' }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <IconGlyph name={getResultIcon(r.type)} size={16} color={badgeColor} />
+                        <Text style={[globalStyles.mono, styles.resultDocket]}>
                           {r.complaintId}
                         </Text>
                       </View>
-                      <View style={[globalStyles.badge, { backgroundColor: `${badgeColor}20`, borderColor: badgeColor, borderWidth: 1 }]}>
-                        <Text style={{ color: badgeColor, fontSize: 10, fontWeight: '900' }}>
+                      <View style={[globalStyles.badge, { backgroundColor: `${badgeColor}18`, borderColor: `${badgeColor}40`, borderWidth: 1 }]}>
+                        <Text style={[styles.badgeText, { color: badgeColor }]}>
                           {(r.riskLevel || 'FLAGGED').toUpperCase()}
                         </Text>
                       </View>
                     </View>
 
-                    <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '800', marginTop: 10 }}>
+                    <Text style={styles.resultIdentifier}>
                       {r.identifier}
                     </Text>
 
-                    <Text style={{ color: colors.accent, fontSize: 11, fontWeight: '700', marginTop: 4, textTransform: 'uppercase' }}>
+                    <Text style={styles.resultCategory}>
                       {r.category}
                     </Text>
 
-                    <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 8, lineHeight: 18 }}>
+                    <Text style={styles.resultDetails}>
                       {r.details}
                     </Text>
 
                     <View style={styles.cardFooter}>
-                      <TouchableOpacity 
-                        style={styles.actionPill}
+                      <TouchableOpacity
+                        style={styles.actionBtn}
                         onPress={() => navigation.navigate('Submit', { prefillSuspect: r.identifier, prefillCategory: r.category })}
+                        activeOpacity={0.8}
                       >
-                        <Text style={styles.actionPillText}>! File Complaint With This Intel</Text>
+                        <IconGlyph name="report" size={15} color={colors.accent} strokeWidth={2.2} />
+                        <Text style={styles.actionBtnText}>File Complaint With This Intel</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -223,95 +235,142 @@ export default function ScamSearchScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 60,
   },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(0, 255, 209, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 255, 209, 0.3)',
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: 1.5,
-  },
-  headerSub: {
-    color: colors.accent,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-    marginTop: 2,
+  cardSub: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: 14,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 25, 50, 0.9)',
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.3)',
+    borderColor: colors.borderLight,
     borderRadius: 10,
-    paddingHorizontal: 14,
-    marginBottom: 4,
+    paddingHorizontal: 12,
+    minHeight: 48,
+    gap: 8,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 10,
     color: colors.text,
     fontSize: 14,
   },
   clearBtn: {
-    padding: 6,
+    padding: 4,
+  },
+  sampleSection: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 12,
+  },
+  sampleHeader: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  sampleScroll: {
+    gap: 8,
   },
   samplePill: {
-    backgroundColor: 'rgba(0, 180, 255, 0.08)',
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.25)',
-    borderRadius: 20,
+    borderColor: colors.borderLight,
+    borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    minHeight: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sampleText: {
-    color: colors.cyber,
+    color: colors.accent,
+    fontSize: 12,
+    fontWeight: '600',
+    fontFamily: typography.mono,
+  },
+  cleanRecordCard: {
+    alignItems: 'center',
+    padding: 24,
+    borderColor: 'rgba(52, 211, 153, 0.3)',
+  },
+  cleanIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(52, 211, 153, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  cleanTitle: {
+    color: colors.success,
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  cleanDesc: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 6,
+    lineHeight: 20,
+  },
+  resultDocket: {
+    color: colors.accent,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  badgeText: {
     fontSize: 11,
     fontWeight: '700',
   },
-  statusIconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
+  resultIdentifier: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '700',
+    marginTop: 10,
+  },
+  resultCategory: {
+    color: colors.accent,
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+    textTransform: 'capitalize',
+  },
+  resultDetails: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginTop: 8,
+    lineHeight: 19,
   },
   cardFooter: {
     marginTop: 14,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.06)',
+    borderTopColor: colors.border,
     paddingTop: 10,
   },
-  actionPill: {
-    backgroundColor: 'rgba(0, 255, 209, 0.1)',
+  actionBtn: {
+    backgroundColor: 'rgba(61, 245, 192, 0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(0, 255, 209, 0.3)',
+    borderColor: 'rgba(61, 245, 192, 0.3)',
     borderRadius: 8,
-    paddingVertical: 10,
+    minHeight: 42,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
-  actionPillText: {
+  actionBtnText: {
     color: colors.accent,
-    fontSize: 11,
-    fontWeight: '900',
-    letterSpacing: 1,
-  }
+    fontSize: 13,
+    fontWeight: '700',
+  },
 });

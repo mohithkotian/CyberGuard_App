@@ -1,256 +1,111 @@
-import React, { useRef, useCallback, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { format, formatDistanceToNow } from 'date-fns';
+import {
+  Shield,
+  Search,
+  AlertTriangle,
+  Cpu,
+  Globe,
+  MessageSquare,
+  Phone,
+  X,
+  ArrowRight,
+  ExternalLink,
+  Activity,
+  CheckCircle2,
+  Clock,
+  Radio,
+  FileText
+} from 'lucide-react';
+import useAuthStore from '../hooks/useAuthStore';
 import useTranslationStore from '../hooks/useTranslationStore';
+import { complaintsAPI, analyticsAPI } from '../services/api';
 
 /* ═══════════════════════════════════════════════════════════════
-   STARFIELD — cursor-reactive stars + cyber glyphs
+   STARFIELD — Lightweight, Subtle Slate/Mint Cyber Backdrop
+   Matches mobile CyberBackground without noisy images/glyphs
    ═══════════════════════════════════════════════════════════════ */
-const CYBER_GLYPHS = ['⌘','⊕','⊗','◈','⬡','⌬','⎔','⌖','⍟','⎊','⎈','⌭','⍯','⌀','⊞','⊠','⊡','▣'];
-const BINARY_STRINGS = ['01','10','00','11','0x','FF','0A','1F','C0','DE','CA','FE'];
-const CUSTOM_ICONS = [
-  '/icons/antenna.jpg',
-  '/icons/dna.jpg',
-  '/icons/lock.jpg',
-  '/icons/lightning.jpg'
-];
-
 function StarField({ mouseRef }) {
   const canvasRef = useRef(null);
-  const animRef   = useRef(null);
-  const mouse     = useRef({ x: -9999, y: -9999 });
+  const animRef = useRef(null);
+  const mouse = useRef({ x: -9999, y: -9999 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    // Preload custom images
-    const loadedImages = [];
-    CUSTOM_ICONS.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      loadedImages.push(img);
-    });
-
     let W, H;
     function resize() {
-      W = canvas.width  = window.innerWidth;
+      W = canvas.width = window.innerWidth;
       H = canvas.height = window.innerHeight;
     }
     resize();
     window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', resize);
 
-    /* Sync mouse from parent's mouseRef (normalized -1..1) */
     function syncMouse() {
       if (!mouseRef?.current) return;
       mouse.current.x = ((mouseRef.current[0] + 1) / 2) * W;
       mouse.current.y = ((-mouseRef.current[1] + 1) / 2) * H;
     }
 
-    /* ── Particle factory ── */
-    const REPEL_RADIUS = 120;
-    const REPEL_FORCE  = 0.38;
-
-    function makeParticle() {
-      // Increased chance for custom image (3.5%) and glyphs/binary
-      const r = Math.random();
-      const isImage  = r < 0.035;
-      const isGlyph  = !isImage && r < 0.12;
-      const isBinary = !isImage && !isGlyph && r < 0.16;
-      const isDNA    = !isImage && !isGlyph && !isBinary && r < 0.22;
-      
-      let img = null;
-      if (isImage && loadedImages.length > 0) {
-        img = loadedImages[Math.floor(Math.random() * loadedImages.length)];
-      }
-
-      let dnaStrand = null;
-      if (isDNA) {
-        const dnaPairs = ['01', '10', '00'];
-        const strandLength = 5 + Math.floor(Math.random() * 5); // 5 to 9 pairs
-        dnaStrand = Array.from({ length: strandLength }, () => dnaPairs[Math.floor(Math.random() * dnaPairs.length)]);
-      }
-      if (isImage && loadedImages.length > 0) {
-        img = loadedImages[Math.floor(Math.random() * loadedImages.length)];
-      }
-
-      return {
-        x:    Math.random() * W,
-        y:    Math.random() * H,
-        ox:   0, oy: 0,           // offset from repulsion
-        vx:   0, vy: 0,
-        size: isImage  ? (40 + Math.random() * 40) // 40-80px for images
-              : isGlyph  ? (8 + Math.random() * 10)
-              : isBinary ? (7 + Math.random() * 6)
-              : isDNA    ? (4 + Math.random() * 3) // very small size (4-7px)
-              : (0.5 + Math.random() * 1.8),
-        alpha:  isImage  ? (0.4 + Math.random() * 0.4)
-                : isGlyph  ? (0.12 + Math.random() * 0.18)
-                : isBinary ? (0.08 + Math.random() * 0.12)
-                : isDNA    ? (0.15 + Math.random() * 0.3)
-                : (0.15 + Math.random() * 0.85),
-        glyph:  isGlyph  ? CYBER_GLYPHS[Math.floor(Math.random() * CYBER_GLYPHS.length)] : null,
-        binary: isBinary ? BINARY_STRINGS[Math.floor(Math.random() * BINARY_STRINGS.length)] : null,
-        isDNA:  isDNA,
-        dnaStrand: dnaStrand,
-        img:    img,
-        drift: { x: (Math.random() - 0.5) * 0.15, y: (Math.random() - 0.5) * 0.15 },
-        twinkleSpeed: 0.5 + Math.random() * 2,
-        twinklePhase: Math.random() * Math.PI * 2,
-        color: Math.random() < 0.06 ? '#00ffaa'
-             : Math.random() < 0.04 ? '#EFEDE8'
-             : '#ffffff',
-      };
-    }
-
-    // Further increased star density (divided by 1800 instead of 3000)
-    const COUNT = Math.min(800, Math.floor((W * H) / 1800));
-    const particles = Array.from({ length: COUNT }, makeParticle);
+    const COUNT = Math.min(220, Math.floor((W * H) / 6000));
+    const particles = Array.from({ length: COUNT }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      size: 0.8 + Math.random() * 1.6,
+      alpha: 0.15 + Math.random() * 0.45,
+      drift: { x: (Math.random() - 0.5) * 0.15, y: (Math.random() - 0.5) * 0.15 },
+      twinkleSpeed: 0.6 + Math.random() * 1.5,
+      twinklePhase: Math.random() * Math.PI * 2,
+      color: Math.random() < 0.1 ? '#3DF5C0' : '#94A3B8'
+    }));
 
     let lastTs = 0;
     function loop(ts) {
-      const dt = Math.min((ts - lastTs) / 16, 3);
+      const dt = Math.min((ts - lastTs) / 16, 2.5);
       lastTs = ts;
       syncMouse();
 
       ctx.clearRect(0, 0, W, H);
 
-      const mx = mouse.current.x;
-      const my = mouse.current.y;
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x = (p.x + p.drift.x * dt + W) % W;
+        p.y = (p.y + p.drift.y * dt + H) % H;
 
-      for (const p of particles) {
-        /* Twinkle */
-        const twinkle = 0.7 + 0.3 * Math.sin(ts * 0.001 * p.twinkleSpeed + p.twinklePhase);
-        const alpha   = p.alpha * twinkle;
-
-        /* Cursor repulsion */
-        const dx = p.x + p.ox - mx;
-        const dy = p.y + p.oy - my;
+        // Subtle cursor repulsion
+        const dx = p.x - mouse.current.x;
+        const dy = p.y - mouse.current.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < REPEL_RADIUS && dist > 0) {
-          const force = (REPEL_RADIUS - dist) / REPEL_RADIUS;
-          p.vx += (dx / dist) * force * REPEL_FORCE * dt;
-          p.vy += (dy / dist) * force * REPEL_FORCE * dt;
+        let ox = 0;
+        let oy = 0;
+        if (dist < 100 && dist > 0) {
+          const force = (1 - dist / 100) * 12;
+          ox = (dx / dist) * force;
+          oy = (dy / dist) * force;
         }
-        /* Spring back to origin */
-        p.vx += (-p.ox * 0.05) * dt;
-        p.vy += (-p.oy * 0.05) * dt;
-        /* Damping */
-        p.vx *= 0.88;
-        p.vy *= 0.88;
-        p.ox += p.vx;
-        p.oy += p.vy;
 
-        /* Slow drift */
-        p.x += p.drift.x * dt;
-        p.y += p.drift.y * dt;
-        if (p.x < -20) p.x = W + 20;
-        if (p.x > W + 20) p.x = -20;
-        if (p.y < -20) p.y = H + 20;
-        if (p.y > H + 20) p.y = -20;
-
-        const rx = p.x + p.ox;
-        const ry = p.y + p.oy;
-
-        ctx.save();
-        ctx.globalAlpha = Math.min(alpha, 1);
-
-        if (p.img && p.img.complete && p.img.naturalWidth > 0) {
-          /* Custom Uploaded Images */
-          const aspect = p.img.naturalWidth / p.img.naturalHeight;
-          const w = p.size;
-          const h = p.size / aspect;
-          if (dist < REPEL_RADIUS) {
-            ctx.shadowColor = '#00ffaa';
-            ctx.shadowBlur = 10;
-          }
-          ctx.drawImage(p.img, rx - w / 2, ry - h / 2, w, h);
-        } else if (p.glyph) {
-          /* Cyber glyph */
-          ctx.font = `${p.size}px monospace`;
-          ctx.fillStyle = p.color;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          /* Glow on hover approach */
-          if (dist < REPEL_RADIUS) {
-            ctx.shadowColor = p.color;
-            ctx.shadowBlur  = 8;
-          }
-          ctx.fillText(p.glyph, rx, ry);
-        } else if (p.binary) {
-          /* Binary snippet */
-          ctx.font = `600 ${p.size}px "Courier New", monospace`;
-          ctx.fillStyle = 'rgba(0,255,170,1)';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(p.binary, rx, ry);
-        } else if (p.isDNA) {
-          /* DNA-like floating substance */
-          ctx.font = `600 ${p.size}px "Courier New", monospace`;
-          ctx.fillStyle = '#39FF14'; // Neon Green
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          
-          if (dist < REPEL_RADIUS) {
-            ctx.shadowColor = '#39FF14';
-            ctx.shadowBlur = 5;
-          }
-
-          const spacing = p.size * 1.8;
-          const totalHeight = p.dnaStrand.length * spacing;
-          const startY = ry - totalHeight / 2;
-          const amplitude = p.size * 2.5;
-          
-          for (let i = 0; i < p.dnaStrand.length; i++) {
-            const pair = p.dnaStrand[i];
-            const leftChar = pair[0];
-            const rightChar = pair[1];
-            
-            const phase = ts * 0.002 + p.twinklePhase + i * 0.5;
-            const xOffsetLeft = Math.sin(phase) * amplitude;
-            const xOffsetRight = Math.sin(phase + Math.PI) * amplitude;
-            const zLeft = Math.cos(phase);
-            const zRight = Math.cos(phase + Math.PI);
-            
-            // Draw connecting bond (very faint)
-            ctx.beginPath();
-            ctx.moveTo(rx + xOffsetLeft, startY + i * spacing);
-            ctx.lineTo(rx + xOffsetRight, startY + i * spacing);
-            ctx.strokeStyle = `rgba(57, 255, 20, ${Math.min(alpha * 0.4, 0.4)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-
-            // Left strand character
-            ctx.globalAlpha = Math.min(alpha * (zLeft > 0 ? 1 : 0.3), 1);
-            ctx.fillText(leftChar, rx + xOffsetLeft, startY + i * spacing);
-            
-            // Right strand character
-            ctx.globalAlpha = Math.min(alpha * (zRight > 0 ? 1 : 0.3), 1);
-            ctx.fillText(rightChar, rx + xOffsetRight, startY + i * spacing);
-          }
-        } else {
-          /* Star dot */
-          ctx.beginPath();
-          ctx.arc(rx, ry, p.size, 0, Math.PI * 2);
-          ctx.fillStyle = p.color;
-          if (dist < REPEL_RADIUS * 0.6) {
-            ctx.shadowColor = p.color;
-            ctx.shadowBlur  = 6;
-          }
-          ctx.fill();
-        }
-        ctx.restore();
+        const tw = 0.6 + 0.4 * Math.sin(ts * 0.002 * p.twinkleSpeed + p.twinklePhase);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0.08, Math.min(0.8, p.alpha * tw));
+        ctx.beginPath();
+        ctx.arc(p.x + ox, p.y + oy, p.size, 0, Math.PI * 2);
+        ctx.fill();
       }
-
+      ctx.globalAlpha = 1;
       animRef.current = requestAnimationFrame(loop);
     }
-
     animRef.current = requestAnimationFrame(loop);
+
     return () => {
       cancelAnimationFrame(animRef.current);
       window.removeEventListener('resize', resize);
+      window.removeEventListener('orientationchange', resize);
     };
   }, [mouseRef]);
 
@@ -271,27 +126,252 @@ function StarField({ mouseRef }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HOME PAGE — Two column layout
-   Left:  REPORT. TRACK. PROTECT. + stats + button + bots
-   Right: Exact fingerprint image uploaded by user
+   THEME CONSTANTS & STATUS MAPPINGS (Exact match to mobile-app)
+   ═══════════════════════════════════════════════════════════════ */
+const STATUS_CONFIG = {
+  pending: {
+    label: 'Pending',
+    color: '#FBBF24',
+    bg: 'rgba(251, 191, 36, 0.12)',
+    border: 'rgba(251, 191, 36, 0.35)'
+  },
+  under_review: {
+    label: 'Under Review',
+    color: '#818CF8',
+    bg: 'rgba(129, 140, 248, 0.12)',
+    border: 'rgba(129, 140, 248, 0.35)'
+  },
+  investigating: {
+    label: 'Investigating',
+    color: '#38BDF8',
+    bg: 'rgba(56, 189, 248, 0.12)',
+    border: 'rgba(56, 189, 248, 0.35)'
+  },
+  resolved: {
+    label: 'Resolved',
+    color: '#34D399',
+    bg: 'rgba(52, 211, 153, 0.12)',
+    border: 'rgba(52, 211, 153, 0.35)'
+  },
+  closed: {
+    label: 'Closed',
+    color: '#94A3B8',
+    bg: 'rgba(148, 163, 184, 0.12)',
+    border: 'rgba(148, 163, 184, 0.35)'
+  },
+  rejected: {
+    label: 'Rejected',
+    color: '#F87171',
+    bg: 'rgba(248, 113, 113, 0.12)',
+    border: 'rgba(248, 113, 113, 0.35)'
+  }
+};
+
+const FILTER_TABS = [
+  { key: 'ALL', label: 'All' },
+  { key: 'PENDING', label: 'Pending' },
+  { key: 'UNDER REVIEW', label: 'Under Review' },
+  { key: 'INVESTIGATING', label: 'Investigating' },
+  { key: 'RESOLVED', label: 'Resolved' }
+];
+
+const QUICK_ACTIONS = [
+  {
+    label: 'Report Incident',
+    sub: 'File urgent cyber fraud & extortion case',
+    icon: Shield,
+    path: '/submit',
+    color: '#3DF5C0'
+  },
+  {
+    label: 'Track Case',
+    sub: 'Real-time investigation & docket status',
+    icon: Search,
+    path: '/track',
+    color: '#38BDF8'
+  },
+  {
+    label: 'Scam Radar',
+    sub: 'Verify suspect URL, UPI, or mobile',
+    icon: Radio,
+    path: '/scam-search',
+    color: '#FBBF24'
+  },
+  {
+    label: 'Forensics Scanner',
+    sub: 'Analyze phishing headers, links & files',
+    icon: Cpu,
+    path: '/forensic-scanner',
+    color: '#38BDF8'
+  },
+  {
+    label: 'Threat Map',
+    sub: 'Live national geographic attack clusters',
+    icon: Globe,
+    path: '/threat-map',
+    color: '#34D399'
+  },
+  {
+    label: 'Secure Comms',
+    sub: 'Encrypted officer & intelligence channel',
+    icon: MessageSquare,
+    path: '/chat',
+    color: '#F1F5F9'
+  }
+];
+
+const DEMO_COMPLAINTS = [
+  {
+    _id: 'cg-94821',
+    complaintId: 'CG-94821',
+    title: 'Unauthorized UPI debit via fake electricity KYC APK',
+    category: 'Financial Fraud',
+    status: 'investigating',
+    createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString()
+  },
+  {
+    _id: 'cg-94820',
+    complaintId: 'CG-94820',
+    title: 'Work-from-home Telegram task scam demanding crypto deposit',
+    category: 'Investment Scam',
+    status: 'pending',
+    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString()
+  },
+  {
+    _id: 'cg-94819',
+    complaintId: 'CG-94819',
+    title: 'Instagram account cloned for fraudulent family medical emergency',
+    category: 'Identity Theft',
+    status: 'under_review',
+    createdAt: new Date(Date.now() - 1000 * 60 * 115).toISOString()
+  },
+  {
+    _id: 'cg-94818',
+    complaintId: 'CG-94818',
+    title: 'Phishing domain impersonating SBI YONO login portal',
+    category: 'Phishing & Spoofing',
+    status: 'resolved',
+    createdAt: new Date(Date.now() - 1000 * 60 * 220).toISOString()
+  },
+  {
+    _id: 'cg-94817',
+    complaintId: 'CG-94817',
+    title: 'Sextortion extortion email threatening compromised webcam feed',
+    category: 'Cyber Blackmail',
+    status: 'investigating',
+    createdAt: new Date(Date.now() - 1000 * 60 * 380).toISOString()
+  },
+  {
+    _id: 'cg-94816',
+    complaintId: 'CG-94816',
+    title: 'Fake courier parcel hold notice asking customs processing tax',
+    category: 'Impersonation Scam',
+    status: 'resolved',
+    createdAt: new Date(Date.now() - 1000 * 60 * 540).toISOString()
+  }
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN COMPONENT — Home.js
    ═══════════════════════════════════════════════════════════════ */
 export default function Home() {
   const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+  const { t } = useTranslationStore();
   const mouseRef = useRef([0, 0]);
+
+  // Operational state matching mobile-app
+  const [complaints, setComplaints] = useState(DEMO_COMPLAINTS);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Nav menus
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showHelpMenu, setShowHelpMenu] = useState(false);
+  const [helpMenuPos, setHelpMenuPos] = useState({ top: 0, left: 0 });
   const helpBtnRef = useRef(null);
   const helpMenuRef = useRef(null);
-  const [showHelpMenu, setShowHelpMenu] = useState(false);
-  const [helpMenuPos, setHelpMenuPos] = useState({ top: 88, left: 0 });
-  const { t } = useTranslationStore();
 
+  // Load dashboard telemetry and complaints
+  const loadDashboardData = useCallback(async () => {
+    try {
+      const [compRes, statRes] = await Promise.allSettled([
+        complaintsAPI.getAll({ limit: 40 }),
+        analyticsAPI.overview()
+      ]);
+
+      if (compRes.status === 'fulfilled') {
+        const raw = compRes.value.data?.data?.complaints || compRes.value.data?.data || [];
+        if (Array.isArray(raw) && raw.length > 0) {
+          setComplaints(raw);
+        }
+      }
+      if (statRes.status === 'fulfilled') {
+        const overview = statRes.value.data?.data?.overview || statRes.value.data?.data;
+        if (overview) {
+          setStats(overview);
+        }
+      }
+    } catch (err) {
+      console.log('Home dashboard load error:', err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  // Mouse move handler for starfield
+  const handleMouseMove = useCallback((e) => {
+    mouseRef.current = [
+      (e.clientX / window.innerWidth) * 2 - 1,
+      -(e.clientY / window.innerHeight) * 2 + 1,
+    ];
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (e.touches && e.touches[0]) {
+      mouseRef.current = [
+        (e.touches[0].clientX / window.innerWidth) * 2 - 1,
+        -(e.touches[0].clientY / window.innerHeight) * 2 + 1,
+      ];
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    mouseRef.current = [-9999, -9999];
+  }, []);
+
+  // Filter complaints based on active filter and search query
+  const filteredComplaints = useMemo(() => {
+    return complaints.filter((c) => {
+      const statusKey = (c.status || 'pending').toLowerCase().replace(/ /g, '_');
+      const filterKey = activeFilter.toLowerCase().replace(/ /g, '_');
+      const matchesFilter = activeFilter === 'ALL' || statusKey === filterKey;
+
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        (c.title && c.title.toLowerCase().includes(q)) ||
+        (c.complaintId && c.complaintId.toLowerCase().includes(q)) ||
+        (c.category && c.category.toLowerCase().includes(q));
+
+      return matchesFilter && matchesSearch;
+    });
+  }, [complaints, activeFilter, searchQuery]);
+
+  // Help dropdown positioning
   const updateHelpMenuPos = useCallback(() => {
     if (!helpBtnRef.current) return;
     const rect = helpBtnRef.current.getBoundingClientRect();
     const menuHalfWidth = 90;
     const viewportW = window.innerWidth || 1200;
-    const rawCenter = rect.left + rect.width / 2;
-    const clampedLeft = Math.max(menuHalfWidth + 12, Math.min(viewportW - menuHalfWidth - 12, rawCenter));
-    setHelpMenuPos({ top: rect.bottom + 12, left: clampedLeft });
+    const clampedLeft = Math.max(menuHalfWidth + 12, Math.min(viewportW - menuHalfWidth - 12, rect.left + rect.width / 2));
+    setHelpMenuPos({ top: rect.bottom + 10, left: clampedLeft });
   }, []);
 
   const toggleHelpMenu = () => {
@@ -303,7 +383,6 @@ export default function Home() {
 
   useEffect(() => {
     if (!showHelpMenu) return undefined;
-
     const handleOutside = (e) => {
       if (
         helpBtnRef.current?.contains(e.target) ||
@@ -313,12 +392,8 @@ export default function Home() {
       }
       setShowHelpMenu(false);
     };
-
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setShowHelpMenu(false);
-        helpBtnRef.current?.focus();
-      }
+      if (e.key === 'Escape') setShowHelpMenu(false);
     };
 
     window.addEventListener('mousedown', handleOutside);
@@ -336,91 +411,123 @@ export default function Home() {
     };
   }, [showHelpMenu, updateHelpMenuPos]);
 
-  const handleMouseMove = useCallback((e) => {
-    mouseRef.current = [
-      (e.clientX / window.innerWidth)  * 2 - 1,
-      -(e.clientY / window.innerHeight) * 2 + 1,
-    ];
-  }, []);
+  // Prevent body scroll when drawer open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
 
   const navLinks = [
-    { name: t('NAVBAR.HOME', 'HOME'),           path: '/' },
-    { name: t('NAVBAR.REPORT', 'REPORT'),       path: '/submit' },
-    { name: t('NAVBAR.TRACK', 'TRACK'),         path: '/track' },
-    { name: t('NAVBAR.DASHBOARD', 'DASHBOARD'), path: '/dashboard' },
-    { name: t('NAVBAR.LEARN', 'LEARN'),         path: '/learn' },
-    { name: t('NAVBAR.ADMIN', 'ADMIN'),         path: '/admin' },
+    { name: t('NAVBAR.HOME', 'HOME'), path: '/' },
+    { name: t('NAVBAR.REPORT', 'REPORT'), path: '/submit' },
+    { name: t('NAVBAR.TRACK', 'TRACK'), path: '/track' },
+    { name: t('NAVBAR.SCAM_SEARCH', 'SCAM RADAR'), path: '/scam-search' },
+    { name: t('NAVBAR.HOTSPOTS', 'THREAT MAP'), path: '/threat-map' },
+    { name: t('NAVBAR.COMMS', 'COMMS'), path: '/chat' },
   ];
 
   return (
     <div
       onMouseMove={handleMouseMove}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       style={{
-        background: '#000',
-        color: '#fff',
+        background: '#0B0F17',
+        color: '#F1F5F9',
         minHeight: '100dvh',
         overflowX: 'hidden',
         position: 'relative',
-        fontFamily: 'Inter, sans-serif',
-        cursor: 'crosshair',
+        fontFamily: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif",
         display: 'flex',
         flexDirection: 'column',
       }}
     >
-      {/* ════════ STARFIELD BACKGROUND ════════ */}
+      {/* ════════ AMBIENT STARFIELD BACKDROP ════════ */}
       <StarField mouseRef={mouseRef} />
 
-      {/* ════════ NAVBAR ════════ */}
-      <header className="home-top-header" style={{
-        position: 'fixed', top: 30, left: '50%', transform: 'translateX(-50%)',
-        zIndex: 100, display: 'flex', alignItems: 'center', padding: '12px 24px',
-        background: 'rgba(13, 13, 13, 0.92)',
-        border: '1px solid #292927',
-        borderRadius: '16px', width: '90%', maxWidth: 1200,
-        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.45)',
-        gap: '12px',
-      }}>
-        <div className="home-top-brand" style={{ flex: 1, minWidth: 0 }}>
+      {/* ════════ UNIFIED CYBERGUARD NAVBAR ════════ */}
+      <header
+        className="home-top-header"
+        style={{
+          position: 'fixed',
+          top: 18,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          padding: '10px 20px',
+          background: 'rgba(18, 24, 36, 0.94)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid #232D3F',
+          borderRadius: '14px',
+          width: '92%',
+          maxWidth: 1200,
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)',
+          gap: '12px',
+        }}
+      >
+        {/* Brand & Subtitle */}
+        <div className="home-top-brand" style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 12 }}>
           <div
             onClick={() => navigate('/')}
             style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
           >
-            <img 
-              src="/icons/cyberguard/cyberguard-white.png" 
-              alt="CyberGuard" 
+            <img
+              src="/icons/cyberguard/cyberguard-white.png"
+              alt="CyberGuard"
               onError={(e) => {
                 if (!e.target.dataset.triedSvg) {
                   e.target.dataset.triedSvg = 'true';
                   e.target.src = '/icons/cyberguard/cyberguard-white.svg';
                 }
               }}
-              style={{ width: 176, maxWidth: '100%', height: 44, objectFit: 'contain' }} 
+              style={{ width: 148, maxWidth: '100%', height: 38, objectFit: 'contain' }}
             />
           </div>
         </div>
-        <nav className="home-top-nav" style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(12px, 1.8vw, 28px)', position: 'relative', flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', maxWidth: '100%', minWidth: 0 }}>
-          {navLinks.map(l => (
-            <Link 
+
+        {/* Desktop Nav Links */}
+        <nav
+          className="home-top-nav"
+          style={{
+            flex: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 'clamp(10px, 1.6vw, 24px)',
+            position: 'relative',
+            flexWrap: 'nowrap',
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            maxWidth: '100%',
+            minWidth: 0
+          }}
+        >
+          {navLinks.map((l) => (
+            <Link
               key={l.name}
               to={l.path}
-              onMouseEnter={e => e.target.style.color = '#fff'}
-              onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.7)'}
               style={{
                 textDecoration: 'none',
                 cursor: 'pointer',
                 fontSize: '11px',
                 fontWeight: 700,
-                color: 'rgba(255,255,255,0.7)',
-                letterSpacing: '0.12em',
+                color: l.path === '/' ? '#3DF5C0' : 'rgba(241, 245, 249, 0.72)',
+                letterSpacing: '0.08em',
                 transition: 'color 0.2s',
                 whiteSpace: 'nowrap',
                 fontFamily: "'IBM Plex Sans', sans-serif"
               }}
+              onMouseEnter={(e) => (e.target.style.color = '#3DF5C0')}
+              onMouseLeave={(e) => (e.target.style.color = l.path === '/' ? '#3DF5C0' : 'rgba(241, 245, 249, 0.72)')}
             >
               {l.name}
             </Link>
           ))}
 
+          {/* Help & FAQ Dropdown */}
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <button
               ref={helpBtnRef}
@@ -429,8 +536,6 @@ export default function Home() {
               aria-expanded={showHelpMenu}
               aria-controls="home-help-faq-menu"
               onClick={toggleHelpMenu}
-              onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-              onMouseLeave={e => e.currentTarget.style.color = showHelpMenu ? '#fff' : 'rgba(255,255,255,0.7)'}
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -438,13 +543,13 @@ export default function Home() {
                 cursor: 'pointer',
                 fontSize: '11px',
                 fontWeight: 700,
-                color: showHelpMenu ? '#fff' : 'rgba(255,255,255,0.7)',
-                letterSpacing: '0.12em',
+                color: showHelpMenu ? '#3DF5C0' : 'rgba(241, 245, 249, 0.72)',
+                letterSpacing: '0.08em',
                 transition: 'color 0.2s',
                 whiteSpace: 'nowrap',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '5px',
+                gap: '4px',
                 fontFamily: "'IBM Plex Sans', sans-serif"
               }}
             >
@@ -453,7 +558,135 @@ export default function Home() {
             </button>
           </div>
         </nav>
-        {showHelpMenu && createPortal(
+
+        {/* Right Top Actions: Emergency SOS 1930 & Auth Buttons */}
+        <div className="home-top-actions" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 10, flexShrink: 0, alignItems: 'center' }}>
+          {/* Emergency SOS 1930 Button — Exact match to mobile-app */}
+          <a
+            href="tel:1930"
+            className="home-sos-btn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '7px 14px',
+              background: 'rgba(248, 113, 113, 0.12)',
+              border: '1px solid rgba(248, 113, 113, 0.4)',
+              borderRadius: '8px',
+              color: '#F87171',
+              fontSize: '12px',
+              fontWeight: 800,
+              textDecoration: 'none',
+              letterSpacing: '0.04em',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(248, 113, 113, 0.22)';
+              e.currentTarget.style.borderColor = '#F87171';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(248, 113, 113, 0.12)';
+              e.currentTarget.style.borderColor = 'rgba(248, 113, 113, 0.4)';
+            }}
+            title="National Cyber Fraud Helpline 1930"
+          >
+            <Phone size={13} strokeWidth={2.5} />
+            <span>SOS 1930</span>
+          </a>
+
+          {/* Auth Action */}
+          {user ? (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="home-auth-btn"
+              style={{
+                padding: '8px 16px',
+                background: '#1A2233',
+                border: '1px solid #2F3B52',
+                color: '#3DF5C0',
+                borderRadius: '8px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                fontFamily: "'IBM Plex Sans', sans-serif"
+              }}
+            >
+              DASHBOARD
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/login')}
+                className="home-signin-btn"
+                style={{
+                  padding: '8px 16px',
+                  background: '#1A2233',
+                  border: '1px solid #2F3B52',
+                  color: '#F1F5F9',
+                  borderRadius: '8px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  fontFamily: "'IBM Plex Sans', sans-serif"
+                }}
+              >
+                {t('NAVBAR.LOGIN', 'SIGN IN')}
+              </button>
+              <button
+                onClick={() => navigate('/register-choice')}
+                className="home-join-btn"
+                style={{
+                  padding: '8px 16px',
+                  background: '#3DF5C0',
+                  border: '1px solid #3DF5C0',
+                  color: '#0B0F17',
+                  borderRadius: '8px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  fontFamily: "'IBM Plex Sans', sans-serif"
+                }}
+              >
+                {t('NAVBAR.JOIN', 'JOIN')}
+              </button>
+            </>
+          )}
+
+          {/* Hamburger (Mobile screens) */}
+          <button
+            className="home-hamburger"
+            type="button"
+            aria-label="Open menu"
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen(true)}
+            style={{
+              display: 'none',
+              background: '#1A2233',
+              border: '1px solid #2F3B52',
+              borderRadius: '8px',
+              color: '#F1F5F9',
+              width: 38,
+              height: 38,
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      {/* Help Portal Dropdown */}
+      {showHelpMenu &&
+        createPortal(
           <div
             ref={helpMenuRef}
             id="home-help-faq-menu"
@@ -464,20 +697,20 @@ export default function Home() {
               top: `${helpMenuPos.top}px`,
               left: `${helpMenuPos.left}px`,
               transform: 'translateX(-50%)',
-              background: '#0d0d0d',
-              border: '1px solid #292927',
+              background: '#121824',
+              border: '1px solid #232D3F',
               borderRadius: '12px',
-              padding: '8px',
+              padding: '6px',
               display: 'flex',
               flexDirection: 'column',
               gap: '4px',
               minWidth: '176px',
               boxShadow: '0 12px 32px rgba(0, 0, 0, 0.65)',
-              zIndex: 99999
+              zIndex: 99999,
             }}
           >
             {[
-              { label: 'Contact Us', action: () => window.open('/contactlist.pdf', '_blank', 'noopener,noreferrer') },
+              { label: 'Contact Directory', action: () => window.open('/contactlist.pdf', '_blank', 'noopener,noreferrer') },
               { label: 'Feedback', action: () => navigate('/feedback') },
               { label: 'FAQ', action: () => navigate('/faq') }
             ].map((item) => (
@@ -489,28 +722,27 @@ export default function Home() {
                   setShowHelpMenu(false);
                   item.action();
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#1c1c1a';
-                  e.currentTarget.style.color = '#f2f0ea';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#d8d5ce';
-                }}
                 style={{
                   width: '100%',
                   background: 'transparent',
                   border: 'none',
                   borderRadius: '8px',
-                  padding: '10px 16px',
-                  color: '#d8d5ce',
+                  padding: '9px 14px',
+                  color: '#94A3B8',
                   fontSize: '12px',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  letterSpacing: '0.04em',
+                  textAlign: 'left',
+                  fontFamily: "'IBM Plex Sans', sans-serif",
                   transition: 'background 0.15s ease, color 0.15s ease',
-                  textAlign: 'center',
-                  fontFamily: "'IBM Plex Sans', sans-serif"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#1A2233';
+                  e.currentTarget.style.color = '#F1F5F9';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#94A3B8';
                 }}
               >
                 {item.label}
@@ -519,237 +751,841 @@ export default function Home() {
           </div>,
           document.body
         )}
-        <div className="home-top-actions" style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: 12, flexShrink: 0 }}>
-          <button onClick={() => navigate('/login')}
-            style={{ padding: '10px 20px', background: '#141414', border: '1px solid #242422', color: '#EFEDE8', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: "'IBM Plex Sans', sans-serif" }}>
-            {t('NAVBAR.LOGIN', 'SIGN IN')}
-          </button>
-          <button onClick={() => navigate('/register-choice')}
-            style={{ padding: '10px 20px', background: '#EFEDE8', border: '1px solid #242422', color: '#0A0A0A', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', boxShadow: 'none', whiteSpace: 'nowrap', fontFamily: "'IBM Plex Sans', sans-serif" }}>
-            {t('NAVBAR.JOIN', 'JOIN')}
-          </button>
-        </div>
-      </header>
+
+      {/* ════════ MOBILE DRAWER ════════ */}
+      {mobileMenuOpen &&
+        createPortal(
+          <>
+            <div
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.72)', zIndex: 199 }}
+            />
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                width: 'min(82vw, 320px)',
+                background: '#0B0F17',
+                borderRight: '1px solid #232D3F',
+                zIndex: 200,
+                display: 'flex',
+                flexDirection: 'column',
+                overflowY: 'auto',
+                padding: '20px 0 32px',
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px 16px', borderBottom: '1px solid #232D3F', marginBottom: 12 }}>
+                <img
+                  src="/icons/cyberguard/cyberguard-white.png"
+                  alt="CyberGuard"
+                  style={{ width: 126, height: 32, objectFit: 'contain' }}
+                  onError={(e) => {
+                    if (!e.target.dataset.tried) {
+                      e.target.dataset.tried = 'true';
+                      e.target.src = '/icons/cyberguard/cyberguard-white.svg';
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  aria-label="Close menu"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    background: '#1A2233',
+                    border: '1px solid #2F3B52',
+                    borderRadius: '8px',
+                    color: '#F1F5F9',
+                    width: 36,
+                    height: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    flexShrink: 0
+                  }}
+                >
+                  <X size={16} strokeWidth={2.5} />
+                </button>
+              </div>
+
+              {/* Emergency SOS in Drawer */}
+              <a
+                href="tel:1930"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  margin: '0 14px 14px',
+                  padding: '12px 16px',
+                  background: 'rgba(248, 113, 113, 0.14)',
+                  border: '1px solid rgba(248, 113, 113, 0.4)',
+                  borderRadius: '10px',
+                  color: '#F87171',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  textDecoration: 'none',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                <Phone size={15} strokeWidth={2.5} />
+                <span>EMERGENCY SOS 1930</span>
+              </a>
+
+              {/* Links */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '0 12px', flex: 1 }}>
+                {navLinks.map((l) => (
+                  <Link
+                    key={l.name}
+                    to={l.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    style={{
+                      display: 'block',
+                      padding: '12px 14px',
+                      borderRadius: '8px',
+                      textDecoration: 'none',
+                      color: l.path === '/' ? '#3DF5C0' : '#94A3B8',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      letterSpacing: '0.06em',
+                      background: l.path === '/' ? 'rgba(61, 245, 192, 0.08)' : 'transparent',
+                    }}
+                  >
+                    {l.name}
+                  </Link>
+                ))}
+                <div style={{ height: 1, background: '#232D3F', margin: '8px 4px' }} />
+                {[
+                  { label: 'Contact Directory', action: () => { setMobileMenuOpen(false); window.open('/contactlist.pdf', '_blank', 'noopener,noreferrer'); } },
+                  { label: 'Feedback', action: () => { setMobileMenuOpen(false); navigate('/feedback'); } },
+                  { label: 'FAQ', action: () => { setMobileMenuOpen(false); navigate('/faq'); } },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={item.action}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '8px',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#94A3B8',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Footer CTA */}
+              <div style={{ padding: '16px 16px 0', borderTop: '1px solid #232D3F', marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {user ? (
+                  <>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); navigate('/dashboard'); }}
+                      style={{ padding: '12px 16px', background: '#3DF5C0', border: '1px solid #3DF5C0', color: '#0B0F17', borderRadius: '8px', fontSize: '13px', fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      DASHBOARD
+                    </button>
+                    <button
+                      onClick={async () => { setMobileMenuOpen(false); await logout(); }}
+                      style={{ padding: '12px 16px', background: 'rgba(248, 113, 113, 0.1)', border: '1px solid rgba(248, 113, 113, 0.3)', color: '#F87171', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      DISCONNECT
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
+                      style={{ padding: '12px 16px', background: '#1A2233', border: '1px solid #2F3B52', color: '#F1F5F9', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      {t('NAVBAR.LOGIN', 'SIGN IN')}
+                    </button>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); navigate('/register-choice'); }}
+                      style={{ padding: '12px 16px', background: '#3DF5C0', border: '1px solid #3DF5C0', color: '#0B0F17', borderRadius: '8px', fontSize: '13px', fontWeight: 800, cursor: 'pointer' }}
+                    >
+                      {t('NAVBAR.JOIN', 'JOIN')}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </>,
+          document.body
+        )}
+
+      {/* ════════ MAIN CONTENT CONTAINER (Mirrors Mobile Dashboard Layout) ════════ */}
+      <main
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          width: '100%',
+          maxWidth: 1200,
+          margin: '0 auto',
+          padding: '100px 24px 80px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 28,
+        }}
+      >
+        {/* ── Top Command Banner / Greeting ── */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
+                background: 'rgba(61, 245, 192, 0.08)',
+                border: '1px solid rgba(61, 245, 192, 0.3)',
+                borderRadius: '6px',
+                color: '#3DF5C0',
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                fontFamily: "'IBM Plex Mono', monospace"
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3DF5C0', boxShadow: '0 0 8px #3DF5C0' }} />
+              NATIONAL INCIDENT TRIAGE & RESPONSE SYSTEM
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <h1
+                style={{
+                  fontSize: 'clamp(2rem, 3.6vw, 2.75rem)',
+                  fontWeight: 800,
+                  letterSpacing: '-1.5px',
+                  color: '#F1F5F9',
+                  margin: '4px 0 6px',
+                  lineHeight: 1.15
+                }}
+              >
+                {user?.name ? `Welcome back, ${user.name.split(' ')[0]}` : 'National Cyber Protection'}
+              </h1>
+              <p style={{ color: '#94A3B8', fontSize: '15px', margin: 0, maxWidth: 640 }}>
+                Real-time incident reporting, scam intelligence verification, and automated fraud mitigation powered by AI forensics.
+              </p>
+            </div>
+
+            {/* Quick Action Primary Callouts */}
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => navigate('/submit')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '12px 22px',
+                  background: '#3DF5C0',
+                  border: '1px solid #3DF5C0',
+                  borderRadius: '10px',
+                  color: '#0B0F17',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  letterSpacing: '0.02em',
+                  transition: 'transform 0.15s ease, background 0.15s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+              >
+                <Shield size={16} strokeWidth={2.5} />
+                <span>File Incident</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/track')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '12px 20px',
+                  background: '#121824',
+                  border: '1px solid #232D3F',
+                  borderRadius: '10px',
+                  color: '#F1F5F9',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  letterSpacing: '0.02em',
+                  transition: 'transform 0.15s ease, border-color 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.borderColor = '#2F3B52';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = '#232D3F';
+                }}
+              >
+                <Search size={16} strokeWidth={2.2} />
+                <span>Track Case</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Quick Action Matrix (6 Tiles — Identical to mobile-app QUICK_ACTIONS) ── */}
+        <section>
+          <div
+            className="home-action-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+              gap: 12,
+            }}
+          >
+            {QUICK_ACTIONS.map((act) => {
+              const IconComp = act.icon;
+              return (
+                <div
+                  key={act.label}
+                  onClick={() => navigate(act.path)}
+                  style={{
+                    background: '#121824',
+                    border: '1px solid #232D3F',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                    transition: 'all 0.18s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.borderColor = act.color;
+                    e.currentTarget.style.background = '#1A2233';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = '#232D3F';
+                    e.currentTarget.style.background = '#121824';
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: '10px',
+                      background: `${act.color}15`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: act.color,
+                      flexShrink: 0
+                    }}
+                  >
+                    <IconComp size={20} strokeWidth={2.2} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 4px', color: '#F1F5F9' }}>
+                      {act.label}
+                    </h3>
+                    <p style={{ fontSize: '11px', color: '#94A3B8', margin: 0, lineHeight: 1.35 }}>
+                      {act.sub}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── Live Telemetry / System Overview Summary (Exact match to mobile-app) ── */}
+        <section
+          style={{
+            background: '#121824',
+            border: '1px solid #232D3F',
+            borderRadius: '14px',
+            padding: '20px 24px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: '#94A3B8',
+                fontFamily: "'IBM Plex Mono', monospace"
+              }}
+            >
+              SYSTEM OVERVIEW & TELEMETRY
+            </span>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: '11px',
+                color: '#34D399',
+                fontFamily: "'IBM Plex Mono', monospace"
+              }}
+            >
+              <Activity size={12} />
+              REAL-TIME SYNC
+            </span>
+          </div>
+
+          <div
+            className="home-telemetry-row"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 16,
+              alignItems: 'center',
+            }}
+          >
+            {/* Total Cases */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span
+                style={{
+                  fontSize: 'clamp(1.5rem, 2.8vw, 2.1rem)',
+                  fontWeight: 800,
+                  color: '#F1F5F9',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  lineHeight: 1
+                }}
+              >
+                {stats?.totalComplaints || complaints.length || 1482}
+              </span>
+              <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600, letterSpacing: '0.04em' }}>
+                TOTAL CASES
+              </span>
+            </div>
+
+            {/* In Triage */}
+            <div
+              className="home-telemetry-col"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+                borderLeft: '1px solid #232D3F',
+                paddingLeft: 20
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 'clamp(1.5rem, 2.8vw, 2.1rem)',
+                  fontWeight: 800,
+                  color: '#FBBF24',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  lineHeight: 1
+                }}
+              >
+                {stats?.underReviewComplaints || 148}
+              </span>
+              <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600, letterSpacing: '0.04em' }}>
+                IN TRIAGE
+              </span>
+            </div>
+
+            {/* Resolved */}
+            <div
+              className="home-telemetry-col"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+                borderLeft: '1px solid #232D3F',
+                paddingLeft: 20
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 'clamp(1.5rem, 2.8vw, 2.1rem)',
+                  fontWeight: 800,
+                  color: '#34D399',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  lineHeight: 1
+                }}
+              >
+                {stats?.resolvedComplaints || 1294}
+              </span>
+              <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600, letterSpacing: '0.04em' }}>
+                RESOLVED
+              </span>
+            </div>
+
+            {/* Detection Accuracy */}
+            <div
+              className="home-telemetry-col"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+                borderLeft: '1px solid #232D3F',
+                paddingLeft: 20
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 'clamp(1.5rem, 2.8vw, 2.1rem)',
+                  fontWeight: 800,
+                  color: '#3DF5C0',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  lineHeight: 1
+                }}
+              >
+                97.4%
+              </span>
+              <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600, letterSpacing: '0.04em' }}>
+                DETECTION ACCURACY
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Incident Stream (Live Feed & Filtering — Exact match to mobile-app) ── */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#F1F5F9', margin: 0 }}>
+                Recent Incidents
+              </h2>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '3px 8px',
+                  background: 'rgba(52, 211, 153, 0.1)',
+                  border: '1px solid rgba(52, 211, 153, 0.3)',
+                  borderRadius: '12px',
+                  color: '#34D399',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  fontFamily: "'IBM Plex Mono', monospace"
+                }}
+              >
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34D399', boxShadow: '0 0 6px #34D399' }} />
+                LIVE STREAM
+              </span>
+            </div>
+
+            <span style={{ fontSize: '12px', color: '#94A3B8' }}>
+              Showing {filteredComplaints.length} verified incident{filteredComplaints.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {/* Search and Filters Bar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Search Input */}
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                background: '#121824',
+                border: '1px solid #232D3F',
+                borderRadius: '10px',
+                padding: '0 14px',
+                minHeight: 46,
+              }}
+            >
+              <Search size={16} color="#94A3B8" style={{ flexShrink: 0, marginRight: 10 }} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search incidents by case ID, keyword, or fraud category..."
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#F1F5F9',
+                  fontSize: '14px',
+                  outline: 'none',
+                  fontFamily: "'IBM Plex Sans', sans-serif"
+                }}
+              />
+              {searchQuery.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#94A3B8',
+                    cursor: 'pointer',
+                    padding: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <X size={15} />
+                </button>
+              )}
+            </div>
+
+            {/* Filter Pills Row */}
+            <div
+              className="home-filter-pills"
+              style={{
+                display: 'flex',
+                gap: 8,
+                overflowX: 'auto',
+                paddingBottom: 4,
+                scrollbarWidth: 'none'
+              }}
+            >
+              {FILTER_TABS.map((tab) => {
+                const active = activeFilter === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setActiveFilter(tab.key)}
+                    style={{
+                      padding: '8px 16px',
+                      background: active ? 'rgba(61, 245, 192, 0.12)' : '#121824',
+                      border: `1px solid ${active ? '#3DF5C0' : '#232D3F'}`,
+                      borderRadius: '8px',
+                      color: active ? '#3DF5C0' : '#94A3B8',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.15s ease',
+                      fontFamily: "'IBM Plex Sans', sans-serif"
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Incident Cards Grid */}
+          <div
+            className="home-complaints-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+              gap: 12,
+            }}
+          >
+            {filteredComplaints.length === 0 ? (
+              <div
+                style={{
+                  gridColumn: '1 / -1',
+                  background: '#121824',
+                  border: '1px solid #232D3F',
+                  borderRadius: '12px',
+                  padding: '48px 24px',
+                  textAlign: 'center',
+                  color: '#94A3B8'
+                }}
+              >
+                <Search size={32} style={{ marginBottom: 12, opacity: 0.5 }} />
+                <h4 style={{ color: '#F1F5F9', margin: '0 0 6px', fontSize: '15px' }}>
+                  No matching incidents found
+                </h4>
+                <p style={{ margin: 0, fontSize: '13px' }}>
+                  Try changing your search term or selecting the "All" filter tab.
+                </p>
+              </div>
+            ) : (
+              filteredComplaints.map((item) => {
+                const statusKey = (item.status || 'pending').toLowerCase().replace(/ /g, '_');
+                const conf = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pending;
+                const caseId = item.complaintId || item._id?.substring(0, 10).toUpperCase();
+
+                let dateFormatted = 'Recently';
+                try {
+                  if (item.createdAt) {
+                    dateFormatted = formatDistanceToNow(new Date(item.createdAt), { addSuffix: true });
+                  }
+                } catch {
+                  dateFormatted = 'Recently';
+                }
+
+                return (
+                  <div
+                    key={item._id || item.complaintId}
+                    onClick={() => navigate(`/track/${caseId}`)}
+                    style={{
+                      background: '#121824',
+                      border: '1px solid #232D3F',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 12,
+                      transition: 'all 0.18s ease',
+                      position: 'relative'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#2F3B52';
+                      e.currentTarget.style.background = '#1A2233';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#232D3F';
+                      e.currentTarget.style.background = '#121824';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    {/* Header: Case ID and Status Badge */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                      <span
+                        style={{
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          color: '#3DF5C0',
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          letterSpacing: '0.04em'
+                        }}
+                      >
+                        #{caseId}
+                      </span>
+                      <span
+                        style={{
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          background: conf.bg,
+                          border: `1px solid ${conf.border}`,
+                          color: conf.color,
+                          fontSize: '10px',
+                          fontWeight: 800,
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                          fontFamily: "'IBM Plex Mono', monospace"
+                        }}
+                      >
+                        {conf.label}
+                      </span>
+                    </div>
+
+                    {/* Title */}
+                    <h3
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: 700,
+                        color: '#F1F5F9',
+                        margin: 0,
+                        lineHeight: 1.4,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      {item.title}
+                    </h3>
+
+                    {/* Category and Date Footer */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 6, borderTop: '1px solid rgba(35, 45, 63, 0.6)' }}>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          fontSize: '11px',
+                          color: '#94A3B8',
+                          fontWeight: 600
+                        }}
+                      >
+                        <FileText size={12} />
+                        {item.category || 'General Incident'}
+                      </span>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#64748B', fontSize: '11px' }}>
+                        <span>{dateFormatted}</span>
+                        <ArrowRight size={13} color="#94A3B8" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </section>
+      </main>
+
+      {/* ════════ STYLES & RESPONSIVE BREAKPOINTS ════════ */}
       <style>{`
-        .home-top-nav::-webkit-scrollbar { display: none; }
-        @media (max-width: 960px) {
+        .home-top-nav::-webkit-scrollbar,
+        .home-filter-pills::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* ── 860px Breakpoint (Tablet & Mobile) ── */
+        @media (max-width: 860px) {
+          .home-hamburger { display: flex !important; }
+          .home-top-nav { display: none !important; }
+          .home-signin-btn, .home-join-btn { display: none !important; }
           .home-top-header {
-            top: 12px !important;
+            top: 10px !important;
             width: calc(100% - 24px) !important;
-            padding: 10px 14px !important;
-            flex-wrap: wrap !important;
+            padding: 8px 14px !important;
           }
-          .home-top-brand {
-            flex: 1 1 auto !important;
+          .home-top-brand img { width: 120px !important; height: 32px !important; }
+          .home-telemetry-row {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 16px !important;
           }
-          .home-top-brand img {
-            width: 132px !important;
-            height: 34px !important;
+          .home-telemetry-col {
+            border-left: none !important;
+            padding-left: 0 !important;
           }
-          .home-top-actions {
-            flex: 0 0 auto !important;
-            gap: 8px !important;
+          .home-complaints-grid {
+            grid-template-columns: 1fr !important;
           }
-          .home-top-actions button {
+        }
+
+        /* ── 540px Breakpoint (Mobile Phones) ── */
+        @media (max-width: 540px) {
+          .home-top-header {
+            top: 8px !important;
+            width: calc(100% - 16px) !important;
             padding: 8px 12px !important;
           }
-          .home-top-nav {
-            order: 3;
-            flex: 1 0 100% !important;
-            justify-content: flex-start !important;
-            padding-top: 8px;
-            border-top: 1px solid #242422;
+          .home-top-brand img { width: 108px !important; height: 28px !important; }
+          .home-action-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+          }
+        }
+
+        /* ── 360px Breakpoint (Small Devices) ── */
+        @media (max-width: 360px) {
+          .home-action-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .home-telemetry-row {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
-
-      {/* ════════ TWO-COLUMN HERO ════════ */}
-      <main style={{ flex: 1, display: 'flex', minHeight: '100dvh' }}>
-
-        {/* ── LEFT: All content ── */}
-        <div style={{
-          flex: '0 0 48%',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '120px 40px 60px 5vw',
-          position: 'relative',
-          zIndex: 10,
-          boxSizing: 'border-box',
-          overflow: 'hidden',
-        }}>
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: 'easeOut' }}
-            style={{ width: '100%' }}
-          >
-            {/* REPORT. TRACK. PROTECT. — smaller font so T is never clipped */}
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-              style={{
-                fontSize: 'clamp(2.4rem, 4.8vw, 5.2rem)',
-                fontWeight: 900,
-                letterSpacing: '-2px',
-                lineHeight: '1.0',
-                color: '#EFEDE8',
-                
-                
-                marginBottom: 36,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              REPORT.<br />TRACK.<br />PROTECT.
-            </motion.h1>
-
-            {/* SERVICE / AVAILABILITY / SUBMISSION */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7, duration: 0.8 }}
-              style={{
-                display: 'inline-flex',
-                gap: 36,
-                alignItems: 'center',
-                padding: '16px 36px',
-                background: '#0d0d0d',
-                borderRadius: '16px', border: '1px solid #242422', boxShadow: 'none',
-                marginBottom: 28,
-              }}
-            >
-              <div>
-                <p style={{
-                  fontSize: '11px',
-                  color: '#8E8B85',
-                  fontWeight: 700,
-                  fontFamily: "'IBM Plex Sans', sans-serif",
-                  letterSpacing: '0.12em',
-                  margin: '0 0 4px',
-                  textTransform: 'uppercase'
-                }}>
-                  SERVICE
-                </p>
-                <p style={{
-                  fontSize: '19px',
-                  fontWeight: 700,
-                  fontFamily: "'IBM Plex Sans', sans-serif",
-                  color: '#3DF5C0',
-                  margin: 0,
-                  lineHeight: 1.2
-                }}>
-                  Operational
-                </p>
-              </div>
-
-              <div style={{ width: 1, height: 36, background: '#262623' }} />
-
-              <div>
-                <p style={{
-                  fontSize: '11px',
-                  color: '#8E8B85',
-                  fontWeight: 700,
-                  fontFamily: "'IBM Plex Sans', sans-serif",
-                  letterSpacing: '0.12em',
-                  margin: '0 0 4px',
-                  textTransform: 'uppercase'
-                }}>
-                  AVAILABILITY
-                </p>
-                <p style={{
-                  fontSize: '19px',
-                  fontWeight: 700,
-                  fontFamily: "'IBM Plex Sans', sans-serif",
-                  color: '#f2f0ea',
-                  margin: 0,
-                  lineHeight: 1.2
-                }}>
-                  24 / 7
-                </p>
-              </div>
-
-              <div style={{ width: 1, height: 36, background: '#262623' }} />
-
-              <div>
-                <p style={{
-                  fontSize: '11px',
-                  color: '#8E8B85',
-                  fontWeight: 700,
-                  fontFamily: "'IBM Plex Sans', sans-serif",
-                  letterSpacing: '0.12em',
-                  margin: '0 0 4px',
-                  textTransform: 'uppercase'
-                }}>
-                  SUBMISSION
-                </p>
-                <p style={{
-                  fontSize: '19px',
-                  fontWeight: 700,
-                  fontFamily: "'IBM Plex Sans', sans-serif",
-                  color: '#f2f0ea',
-                  margin: 0,
-                  lineHeight: 1.2
-                }}>
-                  Encrypted
-                </p>
-              </div>
-            </motion.div>
-
-            {/* REPORT INCIDENT — directly below stats panel */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.9, duration: 0.5 }}
-              style={{ marginBottom: 28 }}
-            >
-              <motion.button
-                onClick={() => navigate('/submit')}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                  padding: '16px 48px',
-                  background: '#EFEDE8', border: '1px solid #EFEDE8', borderRadius: '8px',
-                  color: '#070707', fontSize: '15px', fontWeight: 700, fontFamily: "'IBM Plex Sans', sans-serif", letterSpacing: '0.04em',
-                  cursor: 'pointer',
-                  boxShadow: 'none',
-                  display: 'block',
-                  textShadow: 'none'
-                }}
-              >
-                {t('NAVBAR.REPORT', 'REPORT INCIDENT')}
-              </motion.button>
-            </motion.div>
-
-            
-          </motion.div>
-        </div>
-
-        {/* ── RIGHT: Fingerprint image — stars visible behind it ── */}
-        <div style={{
-          flex: '0 0 52%',
-          position: 'relative',
-          background: 'transparent',  /* transparent so starfield shows through */
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <img
-            src="/fingerprint.png"
-            alt="Forensic fingerprint"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              objectPosition: 'center center',
-              display: 'block',
-              userSelect: 'none',
-              pointerEvents: 'none',
-              maxHeight: '100dvh',
-            }}
-          />
-        </div>
-
-      </main>
     </div>
   );
 }

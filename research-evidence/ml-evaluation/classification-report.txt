@@ -2,9 +2,9 @@
 CYBERGUARD IEEE RESEARCH BENCHMARK: HELD-OUT TEST REPORT (80/20 GROUP SPLIT)
 ======================================================================
 
-Scikit-Learn Version   : 1.8.0
+Scikit-Learn Version   : 1.9.1
 Dataset Version        : 3.0-group-aware
-Dataset SHA-256        : 3426ec7b81cfec76845439e7138780df4b808811f68d184b4918aadb22ee84ac
+Dataset SHA-256        : c6cadb177119a48481a81bffa72685140cdc8df459334b9775e760f466aa2a22
 Random Seed            : 42
 Total Dataset Size     : 1950 samples across 13 categories
 Split Configuration    : Group-Aware (Families 0-7 Dev, Families 8-9 Test)
@@ -15,14 +15,14 @@ Feature Configuration  : TF-IDF (1-2 ngrams, sublinear_tf=True, max_features=100
 Classifier Algorithm   : LogisticRegression (solver=lbfgs, C=2.0, class_weight='balanced')
 
 HELD-OUT TEST AGGREGATED METRICS (390 SAMPLES):
-  Accuracy             : 0.8897
-  Macro Precision      : 0.9016
-  Macro Recall         : 0.8897
-  Macro F1-Score       : 0.8896
-  Weighted F1-Score    : 0.8896
+  Accuracy             : 0.8974
+  Macro Precision      : 0.9106
+  Macro Recall         : 0.8974
+  Macro F1-Score       : 0.8975
+  Weighted F1-Score    : 0.8975
 
 SUBSET EVALUATION BREAKDOWN:
-  Clean Subset (377 samples) : Accuracy = 0.8886, Macro-F1 = 0.8882
+  Clean Subset (377 samples) : Accuracy = 0.8966, Macro-F1 = 0.8966
   Noisy Subset (13 samples) : Accuracy = 0.9231, Macro-F1 = 0.9405
 
 PER-CLASS CLASSIFICATION REPORT:
@@ -30,19 +30,19 @@ PER-CLASS CLASSIFICATION REPORT:
 
 child_exploitation     0.9286    0.8667    0.8966        30
       crypto_fraud     1.0000    0.9667    0.9831        30
-     cyberbullying     0.9583    0.7667    0.8519        30
-       data_breach     0.7368    0.9333    0.8235        30
-   financial_fraud     0.8710    0.9000    0.8852        30
-           hacking     0.7692    0.6667    0.7143        30
-    identity_theft     0.9062    0.9667    0.9355        30
+     cyberbullying     0.9565    0.7333    0.8302        30
+       data_breach     0.7632    0.9667    0.8529        30
+   financial_fraud     0.8750    0.9333    0.9032        30
+           hacking     0.7778    0.7000    0.7368        30
+    identity_theft     0.9667    0.9667    0.9667        30
    network_attacks     0.9677    1.0000    0.9836        30
-      online_fraud     0.8929    0.8333    0.8621        30
+      online_fraud     0.9286    0.8667    0.8966        30
              other     1.0000    0.7000    0.8235        30
           phishing     1.0000    1.0000    1.0000        30
         ransomware     1.0000    1.0000    1.0000        30
-women_child_safety     0.6905    0.9667    0.8056        30
+women_child_safety     0.6744    0.9667    0.7945        30
 
-          accuracy                         0.8897       390
-         macro avg     0.9016    0.8897    0.8896       390
-      weighted avg     0.9016    0.8897    0.8896       390
+          accuracy                         0.8974       390
+         macro avg     0.9106    0.8974    0.8975       390
+      weighted avg     0.9106    0.8974    0.8975       390
 

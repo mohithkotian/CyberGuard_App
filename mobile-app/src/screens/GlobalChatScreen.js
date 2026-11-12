@@ -6,6 +6,8 @@ import { chatsAPI } from '../services/api';
 import useAuthStore from '../hooks/useAuthStore';
 import { format } from 'date-fns';
 import CyberBackground from '../components/CyberBackground';
+import ScreenHeader from '../components/ScreenHeader';
+import IconGlyph from '../components/IconGlyph';
 
 export default function GlobalChatScreen({ navigation }) {
   const { user } = useAuthStore();
@@ -88,19 +90,19 @@ export default function GlobalChatScreen({ navigation }) {
   const renderItem = ({ item }) => {
     const isMe = user?._id && item.sender?._id ? user._id === item.sender._id : item.sender?.name === user?.name;
     const role = item.sender?.role || 'citizen';
-    let roleColor = colors.cyber;
+    let roleColor = colors.accent;
     if (role === 'admin') roleColor = colors.danger;
-    else if (role === 'officer') roleColor = colors.accent;
+    else if (role === 'officer') roleColor = colors.neonBlue;
 
     return (
       <View style={[styles.msgWrapper, isMe ? styles.msgWrapperMe : styles.msgWrapperOther]}>
         <View style={[styles.msgCard, isMe ? styles.msgCardMe : styles.msgCardOther]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, gap: 8 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Text style={[styles.senderName, { color: isMe ? colors.accent : '#FFFFFF' }]}>
+          <View style={styles.msgHeader}>
+            <View style={styles.senderInfo}>
+              <Text style={[styles.senderName, { color: isMe ? colors.accent : colors.text }]}>
                 {item.sender?.name || 'Citizen'}
               </Text>
-              <View style={[styles.roleBadge, { backgroundColor: `${roleColor}25`, borderColor: roleColor }]}>
+              <View style={[styles.roleBadge, { backgroundColor: `${roleColor}18`, borderColor: `${roleColor}40` }]}>
                 <Text style={[styles.roleText, { color: roleColor }]}>{role.toUpperCase()}</Text>
               </View>
             </View>
@@ -115,28 +117,23 @@ export default function GlobalChatScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={globalStyles.screen}>
+    <SafeAreaView style={globalStyles.screen} edges={['top']}>
       <CyberBackground />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backBtn}>
-          <Text style={{ color: colors.accent, fontSize: 18, fontWeight: '900' }}>←</Text>
-        </TouchableOpacity>
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.headerTitle}>CYBER DEFENSE COMMS</Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-            <View style={styles.liveDot} />
-            <Text style={styles.headerSub}>PUBLIC INTELLIGENCE & CITIZEN NETWORK</Text>
-          </View>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Community Comms"
+        subtitle="Citizen defense network"
+        navigation={navigation}
+      />
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
+        style={{ flex: 1 }}
+      >
         {loading ? (
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <View style={styles.loadingWrap}>
             <ActivityIndicator color={colors.accent} size="large" />
-            <Text style={{ color: colors.muted, marginTop: 12, fontSize: 12 }}>Establishing Secure Uplink...</Text>
+            <Text style={styles.loadingText}>Connecting to Comms Channel...</Text>
           </View>
         ) : (
           <FlatList
@@ -144,7 +141,7 @@ export default function GlobalChatScreen({ navigation }) {
             data={messages}
             keyExtractor={item => item._id}
             renderItem={renderItem}
-            contentContainerStyle={{ padding: 16, paddingBottom: 20 }}
+            contentContainerStyle={styles.chatListContent}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           />
         )}
@@ -153,19 +150,21 @@ export default function GlobalChatScreen({ navigation }) {
         <View style={styles.inputBar}>
           <TextInput
             style={styles.chatInput}
-            placeholder="Broadcast message to cyber defense room..."
+            placeholder="Share intelligence or report note..."
             placeholderTextColor={colors.muted}
             value={text}
             onChangeText={setText}
             onSubmitEditing={handleSend}
             returnKeyType="send"
           />
-          <TouchableOpacity 
-            style={[styles.sendBtn, (!text.trim() || sending) && { opacity: 0.5 }]} 
+          <TouchableOpacity
+            style={[styles.sendBtn, (!text.trim() || sending) && styles.sendBtnDisabled]}
             onPress={handleSend}
             disabled={!text.trim() || sending}
+            activeOpacity={0.8}
+            accessibilityLabel="Send message"
           >
-            <Text style={{ color: '#030A14', fontSize: 16, fontWeight: '900' }}>→</Text>
+            <IconGlyph name="send" size={18} color="#070B12" strokeWidth={2.4} />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -174,41 +173,19 @@ export default function GlobalChatScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(0, 255, 209, 0.1)',
+  loadingWrap: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 255, 209, 0.3)',
   },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: 1.5,
+  loadingText: {
+    color: colors.textSecondary,
+    marginTop: 12,
+    fontSize: 13,
   },
-  headerSub: {
-    color: colors.accent,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.success,
+  chatListContent: {
+    padding: 16,
+    paddingBottom: 16,
   },
   msgWrapper: {
     marginBottom: 12,
@@ -227,67 +204,84 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   msgCardMe: {
-    backgroundColor: 'rgba(0, 180, 255, 0.15)',
-    borderColor: 'rgba(0, 180, 255, 0.4)',
-    borderBottomRightRadius: 2,
+    backgroundColor: 'rgba(61, 245, 192, 0.1)',
+    borderColor: 'rgba(61, 245, 192, 0.3)',
+    borderBottomRightRadius: 3,
   },
   msgCardOther: {
-    backgroundColor: 'rgba(12, 22, 45, 0.85)',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderBottomLeftRadius: 2,
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderBottomLeftRadius: 3,
+  },
+  msgHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+    gap: 8,
+  },
+  senderInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 1,
   },
   senderName: {
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: '700',
   },
   roleBadge: {
     paddingHorizontal: 6,
-    paddingVertical: 1,
+    paddingVertical: 2,
     borderRadius: 4,
     borderWidth: 1,
   },
   roleText: {
-    fontSize: 8,
-    fontWeight: '900',
-    letterSpacing: 0.5,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   timestamp: {
     color: colors.muted,
-    fontSize: 9,
+    fontSize: 11,
   },
   msgBody: {
     color: colors.text,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
     marginTop: 2,
   },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 10,
-    backgroundColor: 'rgba(10, 18, 36, 0.95)',
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 180, 255, 0.2)',
+    borderTopColor: colors.border,
     gap: 10,
   },
   chatInput: {
     flex: 1,
-    backgroundColor: 'rgba(15, 25, 50, 0.9)',
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.3)',
-    borderRadius: 20,
-    paddingHorizontal: 16,
+    borderColor: colors.borderLight,
+    borderRadius: 10,
+    paddingHorizontal: 14,
     paddingVertical: 10,
     color: colors.text,
-    fontSize: 13,
+    fontSize: 15,
+    minHeight: 44,
   },
   sendBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 44,
+    height: 44,
+    borderRadius: 10,
     backgroundColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+  sendBtnDisabled: {
+    opacity: 0.4,
+  },
 });

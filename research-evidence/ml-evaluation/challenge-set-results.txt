@@ -2,7 +2,7 @@
 CYBERGUARD ML v3 INDEPENDENT CHALLENGE BENCHMARK RESULTS
 ======================================================================
 
-Model File               : /Users/pruthvishetty/Desktop/cybercrime-system/ml-service/models/classifier.pkl
+Model File               : C:\Users\Mohith\CyberGuard_App\ml-service\models\classifier.pkl
 Confidence Threshold tau : 0.2
 
 215-SAMPLE INDEPENDENT CHALLENGE BENCHMARK
@@ -11,28 +11,28 @@ Confidence Threshold tau : 0.2
   Benign OOD Samples     : 20 (everyday non-cyber queries)
 
 IN-DOMAIN METRICS:
-  Raw Accuracy           : 0.9846
-  Raw Macro Precision    : 0.9856
-  Raw Macro Recall       : 0.9846
-  Raw Macro F1-Score     : 0.9846
-  Weighted F1-Score      : 0.9846
-  Operational Accuracy   : 0.9744
+  Raw Accuracy           : 0.9795
+  Raw Macro Precision    : 0.9804
+  Raw Macro Recall       : 0.9795
+  Raw Macro F1-Score     : 0.9795
+  Weighted F1-Score      : 0.9795
+  Operational Accuracy   : 0.9692
   In-Domain FRR (tau=0.2): 1.03%
-  Mean Confidence        : 0.5868
+  Mean Confidence        : 0.5841
 
 BENIGN OOD METRICS:
-  OOD False Acceptance   : 0.00%
-  OOD Safe Rejection     : 100.00%
-  Mean Confidence        : 0.1673
+  OOD False Acceptance   : 5.00%
+  OOD Safe Rejection     : 95.00%
+  Mean Confidence        : 0.1687
 
 IN-DOMAIN PER-CLASS BREAKDOWN:
                     precision    recall  f1-score   support
 
 child_exploitation     1.0000    1.0000    1.0000        15
-      crypto_fraud     1.0000    1.0000    1.0000        15
+      crypto_fraud     0.9375    1.0000    0.9677        15
      cyberbullying     0.9375    1.0000    0.9677        15
        data_breach     1.0000    0.9333    0.9655        15
-   financial_fraud     0.9375    1.0000    0.9677        15
+   financial_fraud     0.9333    0.9333    0.9333        15
            hacking     1.0000    1.0000    1.0000        15
     identity_theft     0.9375    1.0000    0.9677        15
    network_attacks     1.0000    1.0000    1.0000        15
@@ -42,7 +42,7 @@ child_exploitation     1.0000    1.0000    1.0000        15
         ransomware     1.0000    1.0000    1.0000        15
 women_child_safety     1.0000    0.9333    0.9655        15
 
-          accuracy                         0.9846       195
-         macro avg     0.9856    0.9846    0.9846       195
-      weighted avg     0.9856    0.9846    0.9846       195
+          accuracy                         0.9795       195
+         macro avg     0.9804    0.9795    0.9795       195
+      weighted avg     0.9804    0.9795    0.9795       195
 

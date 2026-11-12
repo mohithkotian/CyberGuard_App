@@ -1,15 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, KeyboardAvoidingView, Platform, ActivityIndicator, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  StyleSheet,
+  Switch
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import { complaintsAPI } from '../services/api';
 import { colors, globalStyles } from '../utils/theme';
 import CyberBackground from '../components/CyberBackground';
+import ScreenHeader from '../components/ScreenHeader';
+import IconGlyph from '../components/IconGlyph';
+import useAuthStore from '../hooks/useAuthStore';
 
-const { width } = Dimensions.get('window');
-const STEPS = ['Incident Details', 'Victim & Suspect', 'Evidence Dossier', 'Review & File'];
+const STEPS = ['Incident Details', 'Suspect Info', 'Evidence', 'Review & File'];
 
 export default function SubmitComplaintScreen({ route, navigation }) {
+  const { user } = useAuthStore();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]);
@@ -71,7 +86,7 @@ export default function SubmitComplaintScreen({ route, navigation }) {
         return false;
       }
       if (!form.incidentDate) {
-        Alert.alert('Validation Error', 'Incident date is mandatory.');
+        Alert.alert('Validation Error', 'Incident date is mandatory (YYYY-MM-DD).');
         return false;
       }
     }
@@ -79,7 +94,6 @@ export default function SubmitComplaintScreen({ route, navigation }) {
   };
 
   const handleSubmit = async () => {
-    // Strictly prevent submission before the final Review & File step
     if (step < STEPS.length - 1) {
       if (validateStep(step)) {
         setStep(s => s + 1);
@@ -102,6 +116,19 @@ export default function SubmitComplaintScreen({ route, navigation }) {
       setStep(0);
       return;
     }
+
+    if (!user) {
+      Alert.alert(
+        'Authentication Required',
+        'To officially lodge a cybercrime incident and receive a trackable Case Docket ID, please sign in with your account or use 1-tap demo credentials.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign In Now', onPress: () => navigation.navigate('Login') }
+        ]
+      );
+      return;
+    }
+
     setLoading(true);
     try {
       const fd = new FormData();
@@ -136,11 +163,11 @@ export default function SubmitComplaintScreen({ route, navigation }) {
       const newCase = data.data?.complaint || data.data;
 
       Alert.alert(
-        'Complaint Lodged Successfully! ◈',
-        `Incident Docket: ${newCase?.complaintId || 'Registered'}\nAI Category: ${(newCase?.category || 'General Fraud').replace(/_/g, ' ')}\nStatus: Pending Investigation`,
+        'Complaint Lodged Successfully',
+        `Incident Docket: ${newCase?.complaintId || 'Registered'}\nCategory: ${(newCase?.category || 'General Fraud').replace(/_/g, ' ')}\nStatus: Pending Investigation`,
         [
           {
-            text: 'View Case Dossier',
+            text: 'View Case File',
             onPress: () => navigation.navigate('ComplaintDetail', { complaintId: newCase?._id || newCase?.complaintId }),
           },
           {
@@ -158,10 +185,10 @@ export default function SubmitComplaintScreen({ route, navigation }) {
   };
 
   const Field = ({ k, label, ...props }) => (
-    <View style={{ marginBottom: 12 }}>
+    <View style={styles.fieldGroup}>
       <Text style={globalStyles.label}>{label}</Text>
       <TextInput
-        style={globalStyles.input}
+        style={[globalStyles.input, { marginBottom: 0 }]}
         placeholderTextColor={colors.muted}
         value={form[k]}
         onChangeText={v => setField(k, v)}
@@ -171,18 +198,40 @@ export default function SubmitComplaintScreen({ route, navigation }) {
   );
 
   return (
-    <SafeAreaView style={globalStyles.screen}>
+    <SafeAreaView style={globalStyles.screen} edges={['top']}>
       <CyberBackground />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => (step > 0 ? setStep(s => s - 1) : navigation.goBack())} style={styles.backBtn}>
-          <Text style={{ color: colors.accent, fontSize: 18, fontWeight: '900' }}>←</Text>
-        </TouchableOpacity>
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.headerTitle}>FILE CYBER INCIDENT</Text>
-          <Text style={styles.headerSub}>STEP {step + 1} OF 4 • {STEPS[step].toUpperCase()}</Text>
+      <ScreenHeader
+        title="File Cyber Incident"
+        subtitle={`Step ${step + 1} of 4: ${STEPS[step]}`}
+        navigation={navigation}
+        onBack={() => (step > 0 ? setStep(s => s - 1) : navigation.goBack())}
+      />
+
+      {/* Account Filing Status Banner */}
+      <View style={{
+        marginHorizontal: 16,
+        marginBottom: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 9,
+        borderRadius: 8,
+        backgroundColor: user ? 'rgba(61, 245, 192, 0.08)' : 'rgba(251, 191, 36, 0.1)',
+        borderWidth: 1,
+        borderColor: user ? 'rgba(61, 245, 192, 0.3)' : 'rgba(251, 191, 36, 0.3)',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+          <IconGlyph name={user ? "check" : "warning"} size={14} color={user ? colors.accent : colors.warn} />
+          <Text style={{ fontSize: 12, color: colors.text, flex: 1 }} numberOfLines={1}>
+            {user ? `Filing as ${user.name} (${user.email})` : 'Guest Mode — Sign in to link case to ledger'}
+          </Text>
         </View>
+        {!user && (
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={{ fontSize: 12, fontWeight: '700', color: colors.accent }}>Sign In</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Stepper Progress Bar */}
@@ -193,31 +242,33 @@ export default function SubmitComplaintScreen({ route, navigation }) {
       </View>
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
-          
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+
           {/* STEP 0: INCIDENT DETAILS */}
           {step === 0 && (
-            <View style={globalStyles.glassCard}>
-              <Text style={globalStyles.sectionTitle}>1. INCIDENT DOSSIER</Text>
-              
+            <View style={globalStyles.card}>
+              <Text style={styles.cardTitle}>1. Incident Details</Text>
+
               <Field
                 k="title"
                 label="Complaint Title *"
                 placeholder="e.g. Unauthorized UPI transfer after fake APK install"
               />
 
-              <Text style={globalStyles.label}>Description of Incident * (min 30 chars)</Text>
-              <TextInput
-                style={[globalStyles.input, { height: 110, textAlignVertical: 'top' }]}
-                placeholderTextColor={colors.muted}
-                multiline
-                placeholder="Detail what happened, timestamps, suspect interactions, apps installed, or payment requests..."
-                value={form.description}
-                onChangeText={v => setField('description', v)}
-              />
-              <Text style={{ color: form.description.length >= 30 ? colors.success : colors.muted, fontSize: 11, marginBottom: 12 }}>
-                {form.description.length}/30 characters minimum
-              </Text>
+              <View style={styles.fieldGroup}>
+                <Text style={globalStyles.label}>Description of Incident * (min 30 characters)</Text>
+                <TextInput
+                  style={[globalStyles.input, styles.textArea]}
+                  placeholderTextColor={colors.muted}
+                  multiline
+                  placeholder="Detail what happened, timestamps, suspect interactions, apps installed, or payment requests..."
+                  value={form.description}
+                  onChangeText={v => setField('description', v)}
+                />
+                <Text style={[styles.charCount, { color: form.description.length >= 30 ? colors.success : colors.muted }]}>
+                  {form.description.length}/30 characters minimum
+                </Text>
+              </View>
 
               <Field
                 k="incidentDate"
@@ -225,24 +276,27 @@ export default function SubmitComplaintScreen({ route, navigation }) {
                 placeholder="2026-08-04"
               />
 
-              {/* Anonymous Checkbox */}
-              <TouchableOpacity
-                onPress={() => setField('isAnonymous', !form.isAnonymous)}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}
-              >
-                <View style={[styles.checkbox, form.isAnonymous && styles.checkboxActive]}>
-                  {form.isAnonymous && <Text style={{ color: '#030A14', fontSize: 12, fontWeight: '900' }}>v</Text>}
+              {/* Anonymous Toggle Row */}
+              <View style={styles.switchRow}>
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text style={styles.switchLabel}>File Anonymously</Text>
+                  <Text style={styles.switchSub}>Hide your personal identity on public incident feeds</Text>
                 </View>
-                <Text style={{ color: colors.text, fontSize: 13 }}>File Anonymously (Hide identity on public feed)</Text>
-              </TouchableOpacity>
+                <Switch
+                  value={form.isAnonymous}
+                  onValueChange={v => setField('isAnonymous', v)}
+                  trackColor={{ false: colors.surfaceElevated, true: colors.accent }}
+                  thumbColor={form.isAnonymous ? '#070B12' : colors.textSecondary}
+                />
+              </View>
             </View>
           )}
 
-          {/* STEP 1: VICTIM & SUSPECT INFO */}
+          {/* STEP 1: FINANCIAL & SUSPECT INFO */}
           {step === 1 && (
-            <View style={globalStyles.glassCard}>
-              <Text style={globalStyles.sectionTitle}>2. FINANCIAL & SUSPECT INTELLIGENCE</Text>
-              
+            <View style={globalStyles.card}>
+              <Text style={styles.cardTitle}>2. Financial & Suspect Info</Text>
+
               <Field
                 k="financialLoss"
                 label="Estimated Financial Loss (₹ INR)"
@@ -262,7 +316,7 @@ export default function SubmitComplaintScreen({ route, navigation }) {
                 placeholder="Mumbai"
               />
 
-              <Text style={[globalStyles.sectionTitle, { marginTop: 12 }]}>! SUSPECT IDENTIFIERS (OPTIONAL)</Text>
+              <Text style={[styles.cardTitle, { marginTop: 12 }]}>Suspect Identifiers (Optional)</Text>
 
               <Field
                 k="suspectPhone"
@@ -289,32 +343,37 @@ export default function SubmitComplaintScreen({ route, navigation }) {
 
           {/* STEP 2: EVIDENCE UPLOAD */}
           {step === 2 && (
-            <View style={globalStyles.glassCard}>
-              <Text style={globalStyles.sectionTitle}>3. ATTACH EVIDENCE ARTIFACTS</Text>
-              <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: 14 }}>
+            <View style={globalStyles.card}>
+              <Text style={styles.cardTitle}>3. Attach Evidence</Text>
+              <Text style={styles.cardSub}>
                 Attach screenshots of transactions, fraudulent SMS, call logs, emails, or APK files (Max 5 files).
               </Text>
 
-              <TouchableOpacity onPress={pickFile} style={styles.uploadBox}>
-                <Text style={{ fontSize: 32, marginBottom: 6 }}>⌕</Text>
-                <Text style={{ color: colors.accent, fontSize: 13, fontWeight: '800' }}>TAP TO ATTACH EVIDENCE</Text>
-                <Text style={{ color: colors.muted, fontSize: 10, marginTop: 4 }}>
-                  Images, PDF, TXT, Logs (Max 10MB per file)
-                </Text>
+              <TouchableOpacity onPress={pickFile} style={styles.uploadBox} activeOpacity={0.8}>
+                <View style={styles.uploadIconWrap}>
+                  <IconGlyph name="upload" size={28} color={colors.accent} />
+                </View>
+                <Text style={styles.uploadTitle}>Tap to Attach Evidence</Text>
+                <Text style={styles.uploadSub}>Images, PDF, TXT, Logs (Max 10MB per file)</Text>
               </TouchableOpacity>
 
               {files.map((f, i) => (
                 <View key={i} style={styles.fileCard}>
-                  <Text style={{ fontSize: 16 }}>▤</Text>
+                  <IconGlyph name="file" size={18} color={colors.accent} />
                   <Text style={styles.fileName} numberOfLines={1}>{f.name}</Text>
-                  <TouchableOpacity onPress={() => setFiles(prev => prev.filter((_, j) => j !== i))}>
-                    <Text style={{ color: colors.danger, fontSize: 16, padding: 4 }}>x</Text>
+                  <TouchableOpacity
+                    onPress={() => setFiles(prev => prev.filter((_, j) => j !== i))}
+                    style={styles.fileRemoveBtn}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    accessibilityLabel="Remove file"
+                  >
+                    <IconGlyph name="close" size={16} color={colors.danger} />
                   </TouchableOpacity>
                 </View>
               ))}
 
               {files.length === 0 && (
-                <Text style={{ color: colors.muted, fontSize: 11, textAlign: 'center', marginTop: 10 }}>
+                <Text style={styles.emptyEvidenceNote}>
                   Evidence is optional but accelerates officer triage.
                 </Text>
               )}
@@ -323,17 +382,17 @@ export default function SubmitComplaintScreen({ route, navigation }) {
 
           {/* STEP 3: REVIEW & SUBMIT */}
           {step === 3 && (
-            <View style={globalStyles.glassCard}>
-              <Text style={globalStyles.sectionTitle}>4. REVIEW INCIDENT DOSSIER</Text>
+            <View style={globalStyles.card}>
+              <Text style={styles.cardTitle}>4. Review Incident Details</Text>
 
               {[
-                ['TITLE', form.title],
-                ['DATE', form.incidentDate],
-                ['FINANCIAL LOSS', form.financialLoss ? `₹${Number(form.financialLoss).toLocaleString()}` : 'None Reported'],
-                ['LOCATION', `${form.district}, ${form.state}`],
-                ['ANONYMOUS', form.isAnonymous ? 'YES' : 'NO'],
-                ['EVIDENCE', `${files.length} artifact(s) attached`],
-                ['SUSPECT REF', form.suspectPhone || form.suspectEmail || form.suspectBank || 'Not provided'],
+                ['Title', form.title],
+                ['Date', form.incidentDate],
+                ['Financial Loss', form.financialLoss ? `₹${Number(form.financialLoss).toLocaleString()}` : 'None Reported'],
+                ['Location', `${form.district}, ${form.state}`],
+                ['Anonymous', form.isAnonymous ? 'Yes' : 'No'],
+                ['Evidence', `${files.length} artifact(s) attached`],
+                ['Suspect Ref', form.suspectPhone || form.suspectEmail || form.suspectBank || 'Not provided'],
               ].map(([k, v]) => (
                 <View key={k} style={styles.reviewRow}>
                   <Text style={styles.reviewKey}>{k}</Text>
@@ -342,40 +401,51 @@ export default function SubmitComplaintScreen({ route, navigation }) {
               ))}
 
               <View style={styles.neuralBanner}>
-                <Text style={{ fontSize: 16 }}>◈</Text>
-                <Text style={{ color: colors.accent, fontSize: 11, flex: 1 }}>
-                  Neural ML Engine will automatically compute threat severity and triage this incident in MongoDB Atlas.
+                <IconGlyph name="shield" size={20} color={colors.accent} />
+                <Text style={styles.neuralBannerText}>
+                  AI classification engine will automatically determine threat severity and triage this incident for investigating officers.
                 </Text>
               </View>
             </View>
           )}
 
           {/* Navigation Controls */}
-          <View style={{ gap: 10, marginTop: 20 }}>
+          <View style={styles.controlsRow}>
             {step < STEPS.length - 1 ? (
               <TouchableOpacity
                 style={globalStyles.btnPrimary}
                 onPress={() => validateStep() && setStep(s => s + 1)}
+                activeOpacity={0.8}
               >
-                <Text style={globalStyles.btnPrimaryText}>CONTINUE TO {STEPS[step + 1].toUpperCase()} →</Text>
+                <Text style={globalStyles.btnPrimaryText}>Continue to {STEPS[step + 1]}</Text>
+                <IconGlyph name="arrowRight" size={18} color="#070B12" strokeWidth={2.4} />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                style={[globalStyles.btnPrimary, { backgroundColor: colors.accent }]}
+                style={globalStyles.btnPrimary}
                 onPress={handleSubmit}
                 disabled={loading}
+                activeOpacity={0.8}
               >
                 {loading ? (
-                  <ActivityIndicator color="#030A14" />
+                  <ActivityIndicator color="#070B12" />
                 ) : (
-                  <Text style={globalStyles.btnPrimaryText}>» SUBMIT INCIDENT TO CLOUD DB</Text>
+                  <>
+                    <IconGlyph name="check" size={18} color="#070B12" strokeWidth={2.4} />
+                    <Text style={globalStyles.btnPrimaryText}>Submit Incident Report</Text>
+                  </>
                 )}
               </TouchableOpacity>
             )}
 
             {step > 0 && (
-              <TouchableOpacity style={globalStyles.btnOutline} onPress={() => setStep(s => s - 1)}>
-                <Text style={globalStyles.btnOutlineText}>← Back to Previous Step</Text>
+              <TouchableOpacity
+                style={[globalStyles.btnOutline, { marginTop: 10 }]}
+                onPress={() => setStep(s => s - 1)}
+                activeOpacity={0.75}
+              >
+                <IconGlyph name="arrowLeft" size={16} color={colors.text} />
+                <Text style={globalStyles.btnOutlineText}>Back to Previous Step</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -386,116 +456,165 @@ export default function SubmitComplaintScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(0, 255, 209, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 255, 209, 0.3)',
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: 1.5,
-  },
-  headerSub: {
-    color: colors.accent,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
   stepperContainer: {
     flexDirection: 'row',
-    gap: 6,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: colors.bg,
   },
   stepBar: {
     flex: 1,
-    height: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    height: 4,
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 2,
   },
   stepBarActive: {
     backgroundColor: colors.accent,
   },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 60,
   },
-  checkboxActive: {
-    backgroundColor: colors.accent,
+  cardTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  cardSub: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    marginBottom: 16,
+    lineHeight: 19,
+  },
+  fieldGroup: {
+    marginBottom: 16,
+  },
+  textArea: {
+    height: 110,
+    textAlignVertical: 'top',
+    paddingTop: 12,
+  },
+  charCount: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 6,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    marginTop: 8,
+  },
+  switchLabel: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  switchSub: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
   },
   uploadBox: {
     borderWidth: 1.5,
-    borderColor: 'rgba(0, 180, 255, 0.35)',
+    borderColor: colors.borderLight,
     borderStyle: 'dashed',
     borderRadius: 12,
     padding: 24,
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 180, 255, 0.04)',
+    backgroundColor: colors.surfaceElevated,
+    marginBottom: 12,
+  },
+  uploadIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(61, 245, 192, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 10,
+  },
+  uploadTitle: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  uploadSub: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 4,
   },
   fileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 25, 50, 0.9)',
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: 10,
+    padding: 12,
     marginTop: 8,
     borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.2)',
+    borderColor: colors.borderLight,
+    gap: 10,
   },
   fileName: {
     color: colors.text,
-    fontSize: 12,
+    fontSize: 13,
     flex: 1,
-    marginLeft: 8,
+  },
+  fileRemoveBtn: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyEvidenceNote: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 10,
   },
   reviewRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    alignItems: 'center',
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+    borderBottomColor: colors.border,
   },
   reviewKey: {
-    color: colors.muted,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1,
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '500',
   },
   reviewVal: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+    flexShrink: 1,
+    textAlign: 'right',
   },
   neuralBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: 'rgba(0, 255, 209, 0.08)',
+    gap: 12,
+    backgroundColor: 'rgba(61, 245, 192, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(0, 255, 209, 0.25)',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 14,
-  }
+    borderColor: 'rgba(61, 245, 192, 0.25)',
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 16,
+  },
+  neuralBannerText: {
+    color: colors.text,
+    fontSize: 13,
+    lineHeight: 18,
+    flex: 1,
+  },
+  controlsRow: {
+    marginTop: 16,
+  },
 });

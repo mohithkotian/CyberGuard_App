@@ -117,20 +117,72 @@ Web app URL:
 http://localhost:3000
 ```
 
-Open the web app at:
+### Terminal 4 — Expo mobile app (React Native)
+
+```powershell
+cd C:\Users\Mohith\CyberGuard_App\mobile-app
+npx expo start -c
+```
+
+Metro bundler URL:
 
 ```text
-http://localhost:3000
+http://localhost:8081
 ```
+
+#### Complete iOS / iPhone Startup & Commands:
+
+1. **Local Wi-Fi Mode (Recommended):**
+   ```powershell
+   npx expo start -c
+   ```
+   - Open the **Camera app** on your iPhone.
+   - Point the lens at the QR code in your terminal.
+   - Tap the yellow pop-up banner: **"Open in Expo Go"**.
+
+2. **Safari Direct Deep-Link (If QR doesn't trigger):**
+   - Open **Safari** on your iPhone.
+   - Type or paste: `exp://192.168.1.148:8081` (replace with your active Wi-Fi IP from `ipconfig`).
+   - Tap **Open** when prompted to launch Expo Go.
+
+3. **Cloud Tunnel Mode (When testing across different Wi-Fi / Hotspot):**
+   ```powershell
+   npx expo start --tunnel
+   ```
+   - Creates a public proxy tunnel (`exp://*.exp.direct`) that routes through firewalls.
+
+4. **Offline Local Dev Mode:**
+   ```powershell
+   npx expo start --offline
+   ```
+
+5. **Fixing iOS Expo Go Account Mismatch:**
+   - **Error:** `iOS ERROR: You're signed in to Expo Go as 'mohithkotian', but not signed in to Expo CLI`
+   - **Quick Fix:** On your iPhone, open the **Expo Go** app → Tap the **Profile / Settings** icon in the top right → Tap **Sign Out**. Now scan the QR code again in anonymous local mode without any account restriction.
+   - **CLI Login Alternative:** Run `npx expo login` in your terminal to authenticate your PC with the same account.
+
+- Note: Standalone iOS `.ipa` builds require Apple Developer credentials and cloud EAS:
+  ```powershell
+  npx eas-cli build --platform ios
+  ```
 
 ## Correct startup order
 
 ```text
-1. MongoDB
-2. ML service — port 5003
-3. Backend API — port 5002
-4. React web app — port 3000
+1. MongoDB (Port 27017)
+2. ML service — Port 5003
+3. Backend API — Port 5002
+4. React web app — Port 3000
+5. Mobile app (Expo) — Port 8081/8082
 ```
+
+## Demo accounts for testing
+
+| Role | Email | Password | Scope |
+|---|---|---|---|
+| **Citizen (Demo)** | `citizen@test.com` | `Citizen@123` | File & track complaints, browse public radar |
+| **Police Officer** | `officer@cyberguard.gov` | `Officer@123` | Investigation desk, status updates, live radar |
+| **Cyber Admin** | `admin@cyberguard.gov` | `Admin@12345` | Global admin dashboard, user management |
 
 ## Important commands
 

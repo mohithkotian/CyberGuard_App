@@ -1,13 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, KeyboardAvoidingView, Platform, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  ActivityIndicator
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import useAuthStore from '../hooks/useAuthStore';
 import { colors, globalStyles } from '../utils/theme';
 import CyberBackground from '../components/CyberBackground';
+import ScreenHeader from '../components/ScreenHeader';
+import IconGlyph from '../components/IconGlyph';
 
 export default function RegisterScreen({ navigation }) {
   const { register, loading } = useAuthStore();
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirm: '' });
+  const [showPassword, setShowPassword] = useState(false);
+
   const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const handleRegister = async () => {
@@ -25,61 +40,124 @@ export default function RegisterScreen({ navigation }) {
         password: form.password,
       });
     } catch (err) {
-      Alert.alert('Registration Failed', err.message || 'Could not complete citizen registration.');
+      Alert.alert('Registration Failed', err.message || 'Could not complete registration.');
     }
   };
-
-  const Field = ({ k, label, ...props }) => (
-    <View style={{ marginBottom: 12 }}>
-      <Text style={globalStyles.label}>{label}</Text>
-      <TextInput
-        style={globalStyles.input}
-        placeholderTextColor={colors.muted}
-        value={form[k]}
-        onChangeText={v => setField(k, v)}
-        {...props}
-      />
-    </View>
-  );
 
   return (
     <SafeAreaView style={globalStyles.screen}>
       <CyberBackground />
+      <ScreenHeader
+        title="Create Account"
+        subtitle="Citizen enrollment"
+        navigation={navigation}
+        onBack={() => navigation.navigate('Login')}
+      />
+
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
-          
-          {/* Header */}
-          <View style={{ alignItems: 'center', marginBottom: 24, marginTop: 10 }}>
-            <Text style={styles.brandTitle}>CITIZEN ENROLLMENT</Text>
-            <Text style={styles.brandSub}>JOIN NATIONAL CYBER DEFENSE NETWORK</Text>
-          </View>
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
 
-          <View style={globalStyles.glassCard}>
-            <Field k="name" label="FULL CITIZEN NAME *" placeholder="e.g. Ramesh Kumar" />
-            <Field k="email" label="OFFICIAL EMAIL ADDRESS *" placeholder="citizen@domain.com" keyboardType="email-address" autoCapitalize="none" />
-            <Field k="phone" label="PHONE NUMBER (FOR OTP/ALERTS)" placeholder="+91 9800000000" keyboardType="phone-pad" />
-            <Field k="password" label="MASTER PASSWORD (MIN 8 CHARS) *" placeholder="••••••••••••" secureTextEntry />
-            <Field k="confirm" label="CONFIRM PASSWORD *" placeholder="••••••••••••" secureTextEntry />
+          <View style={globalStyles.card}>
+            <View style={styles.fieldGroup}>
+              <Text style={globalStyles.label}>Full Name *</Text>
+              <TextInput
+                style={[globalStyles.input, { marginBottom: 0 }]}
+                placeholder="e.g. Ramesh Kumar"
+                placeholderTextColor={colors.muted}
+                value={form.name}
+                onChangeText={v => setField('name', v)}
+                textContentType="name"
+                autoComplete="name"
+              />
+            </View>
 
-            <TouchableOpacity 
+            <View style={styles.fieldGroup}>
+              <Text style={globalStyles.label}>Email Address *</Text>
+              <TextInput
+                style={[globalStyles.input, { marginBottom: 0 }]}
+                placeholder="citizen@domain.com"
+                placeholderTextColor={colors.muted}
+                value={form.email}
+                onChangeText={v => setField('email', v)}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="emailAddress"
+              />
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={globalStyles.label}>Phone Number (for alerts)</Text>
+              <TextInput
+                style={[globalStyles.input, { marginBottom: 0 }]}
+                placeholder="+91 9800000000"
+                placeholderTextColor={colors.muted}
+                value={form.phone}
+                onChangeText={v => setField('phone', v)}
+                keyboardType="phone-pad"
+                textContentType="telephoneNumber"
+              />
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={globalStyles.label}>Password (min 8 chars) *</Text>
+              <View style={styles.passwordWrap}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Create a strong password"
+                  placeholderTextColor={colors.muted}
+                  value={form.password}
+                  onChangeText={v => setField('password', v)}
+                  secureTextEntry={!showPassword}
+                  textContentType="newPassword"
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeBtn}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <IconGlyph name={showPassword ? 'eyeOff' : 'eye'} size={18} color={colors.textSecondary} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.fieldGroup}>
+              <Text style={globalStyles.label}>Confirm Password *</Text>
+              <TextInput
+                style={[globalStyles.input, { marginBottom: 0 }]}
+                placeholder="Re-enter your password"
+                placeholderTextColor={colors.muted}
+                value={form.confirm}
+                onChangeText={v => setField('confirm', v)}
+                secureTextEntry={!showPassword}
+              />
+            </View>
+
+            <TouchableOpacity
               style={[globalStyles.btnPrimary, { marginTop: 8 }]}
               onPress={handleRegister}
               disabled={loading}
+              activeOpacity={0.8}
             >
               {loading ? (
-                <ActivityIndicator color="#030A14" />
+                <ActivityIndicator color="#070B12" />
               ) : (
-                <Text style={globalStyles.btnPrimaryText}>CREATE SECURE ACCOUNT →</Text>
+                <>
+                  <Text style={globalStyles.btnPrimaryText}>Create Account</Text>
+                  <IconGlyph name="arrowRight" size={18} color="#070B12" strokeWidth={2.4} />
+                </>
               )}
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('Login')} 
-            style={{ marginTop: 20, alignItems: 'center' }}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Login')}
+            style={styles.footerLink}
+            activeOpacity={0.7}
           >
-            <Text style={{ color: colors.muted, fontSize: 13 }}>
-              Already registered? <Text style={{ color: colors.accent, fontWeight: '800' }}>Access System</Text>
+            <Text style={styles.footerText}>
+              Already have an account? <Text style={styles.footerTextAccent}>Sign In</Text>
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -89,17 +167,46 @@ export default function RegisterScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  brandTitle: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '900',
-    letterSpacing: 2,
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 60,
   },
-  brandSub: {
+  fieldGroup: {
+    marginBottom: 16,
+  },
+  passwordWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    borderRadius: 10,
+    minHeight: 48,
+  },
+  passwordInput: {
+    flex: 1,
+    color: colors.text,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 15,
+  },
+  eyeBtn: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footerLink: {
+    marginTop: 16,
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  footerText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  footerTextAccent: {
     color: colors.accent,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-    marginTop: 4,
-  }
+    fontWeight: '700',
+  },
 });

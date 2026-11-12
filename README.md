@@ -159,7 +159,7 @@ stateDiagram-v2
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend Web** | React 18, Framer Motion, Recharts, Axios, Socket.IO Client |
-| **Frontend Mobile** | React Native, Expo SDK 54, React Navigation _(not production-ready — see below)_ |
+| **Frontend Mobile** | React Native, Expo SDK 54, React Navigation, Axios, Expo Vector Icons |
 | **Backend Core** | Node.js, Express.js, MongoDB, Mongoose, Socket.IO |
 | **AI / ML Service** | Python 3.14, Flask, scikit-learn, TF-IDF + Multinomial Logistic Regression, Flask-Limiter |
 | **Forensics & OCR** | Tesseract.js / Tesseract OCR, Sharp |
@@ -200,11 +200,13 @@ CyberGuard_App/
 │       ├── services/           API Axios client and Socket listener
 │       └── hooks/              Zustand auth and theme state management
 │
-├── mobile-app/                React Native Expo mobile app (⚠ not production-ready)
-│   └── src/                   Native screens and components
+├── mobile-app/                React Native (Expo SDK 54) mobile app (Threat Radar, Scam Search, Forensics)
+│   ├── src/                   Native screens, components, services, and navigation
+│   └── README.md              Mobile setup, troubleshooting, and QR code guide
 │
-├── docs/                      Product and user documentation
-│   └── user-guides/           CYBERGUARD_CITIZEN_USER_GUIDE.md
+├── docs/                      Product, user, and archival documentation
+│   ├── user-guides/           CYBERGUARD_CITIZEN_USER_GUIDE.md
+│   └── archive/               Historical audit and acceptance reports (14 archived reports)
 │
 └── render.yaml                Render infrastructure-as-code (3 services)
 ```
@@ -323,17 +325,25 @@ npm start
 
 ---
 
-### Mobile App (development only)
+### Mobile App (React Native / Expo SDK 54)
 
-> ⚠ The mobile app is **not production-ready**. It has a hard-coded local tunnel API URL, a broken refresh token flow, and several crash-level bugs. Do not use it in production.
+The cross-platform mobile client connects to the backend API and provides mobile-native incident filing, threat radar, and forensic scanning.
 
 ```powershell
+# Terminal 4 — Mobile App (Metro bundler port 8081/8082)
 cd CyberGuard_App\mobile-app
 npm install
-npx expo start
+npx expo start -c
 ```
 
-Scan the QR code with Expo Go on iOS or Android.
+- **iOS / iPhone:**
+  - Standard LAN mode: Open Camera app and point to the QR code shown in your terminal (tap "Open in Expo Go").
+  - Direct Safari deep-link: `exp://<YOUR_LOCAL_IP>:8081`
+  - Cloud tunnel mode (across different subnets/cellular): `npx expo start --tunnel`
+  - Overcoming account mismatch: In iPhone Expo Go, tap Profile → Sign Out to allow anonymous local dev.
+- **Android:** Scan the terminal QR code directly from inside the Expo Go app.
+- **Local Network API URL:** Set `EXPO_PUBLIC_API_URL=http://<YOUR_LOCAL_IP>:5002/api` in `mobile-app/.env`.
+- For detailed mobile startup instructions, troubleshooting, and standalone build guides, see [mobile-app/README.md](file:///c:/Users/Mohith/CyberGuard_App/mobile-app/README.md).
 
 ---
 
@@ -361,13 +371,15 @@ All three services are defined in `render.yaml` and deploy automatically on push
 
 ---
 
-## Default Dev Credentials
+## Default Dev & Demo Credentials
 
-| Role | Email | Password |
-| :--- | :--- | :--- |
-| Super Admin | `admin@cybercrime.gov` | `Admin@123456` |
-| Police Officer | `officer@cybercrime.gov` | `Officer@123456` |
-| Test Citizen | `user@cybercrime.gov` | `User@123456` |
+| Role | Email | Password | Access Scope |
+| :--- | :--- | :--- | :--- |
+| **Citizen (Demo)** | `citizen@test.com` | `Citizen@123` | File & track complaints, view public threat radar |
+| **Police Officer** | `officer@cyberguard.gov` | `Officer@123` | Investigation desk, status updates, live triage radar |
+| **Cyber Admin** | `admin@cyberguard.gov` | `Admin@12345` | Full administrative control, system logs & users |
+| Root Admin | `admin@cybercrime.gov` | `Admin@123456` | Root database administrator |
+| Staff Officer | `officer@cybercrime.gov` | `Officer@123456` | Secondary law enforcement profile |
 
 > Change all default passwords immediately in any internet-facing environment.
 

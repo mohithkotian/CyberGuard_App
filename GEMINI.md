@@ -60,3 +60,40 @@ Remove all "AI-generated" generic decorative tropes:
 - Run builds (`npm run build`) to ensure zero compile or type errors.
 - Run Impeccable design audits (`.gemini/skills/impeccable/scripts/impeccable.cmd detect`).
 - Work cleanly and review git status (`git status --short`, `git diff --stat`) before completing tasks.
+
+## 11. Platform Architecture & Ground Truth (Anti-Hallucination Reference)
+
+To ensure agents do not hallucinate endpoints, ports, or platform capabilities, adhere strictly to these ground-truth specifications:
+
+### Active Services & Port Map
+- **MongoDB**: Port `27017` (database: `cybercrime_db`, primary local instance with Atlas fallback).
+- **Python ML Service**: `ml-service/src/app.py` running on Port `5003` (NOT 5001). Internal secret auth header: `X-ML-Secret`.
+- **Node.js Backend**: `backend/src/server.js` running on Port `5002`.
+- **React Web App**: `web-app/` running on Port `3000` (run `npm start`, NOT `npm run dev`).
+- **Mobile App**: `mobile-app/` React Native on Expo SDK 54 running Metro bundler on Port `8081` / `8082`.
+
+### Mobile & iOS Development Rules
+- Development occurs on Windows; native macOS Xcode / iOS simulators cannot run locally on this host machine.
+- **Physical iPhone execution**:
+  - Run `npx expo start -c` from `mobile-app/`.
+  - Scan the Metro terminal QR code with the native iOS Camera app (tap the yellow "Open in Expo Go" banner).
+  - Alternative direct deep-link in Safari on iPhone: `exp://<LOCAL_WIFI_IP>:8081` (e.g. `exp://192.168.1.148:8081`).
+  - **Overcoming Account Mismatch**: If iOS Expo Go errors with `"You're signed in to Expo Go as 'user', but not signed in to Expo CLI"`:
+    - In iPhone Expo Go: tap Profile / Gear icon -> tap "Sign Out" to use unauthenticated anonymous local dev mode, OR
+    - Run `npx expo login` on the host PC (with token configured in Windows environment variable `EXPO_TOKEN`).
+  - **Tunnel mode** (across different subnets or cellular 4G/5G): `npx expo start --tunnel`.
+  - Standalone iOS builds require cloud EAS Build: `npx eas-cli build --platform ios`.
+
+### RBAC Endpoint Constraints (Prevent 403 Forbidden)
+- `/api/analytics/overview` is strictly restricted to `officer` and `admin` roles.
+- For public/citizen dashboards, query `/api/complaints/public/radar`. Never call `/analytics/overview` as a citizen or unauthenticated guest.
+
+### Pre-Seeded Working Test Accounts (in MongoDB)
+- **Citizen**: `citizen@test.com` / `Citizen@123` (`role: user`)
+- **Police Officer**: `officer@cyberguard.gov` / `Officer@123` (`role: officer`)
+- **Cyber Admin**: `admin@cyberguard.gov` / `Admin@12345` (`role: admin`)
+- **Root Admin**: `admin@cybercrime.gov` / `Admin@123456` (`role: admin`)
+
+### Documentation Organization
+- All 14 historical audit and verification reports are safely archived in `docs/archive/`.
+- Active root operational guides: `README.md`, `start.md`, `WINDOWS_STARTUP_CHECKLIST.md`, `DESIGN.md`.
