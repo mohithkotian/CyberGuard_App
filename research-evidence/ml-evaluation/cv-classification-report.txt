@@ -2,9 +2,9 @@
 CYBERGUARD IEEE RESEARCH BENCHMARK: 5-FOLD GROUP CROSS-VALIDATION REPORT
 ======================================================================
 
-Scikit-Learn Version   : 1.8.0
+Scikit-Learn Version   : 1.9.1
 Dataset Version        : 3.0-group-aware
-Dataset SHA-256        : 3426ec7b81cfec76845439e7138780df4b808811f68d184b4918aadb22ee84ac
+Dataset SHA-256        : c6cadb177119a48481a81bffa72685140cdc8df459334b9775e760f466aa2a22
 Random Seed            : 42
 Cross-Validation Design: GroupKFold (n_splits=5, grouped by scenario_family)
 Feature Extraction     : TF-IDF (1-2 ngrams, sublinear_tf=True, max_features=10000, strictly in-fold)
@@ -13,42 +13,42 @@ Development Set Size   : 1560 samples, 13 categories (balanced 120/class across 
 
 FOLD-BY-FOLD METRICS:
  fold  train_size  val_size  train_groups  val_groups  group_leakage  accuracy  macro_precision  macro_recall  macro_f1  weighted_precision  weighted_recall  weighted_f1
-    1        1245       315            83          21              0  0.806349         0.792493      0.693162  0.722911            0.939912         0.806349     0.848276
-    2        1245       315            83          21              0  0.828571         0.774982      0.780342  0.757396            0.870352         0.828571     0.829808
-    3        1245       315            83          21              0  0.742857         0.790799      0.783761  0.745695            0.813561         0.742857     0.733150
-    4        1245       315            83          21              0  0.806349         0.814282      0.819658  0.812301            0.805050         0.806349     0.800514
-    5        1260       300            84          20              0  0.790000         0.769088      0.730769  0.715405            0.815498         0.790000     0.780074
+    1        1245       315            83          21              0  0.803175         0.841655      0.835897  0.823937            0.836720         0.803175     0.803679
+    2        1245       315            83          21              0  0.746032         0.722871      0.682051  0.677971            0.760877         0.746032     0.735320
+    3        1245       315            83          21              0  0.926984         0.926715      0.920513  0.918716            0.935957         0.926984     0.926876
+    4        1245       315            83          21              0  0.857143         0.858685      0.851282  0.833238            0.883616         0.857143     0.853520
+    5        1260       300            84          20              0  0.706667         0.749469      0.712821  0.689458            0.732692         0.706667     0.683908
 
-CROSS-VALIDATION SUMMARY (MEAN Â± STD):
-  Accuracy           : 0.7948 Â± 0.0321
-  Macro Precision    : 0.7883 Â± 0.0176
-  Macro Recall       : 0.7615 Â± 0.0496
-  Macro F1-Score     : 0.7507 Â± 0.0383
-  Weighted F1-Score  : 0.7984 Â± 0.0449
+CROSS-VALIDATION SUMMARY (MEAN ± STD):
+  Accuracy           : 0.8080 ± 0.0876
+  Macro Precision    : 0.8199 ± 0.0833
+  Macro Recall       : 0.8005 ± 0.0999
+  Macro F1-Score     : 0.7887 ± 0.1028
+  Weighted F1-Score  : 0.8007 ± 0.0957
 
 OUT-OF-FOLD (OOF) POOLED EVALUATION (ALL 1560 SAMPLES):
-  OOF Accuracy       : 0.7949
-  OOF Macro F1       : 0.7948
-  OOF Weighted F1    : 0.7948
+  OOF Accuracy       : 0.8090
+  OOF Macro F1       : 0.8079
+  OOF Weighted F1    : 0.8079
 
 PER-CLASS OUT-OF-FOLD BREAKDOWN:
                     precision    recall  f1-score   support
 
-child_exploitation     0.7742    0.8000    0.7869       120
-      crypto_fraud     0.9368    0.7417    0.8279       120
-     cyberbullying     0.7714    0.9000    0.8308       120
-       data_breach     0.8407    0.7917    0.8155       120
-   financial_fraud     0.5496    0.6000    0.5737       120
-           hacking     0.7153    0.8167    0.7626       120
-    identity_theft     0.9174    0.8333    0.8734       120
-   network_attacks     0.9130    0.8750    0.8936       120
-      online_fraud     0.6667    0.9000    0.7660       120
-             other     0.9878    0.6750    0.8020       120
-          phishing     0.8284    0.9250    0.8740       120
-        ransomware     0.9750    0.9750    0.9750       120
-women_child_safety     0.6122    0.5000    0.5505       120
+child_exploitation     0.8537    0.8750    0.8642       120
+      crypto_fraud     0.8868    0.7833    0.8319       120
+     cyberbullying     0.7481    0.8417    0.7922       120
+       data_breach     0.8462    0.7333    0.7857       120
+   financial_fraud     0.6455    0.5917    0.6174       120
+           hacking     0.6849    0.8333    0.7519       120
+    identity_theft     0.9397    0.9083    0.9237       120
+   network_attacks     0.9455    0.8667    0.9043       120
+      online_fraud     0.6748    0.9167    0.7774       120
+             other     0.9884    0.7083    0.8252       120
+          phishing     0.8201    0.9500    0.8803       120
+        ransomware     0.9590    0.9750    0.9669       120
+women_child_safety     0.6400    0.5333    0.5818       120
 
-          accuracy                         0.7949      1560
-         macro avg     0.8068    0.7949    0.7948      1560
-      weighted avg     0.8068    0.7949    0.7948      1560
+          accuracy                         0.8090      1560
+         macro avg     0.8179    0.8090    0.8079      1560
+      weighted avg     0.8179    0.8090    0.8079      1560
 

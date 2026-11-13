@@ -2,18 +2,18 @@
 
 child_exploitation     0.9286    0.8667    0.8966        30
       crypto_fraud     1.0000    0.9667    0.9831        30
-     cyberbullying     0.9583    0.7667    0.8519        30
-       data_breach     0.7368    0.9333    0.8235        30
-   financial_fraud     0.8710    0.9000    0.8852        30
-           hacking     0.7692    0.6667    0.7143        30
-    identity_theft     0.9062    0.9667    0.9355        30
+     cyberbullying     0.9565    0.7333    0.8302        30
+       data_breach     0.7632    0.9667    0.8529        30
+   financial_fraud     0.8750    0.9333    0.9032        30
+           hacking     0.7778    0.7000    0.7368        30
+    identity_theft     0.9667    0.9667    0.9667        30
    network_attacks     0.9677    1.0000    0.9836        30
-      online_fraud     0.8929    0.8333    0.8621        30
+      online_fraud     0.9286    0.8667    0.8966        30
              other     1.0000    0.7000    0.8235        30
           phishing     1.0000    1.0000    1.0000        30
         ransomware     1.0000    1.0000    1.0000        30
-women_child_safety     0.6905    0.9667    0.8056        30
+women_child_safety     0.6744    0.9667    0.7945        30
 
-          accuracy                         0.8897       390
-         macro avg     0.9016    0.8897    0.8896       390
-      weighted avg     0.9016    0.8897    0.8896       390
+          accuracy                         0.8974       390
+         macro avg     0.9106    0.8974    0.8975       390
+      weighted avg     0.9106    0.8974    0.8975       390

@@ -1,0 +1,18 @@
+{
+  "short_name": "CyberGuard",
+  "name": "CyberGuard — AI Cybercrime Defense & Reporting",
+  "icons": [
+    {
+      "src": "/icons/cyberguard/cyberguard-app-icon.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#070707",
+  "theme_color": "#070707",
+  "display": "standalone",
+  "orientation": "portrait"
+}
+

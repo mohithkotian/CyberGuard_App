@@ -25,7 +25,7 @@ const Stack = createNativeStackNavigator();
 const Tab   = createBottomTabNavigator();
 
 const LINKING_CONFIG = {
-  prefixes: ['cyberguard://', 'https://cyberguard.app'],
+  prefixes: ['cyberguard://', 'https://cyberguard.app', 'http://localhost:3000', 'http://127.0.0.1:3000', 'exp://'],
   config: {
     screens: {
       Login: 'login',
@@ -50,7 +50,9 @@ const LINKING_CONFIG = {
 
 const SCREEN_OPTIONS = {
   headerShown: false,
-  contentStyle: { backgroundColor: '#070C18' },
+  contentStyle: { backgroundColor: colors.bg },
+  animation: 'slide_from_right',
+  gestureEnabled: true,
 };
 
 function UserTabs() {
@@ -62,42 +64,48 @@ function UserTabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: '#5A6E8C',
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: 'rgba(8, 14, 28, 0.96)',
-          borderTopColor: 'rgba(0, 180, 255, 0.2)',
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
           height: Platform.OS === 'ios' ? 84 : 64,
           paddingBottom: Platform.OS === 'ios' ? 24 : 8,
           paddingTop: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: '800',
-          letterSpacing: 0.5,
+          fontSize: 11,
+          fontWeight: '600',
+          letterSpacing: 0.1,
         },
-        tabBarIcon: ({ focused, color }) => {
+        tabBarIcon: ({ focused }) => {
           let icon = 'home';
           if (route.name === 'Submit') icon = 'report';
           else if (route.name === 'ScamSearch') icon = 'radar';
           else if (route.name === 'Comms') icon = 'chat';
-          else if (route.name === 'Profile') icon = 'settings';
+          else if (route.name === 'Profile') icon = 'user';
           else if (route.name === 'Admin') icon = 'shield';
 
           return (
-            <View style={[styles.tabIconWrap, focused && styles.tabIconWrapActive]}>
-              <IconGlyph name={icon} size={20} color={focused ? colors.accent : '#5A6E8C'} label={`${route.name} navigation`} />
+            <View style={styles.tabIconWrap}>
+              <IconGlyph
+                name={icon}
+                size={21}
+                color={focused ? colors.accent : colors.textSecondary}
+                strokeWidth={focused ? 2.2 : 1.8}
+                label={`${route.name} tab`}
+              />
             </View>
           );
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'DASHBOARD' }} />
-      <Tab.Screen name="Submit" component={SubmitComplaintScreen} options={{ tabBarLabel: 'REPORT' }} />
-      <Tab.Screen name="ScamSearch" component={ScamSearchScreen} options={{ tabBarLabel: 'RADAR' }} />
-      <Tab.Screen name="Comms" component={GlobalChatScreen} options={{ tabBarLabel: 'COMMS' }} />
-      {showAdminTab && <Tab.Screen name="Admin" component={AdminScreen} options={{ tabBarLabel: 'TRIAGE' }} />}
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'SECURITY' }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Home' }} />
+      <Tab.Screen name="Submit" component={SubmitComplaintScreen} options={{ tabBarLabel: 'Report' }} />
+      <Tab.Screen name="ScamSearch" component={ScamSearchScreen} options={{ tabBarLabel: 'Radar' }} />
+      <Tab.Screen name="Comms" component={GlobalChatScreen} options={{ tabBarLabel: 'Comms' }} />
+      {showAdminTab && <Tab.Screen name="Admin" component={AdminScreen} options={{ tabBarLabel: 'Triage' }} />}
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: 'Profile' }} />
     </Tab.Navigator>
   );
 }
@@ -111,11 +119,9 @@ export default function AppNavigator() {
 
   if (!hydrated) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#070C18' }}>
+      <View style={styles.splashContainer}>
         <ActivityIndicator size="large" color={colors.accent} />
-        <Text style={{ color: colors.muted, marginTop: 14, fontSize: 12, letterSpacing: 1.5, fontWeight: '800' }}>
-          INITIALIZING CYBER DEFENSE PROTOCOLS...
-        </Text>
+        <Text style={styles.splashText}>Initializing CyberGuard...</Text>
       </View>
     );
   }
@@ -143,14 +149,22 @@ export default function AppNavigator() {
 }
 
 const styles = StyleSheet.create({
+  splashContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.bg,
+  },
+  splashText: {
+    color: colors.textSecondary,
+    marginTop: 14,
+    fontSize: 14,
+    fontWeight: '600',
+  },
   tabIconWrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
   },
-  tabIconWrapActive: {
-    backgroundColor: 'rgba(0, 255, 209, 0.12)',
-  }
 });

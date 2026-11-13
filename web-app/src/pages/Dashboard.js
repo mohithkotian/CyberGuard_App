@@ -21,11 +21,12 @@ import useTranslationStore from '../hooks/useTranslationStore';
 
 
 const STATUS_COLORS = {
-
-  pending:'#FFD600', under_review:'#EFEDE8', investigating:'#FF6B35',
-
-  resolved:'#00C896', closed:'#5A6480', rejected:'#FF5252'
-
+  pending: '#FBBF24',
+  under_review: '#818CF8',
+  investigating: '#38BDF8',
+  resolved: '#34D399',
+  closed: '#94A3B8',
+  rejected: '#F87171'
 };
 
 

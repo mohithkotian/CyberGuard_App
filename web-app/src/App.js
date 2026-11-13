@@ -46,6 +46,7 @@ import CyberReport from './components/CyberReport';
 import ProtectedRoute from './components/ProtectedRoute';
 import DeveloperPage from './pages/DeveloperPage';
 import CitizenAssistant from './components/CitizenAssistant';
+import MobileBottomNav from './components/MobileBottomNav';
 
 function LanguageSynchronizer() {
   const location = useLocation();
@@ -250,6 +251,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <CitizenAssistant />
+      <MobileBottomNav />
     </BrowserRouter>
     </div>
   );

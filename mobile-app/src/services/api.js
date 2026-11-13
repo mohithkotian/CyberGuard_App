@@ -216,7 +216,8 @@ export const complaintsAPI = {
   track:         (id)   => api.get(`/complaints/track/${id}`),
   updateStatus:  (id, d)=> api.patch(`/complaints/${id}/status`, d),
   updatePriority:(id, d)=> api.patch(`/complaints/${id}/status`, d),
-  publicSearch:  (q)    => api.get('/complaints/public/search', { params: { query: q } }),
+  publicSearch:  (q)    => api.get('/complaints/public/search', { params: { q } }),
+  getRadar:      (p)    => api.get('/complaints/public/radar', { params: p }),
   delete:        (id)   => api.delete(`/complaints/${id}`),
 };
 

@@ -1,0 +1,532 @@
+/*
+ * CyberGuard – Global Responsive Layer
+ * Breakpoints: 320px (watch/tiny), 390px (mobile), 540px, 768px (tablet), 1024px (laptop), 1440px+
+ * Rules: layout & spacing only. No colour, font, or functional changes.
+ */
+
+/* ─── 1. BASE SAFETY NETS ─────────────────────────────────────────────── */
+
+/* Mobile Bottom Navigation Bar: Hidden by default on desktop, visible on mobile/tablet */
+.mobile-bottom-nav {
+  display: none !important;
+}
+
+@media (max-width: 860px) {
+  .mobile-bottom-nav {
+    display: flex !important;
+  }
+
+  /* Ensure page content is not obscured by the bottom bar on mobile screens */
+  .page-shell,
+  .dashboard-content-wrapper,
+  .report-layout,
+  .auth-page {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+html {
+  /* Prevent text inflation on iOS Safari */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Stop the common "my element causes horizontal scroll" problem */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ─── 2. AUTH PAGES (Login / Register / RegisterChoice) ──────────────── */
+
+.auth-page {
+  padding: clamp(16px, 4vw, 24px) !important;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card inside auth */
+.auth-page > * > div[style] {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .auth-page > * {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  /* Reduce inner card padding on small screens */
+  .auth-page div[style*="padding: '40px'"],
+  .auth-page div[style*='padding: "40px"'] {
+    padding: 24px !important;
+  }
+}
+
+@media (max-width: 320px) {
+  .auth-page {
+    padding: 12px !important;
+  }
+}
+
+/* ─── 3. PAGE SHELL & CONTENT WRAPPER ───────────────────────────────── */
+
+.page-shell {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* Generic dashboard/interior content wrapper */
+.cg-content {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding-inline: clamp(16px, 4vw, 48px);
+}
+
+/* ─── 4. AUTHENTICATED NAVBAR (Navbar.js) ───────────────────────────── */
+
+/* Hamburger button — hidden by default on desktop */
+.nav-hamburger {
+  display: none;
+  background: #141414;
+  border: 1px solid #3b3b38;
+  border-radius: 8px;
+  color: #f2f0ea;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Mobile drawer overlay */
+.nav-drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 199;
+}
+.nav-drawer-overlay.open {
+  display: block;
+}
+
+/* Mobile nav drawer */
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(80vw, 320px);
+  background: #0a0a0a;
+  border-right: 1px solid #242422;
+  z-index: 200;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 24px 0 32px;
+}
+.nav-drawer.open {
+  transform: translateX(0);
+}
+
+.nav-drawer-close {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 20px;
+  border-bottom: 1px solid #242422;
+  margin-bottom: 16px;
+}
+
+.nav-drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+  flex: 1;
+}
+
+.nav-drawer-links a,
+.nav-drawer-links button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #8e8b84;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  text-align: left;
+  width: 100%;
+}
+.nav-drawer-links a:hover,
+.nav-drawer-links button:hover,
+.nav-drawer-links a[data-active="true"] {
+  background: #141414;
+  border-color: #3b3b38;
+  color: #f2f0ea;
+}
+
+.nav-drawer-links .nav-drawer-category {
+  font-size: 9px;
+  font-weight: 600;
+  color: #5a5852;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.nav-drawer-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 8px 12px;
+}
+
+.nav-drawer-footer {
+  padding: 16px 20px 0;
+  border-top: 1px solid #242422;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* On tablet/mobile: show hamburger, hide the scroll-dock */
+@media (max-width: 860px) {
+  .nav-hamburger {
+    display: flex;
+  }
+  /* Hide the full scroll dock on mobile */
+  .nav-scroll-dock {
+    display: none !important;
+  }
+  /* Collapse the right controls: hide logout text, keep icons */
+  .nav-logout-btn span {
+    display: none;
+  }
+  .nav-logout-btn {
+    padding: 10px !important;
+    min-width: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Navbar height + brand tighten */
+  nav[style*="height: 74"] {
+    padding-inline: 14px !important;
+    height: 60px !important;
+  }
+}
+
+/* ─── 5. DASHBOARD GRID ─────────────────────────────────────────────── */
+
+/* Stats row: 4-col → 2-col → 1-col */
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 540px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+}
+
+/* Filter bar wrapping */
+.dashboard-filter-bar {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 540px) {
+  .dashboard-filter-bar {
+    gap: 8px;
+  }
+  .dashboard-filter-bar > * {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
+}
+
+/* Dashboard main content max-width with responsive padding */
+.dashboard-content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 80px) clamp(16px, 3vw, 24px);
+}
+
+/* ─── 6. REPORT FORM (SubmitComplaint) ───────────────────────────────── */
+
+@media (max-width: 540px) {
+  .report-layout {
+    width: 100% !important;
+    padding-inline: 16px !important;
+    padding-top: 20px !important;
+  }
+
+  .form-section,
+  .form-footer {
+    padding-left: clamp(52px, 12vw, 68px) !important;
+    padding-right: 16px !important;
+  }
+
+  .section-heading h3 {
+    font-size: 18px !important;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100% !important;
+    justify-content: center;
+  }
+}
+
+/* ─── 7. HOME PAGE HERO ──────────────────────────────────────────────── */
+
+/* Hero two-column → single column on mobile */
+.home-hero-main {
+  flex-direction: row;
+}
+
+@media (max-width: 860px) {
+  .home-hero-main {
+    flex-direction: column !important;
+    min-height: 100dvh !important;
+    justify-content: center !important;
+  }
+
+  .home-hero-left {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 100px 24px 40px !important;
+    min-width: 0;
+    overflow: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+
+  .home-hero-right {
+    display: none !important;
+  }
+
+  .home-hero-title {
+    font-size: clamp(2.2rem, 9vw, 3.2rem) !important;
+    white-space: normal !important;
+    letter-spacing: -1.5px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .home-stats-panel {
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    padding: 16px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .home-stats-divider {
+    display: none !important;
+  }
+}
+
+@media (max-width: 540px) {
+  .home-hero-left {
+    padding: 90px 20px 32px !important;
+  }
+
+  .home-stats-panel {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+
+  .home-cta-btn {
+    width: 100% !important;
+    display: block !important;
+  }
+}
+
+/* Home header pill: tighter on small screens */
+@media (max-width: 540px) {
+  .home-top-header {
+    top: 10px !important;
+    width: calc(100% - 20px) !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+
+  .home-top-brand img {
+    width: 110px !important;
+    height: 30px !important;
+  }
+
+  .home-top-actions {
+    gap: 6px !important;
+  }
+
+  .home-top-actions button {
+    padding: 8px 10px !important;
+    font-size: 10px !important;
+  }
+}
+
+/* Watch / very small screens (≤ 320px) */
+@media (max-width: 320px) {
+  .home-top-header {
+    padding: 6px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .home-top-brand img {
+    width: 90px !important;
+    height: 24px !important;
+  }
+
+  /* Show only JOIN on tiny screens */
+  .home-top-actions button:first-child {
+    display: none !important;
+  }
+
+  .home-hero-title {
+    font-size: 1.8rem !important;
+  }
+}
+
+/* ─── 8. TRACK COMPLAINT ─────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .track-card {
+    padding: 20px 16px !important;
+  }
+
+  .track-timeline-item {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+}
+
+/* ─── 9. LEARN PAGE ──────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .learn-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── 10. ADMIN PAGES ────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .admin-two-col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table-wrapper table {
+    min-width: 560px;
+  }
+}
+
+/* ─── 11. MODALS / DIALOGS ───────────────────────────────────────────── */
+
+@media (max-width: 540px) {
+  .cg-modal {
+    width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 92dvh !important;
+    overflow-y: auto;
+    margin-top: auto;
+  }
+
+  .cg-modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+}
+
+/* ─── 12. GLOBAL TABLE SAFETY ────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ─── 13. TOUCH TARGETS ──────────────────────────────────────────────── */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Minimum 44px touch targets */
+  button, [role="button"], a, input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+  }
+
+  /* Avoid sticky hover states on touch */
+  button:hover:not(:active) {
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+/* ─── 14. SAFE AREA (iPhone notch / home bar) ────────────────────────── */
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .nav-drawer {
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+
+  .home-top-header {
+    /* account for notch if header were at bottom */
+  }
+
+  /* Fixed bottom elements */
+  .help-fab {
+    bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+    right: calc(24px + env(safe-area-inset-right)) !important;
+  }
+}
+
+/* ─── 15. PRINT / REDUCED MOTION ─────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-drawer {
+    transition: none !important;
+  }
+}
+

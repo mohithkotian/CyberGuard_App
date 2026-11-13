@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, globalStyles, severityColors } from '../utils/theme';
+import { colors, globalStyles, typography } from '../utils/theme';
 import CyberBackground from '../components/CyberBackground';
-
-const { width } = Dimensions.get('window');
+import ScreenHeader from '../components/ScreenHeader';
+import IconGlyph from '../components/IconGlyph';
 
 const ATTACK_PRESETS = [
   {
-    title: 'Electricity Cut Notice',
+    title: 'Electricity Bill Notice',
     text: 'Dear Consumer, Your Electricity power will be disconnected tonight at 9.30 PM from electricity office because your previous month bill was not updated. Please immediately contact our power officer 9800000001 or pay via upi: fast.power@paytm'
   },
   {
-    title: 'Urgent KYC Block Notice',
+    title: 'Urgent KYC Suspension',
     text: 'URGENT: SBI customer, your YONO account is suspended today due to missing Aadhaar KYC. Update immediately at http://sbi-kyc-secure-auth.com or your account will be permanently blocked within 24 hours.'
   },
   {
@@ -20,7 +20,7 @@ const ATTACK_PRESETS = [
     text: 'CBI & Cyber Crime Cell Notice: A parcel containing illicit narcotics and fake passports under your Aadhaar has been seized at Mumbai Airport. Join immediate Skype investigation or arrest warrant will be issued. Contact DCP Officer at +91 9800000009.'
   },
   {
-    title: 'Part-Time YouTube Job',
+    title: 'Part-Time Job Scam',
     text: 'Earn Rs 5000 to Rs 15000 daily by liking YouTube videos and rating Google maps. No experience needed! Free registration. Join telegram channel @crypto_wealth_signals_vip to claim your Rs 500 joining bonus.'
   }
 ];
@@ -47,7 +47,7 @@ export default function ForensicScannerScreen({ navigation }) {
     const urls = Array.from(new Set(raw.match(urlRegex) || []));
     const ifscs = Array.from(new Set(raw.match(ifscRegex) || []));
 
-    // 2. Keyword & Heuristic Threat Patterns
+    // 2. Keyword & Threat Patterns
     const lower = raw.toLowerCase();
     let score = 0;
     const indicators = [];
@@ -55,44 +55,44 @@ export default function ForensicScannerScreen({ navigation }) {
 
     if (lower.includes('electric') || lower.includes('power') || lower.includes('disconnected') || lower.includes('bill')) {
       score += 35;
-      indicators.push('Electricity / Utility Disconnection Urgency');
+      indicators.push('Utility disconnection urgency');
       detectedType = 'Utility Disconnection Phishing';
     }
     if (lower.includes('kyc') || lower.includes('pan card') || lower.includes('aadhaar') || lower.includes('suspended') || lower.includes('yono')) {
       score += 40;
-      indicators.push('Banking KYC Account Suspension Threat');
+      indicators.push('Banking KYC suspension threat');
       detectedType = 'Banking KYC Phishing';
     }
     if (lower.includes('cbi') || lower.includes('police') || lower.includes('arrest') || lower.includes('customs') || lower.includes('narcotics') || lower.includes('parcel')) {
       score += 50;
-      indicators.push('Digital Arrest & Law Enforcement Impersonation');
+      indicators.push('Digital arrest & law enforcement impersonation');
       detectedType = 'Digital Arrest Extortion';
     }
     if (lower.includes('telegram') || lower.includes('earn') || lower.includes('bonus') || lower.includes('like youtube') || lower.includes('daily')) {
       score += 35;
-      indicators.push('Part-Time Job / Task Investment Bait');
+      indicators.push('Part-time task / investment bait');
       detectedType = 'Investment / Task Scam';
     }
     if (lower.includes('otp') || lower.includes('password') || lower.includes('pin') || lower.includes('cvv')) {
       score += 45;
-      indicators.push('Credential / OTP Harvesting Prompt');
+      indicators.push('Credential / OTP harvesting prompt');
     }
     if (lower.includes('urgent') || lower.includes('immediately') || lower.includes('within 24 hours') || lower.includes('tonight')) {
       score += 20;
-      indicators.push('Psychological Pressure & Artificial Time Limit');
+      indicators.push('Urgency pressure & artificial deadline');
     }
 
     if (urls.length > 0) {
       score += 30;
-      indicators.push(`Extracted Suspicious Web Link (${urls.length})`);
+      indicators.push(`Extracted suspicious web link (${urls.length})`);
     }
     if (upis.length > 0) {
       score += 25;
-      indicators.push(`Extracted Financial UPI Handle (${upis.length})`);
+      indicators.push(`Extracted UPI payment handle (${upis.length})`);
     }
     if (phones.length > 0) {
       score += 20;
-      indicators.push(`Extracted Contact Vector (${phones.length})`);
+      indicators.push(`Extracted contact vector (${phones.length})`);
     }
 
     const finalScore = Math.min(100, Math.max(score, (phones.length + upis.length + urls.length > 0 ? 45 : 20)));
@@ -125,37 +125,31 @@ export default function ForensicScannerScreen({ navigation }) {
     ].join(', ');
 
     navigation.navigate('Submit', {
-      prefillTitle: `Incident: Suspicious ${report.type}`,
+      prefillTitle: `Suspicious ${report.type}`,
       prefillDescription: `Forensic text analysis detected potential ${report.type} (Threat Score: ${report.score}/100).\n\nOriginal Text:\n${text}\n\nIndicators:\n- ${report.indicators.join('\n- ')}`,
       prefillSuspect: suspectInfo
     });
   };
 
   return (
-    <SafeAreaView style={globalStyles.screen}>
+    <SafeAreaView style={globalStyles.screen} edges={['top']}>
       <CyberBackground />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backBtn}>
-          <Text style={{ color: colors.accent, fontSize: 18, fontWeight: '900' }}>←</Text>
-        </TouchableOpacity>
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.headerTitle}>NEURAL FORENSIC SCANNER</Text>
-          <Text style={styles.headerSub}>AUTOMATED IOC EXTRACTION & NLP ANALYSIS</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Forensic Scanner"
+        subtitle="Automated IOC extraction"
+        navigation={navigation}
+      />
 
-      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         {/* Input Console */}
-        <View style={globalStyles.glassCard}>
-          <Text style={globalStyles.label}>INPUT SUSPICIOUS MESSAGE / CONTENT</Text>
-          <Text style={{ color: colors.textSecondary, fontSize: 12, marginBottom: 10 }}>
-            Paste suspicious SMS, WhatsApp message, email, or phishing notice for instant forensic inspection.
+        <View style={globalStyles.card}>
+          <Text style={globalStyles.label}>Suspicious Message Content</Text>
+          <Text style={styles.cardSub}>
+            Paste suspicious SMS, WhatsApp message, email, or notice for automated indicator extraction.
           </Text>
 
           <TextInput
-            style={styles.textArea}
+            style={[globalStyles.input, styles.textArea]}
             placeholder="Paste suspicious text here..."
             placeholderTextColor={colors.muted}
             multiline
@@ -165,16 +159,19 @@ export default function ForensicScannerScreen({ navigation }) {
             textAlignVertical="top"
           />
 
-          <TouchableOpacity style={[globalStyles.btnPrimary, { marginTop: 12 }]} onPress={analyzeContent}>
-            <Text style={globalStyles.btnPrimaryText}>» RUN NEURAL ANALYSIS</Text>
+          <TouchableOpacity
+            style={[globalStyles.btnPrimary, { marginTop: 12 }]}
+            onPress={analyzeContent}
+            activeOpacity={0.8}
+          >
+            <IconGlyph name="scan" size={18} color="#070B12" strokeWidth={2.4} />
+            <Text style={globalStyles.btnPrimaryText}>Analyze Message</Text>
           </TouchableOpacity>
 
           {/* Preset Attack Scenarios */}
-          <View style={{ marginTop: 16 }}>
-            <Text style={{ color: colors.muted, fontSize: 10, fontWeight: '800', letterSpacing: 1, marginBottom: 8 }}>
-              QUICK TEST SAMPLES:
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <View style={styles.presetSection}>
+            <Text style={styles.presetHeading}>Quick Test Samples</Text>
+            <View style={styles.presetRow}>
               {ATTACK_PRESETS.map((preset, idx) => (
                 <TouchableOpacity
                   key={idx}
@@ -183,6 +180,7 @@ export default function ForensicScannerScreen({ navigation }) {
                     setText(preset.text);
                     setReport(null);
                   }}
+                  activeOpacity={0.75}
                 >
                   <Text style={styles.presetText}>{preset.title}</Text>
                 </TouchableOpacity>
@@ -193,92 +191,91 @@ export default function ForensicScannerScreen({ navigation }) {
 
         {/* Forensic Report Dossier */}
         {report && (
-          <View style={{ marginTop: 10 }}>
-            <Text style={globalStyles.sectionTitle}>◈ FORENSIC EVALUATION REPORT</Text>
-            
-            {/* Score & Risk Banner */}
+          <View style={{ marginTop: 8 }}>
+            <Text style={globalStyles.sectionTitle}>Analysis Report</Text>
+
             <View style={[
-              globalStyles.glassCard, 
-              { borderColor: report.riskLevel === 'CRITICAL' ? 'rgba(255, 59, 48, 0.4)' : 'rgba(0, 255, 209, 0.4)' }
+              globalStyles.card,
+              { borderColor: report.riskLevel === 'CRITICAL' ? colors.danger : colors.accent }
             ]}>
               <View style={globalStyles.spaceBetween}>
-                <View>
-                  <Text style={{ color: colors.muted, fontSize: 10, fontWeight: '800', letterSpacing: 1 }}>
-                    THREAT VECTOR
-                  </Text>
-                  <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '900', marginTop: 2 }}>
-                    {report.type}
-                  </Text>
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <Text style={styles.vectorLabel}>Detected Threat Vector</Text>
+                  <Text style={styles.vectorTitle}>{report.type}</Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ color: colors.accent, fontSize: 24, fontWeight: '900' }}>
-                    {report.score}<Text style={{ fontSize: 13, color: colors.muted }}>/100</Text>
+                  <Text style={[styles.scoreNumber, { color: report.score > 70 ? colors.danger : report.score > 40 ? colors.warn : colors.success }]}>
+                    {report.score}<Text style={styles.scoreDenominator}>/100</Text>
                   </Text>
-                  <Text style={{ color: colors.muted, fontSize: 9 }}>ACCURACY: {report.confidence}%</Text>
+                  <Text style={styles.confidenceText}>{report.confidence}% confidence</Text>
                 </View>
               </View>
 
               {/* Progress Bar */}
               <View style={styles.progressBarBg}>
                 <View style={[
-                  styles.progressBarFill, 
-                  { 
-                    width: `${report.score}%`, 
-                    backgroundColor: report.score > 70 ? colors.danger : report.score > 40 ? colors.warn : colors.success 
+                  styles.progressBarFill,
+                  {
+                    width: `${report.score}%`,
+                    backgroundColor: report.score > 70 ? colors.danger : report.score > 40 ? colors.warn : colors.success
                   }
                 ]} />
               </View>
 
               {/* Indicators */}
-              <View style={{ marginTop: 14 }}>
-                <Text style={globalStyles.label}>DETECTED HEURISTICS & PATTERNS</Text>
+              <View style={styles.indicatorsSection}>
+                <Text style={globalStyles.label}>Detected Indicators</Text>
                 {report.indicators.map((ind, i) => (
-                  <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                    <Text style={{ color: colors.danger, fontSize: 12 }}>!</Text>
-                    <Text style={{ color: colors.text, fontSize: 12 }}>{ind}</Text>
+                  <View key={i} style={styles.indicatorRow}>
+                    <IconGlyph name="warning" size={14} color={colors.warn} />
+                    <Text style={styles.indicatorText}>{ind}</Text>
                   </View>
                 ))}
               </View>
 
               {/* IOCs Extracted */}
-              <View style={{ marginTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.08)', paddingTop: 12 }}>
-                <Text style={globalStyles.label}>EXTRACTED INDICATORS OF COMPROMISE (IOCs)</Text>
-                
-                {report.iocs.phones.length > 0 && (
-                  <View style={styles.iocRow}>
-                    <Text style={styles.iocLabel}>⌕ Phones:</Text>
-                    <Text style={styles.iocValue}>{report.iocs.phones.join(', ')}</Text>
-                  </View>
-                )}
+              {(report.iocs.phones.length > 0 || report.iocs.upis.length > 0 || report.iocs.urls.length > 0 || report.iocs.ifscs.length > 0) && (
+                <View style={styles.iocSection}>
+                  <Text style={globalStyles.label}>Extracted Indicators of Compromise (IOCs)</Text>
 
-                {report.iocs.upis.length > 0 && (
-                  <View style={styles.iocRow}>
-                    <Text style={styles.iocLabel}>◇ UPI IDs:</Text>
-                    <Text style={styles.iocValue}>{report.iocs.upis.join(', ')}</Text>
-                  </View>
-                )}
+                  {report.iocs.phones.length > 0 && (
+                    <View style={styles.iocRow}>
+                      <Text style={styles.iocLabel}>Phones:</Text>
+                      <Text style={styles.iocValue}>{report.iocs.phones.join(', ')}</Text>
+                    </View>
+                  )}
 
-                {report.iocs.urls.length > 0 && (
-                  <View style={styles.iocRow}>
-                    <Text style={styles.iocLabel}>◉ Links:</Text>
-                    <Text style={styles.iocValue}>{report.iocs.urls.join(', ')}</Text>
-                  </View>
-                )}
+                  {report.iocs.upis.length > 0 && (
+                    <View style={styles.iocRow}>
+                      <Text style={styles.iocLabel}>UPI IDs:</Text>
+                      <Text style={styles.iocValue}>{report.iocs.upis.join(', ')}</Text>
+                    </View>
+                  )}
 
-                {report.iocs.ifscs.length > 0 && (
-                  <View style={styles.iocRow}>
-                    <Text style={styles.iocLabel}>▣ IFSC:</Text>
-                    <Text style={styles.iocValue}>{report.iocs.ifscs.join(', ')}</Text>
-                  </View>
-                )}
-              </View>
+                  {report.iocs.urls.length > 0 && (
+                    <View style={styles.iocRow}>
+                      <Text style={styles.iocLabel}>Links:</Text>
+                      <Text style={styles.iocValue}>{report.iocs.urls.join(', ')}</Text>
+                    </View>
+                  )}
 
-              {/* Pre-fill Action */}
-              <TouchableOpacity 
-                style={[globalStyles.btnCyber, { marginTop: 16 }]}
+                  {report.iocs.ifscs.length > 0 && (
+                    <View style={styles.iocRow}>
+                      <Text style={styles.iocLabel}>IFSC:</Text>
+                      <Text style={styles.iocValue}>{report.iocs.ifscs.join(', ')}</Text>
+                    </View>
+                  )}
+                </View>
+              )}
+
+              {/* Export to Complaint */}
+              <TouchableOpacity
+                style={[globalStyles.btnPrimary, { marginTop: 18 }]}
                 onPress={handleExportToComplaint}
+                activeOpacity={0.8}
               >
-                <Text style={globalStyles.btnCyberText}>» File Complaint With This Evidence →</Text>
+                <IconGlyph name="report" size={18} color="#070B12" strokeWidth={2.4} />
+                <Text style={globalStyles.btnPrimaryText}>File Complaint with This Evidence</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -289,70 +286,107 @@ export default function ForensicScannerScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 60,
   },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(0, 255, 209, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 255, 209, 0.3)',
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: 1.5,
-  },
-  headerSub: {
-    color: colors.accent,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-    marginTop: 2,
+  cardSub: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    lineHeight: 19,
+    marginBottom: 12,
   },
   textArea: {
-    backgroundColor: 'rgba(15, 25, 50, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.3)',
-    borderRadius: 10,
-    padding: 14,
-    color: colors.text,
+    minHeight: 120,
+    paddingTop: 12,
+  },
+  presetSection: {
+    marginTop: 18,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 14,
+  },
+  presetHeading: {
+    color: colors.textSecondary,
     fontSize: 13,
-    minHeight: 110,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  presetRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   presetChip: {
-    backgroundColor: 'rgba(0, 180, 255, 0.08)',
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.25)',
+    borderColor: colors.borderLight,
     borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    minHeight: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   presetText: {
-    color: colors.cyber,
-    fontSize: 11,
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  vectorLabel: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  vectorTitle: {
+    color: colors.text,
+    fontSize: 17,
     fontWeight: '700',
+    marginTop: 2,
+  },
+  scoreNumber: {
+    fontSize: 24,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  scoreDenominator: {
+    fontSize: 14,
+    color: colors.muted,
+  },
+  confidenceText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
   },
   progressBarBg: {
     height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 3,
-    marginTop: 12,
+    marginTop: 14,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
     borderRadius: 3,
+  },
+  indicatorsSection: {
+    marginTop: 16,
+  },
+  indicatorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 6,
+  },
+  indicatorText: {
+    color: colors.text,
+    fontSize: 13,
+    flex: 1,
+  },
+  iocSection: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 14,
   },
   iocRow: {
     flexDirection: 'row',
@@ -361,15 +395,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   iocLabel: {
-    color: colors.muted,
-    fontSize: 11,
-    fontWeight: '800',
-    width: 70,
+    color: colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+    width: 65,
   },
   iocValue: {
     color: colors.accent,
-    fontSize: 11,
+    fontSize: 13,
     flex: 1,
-    fontFamily: 'monospace',
-  }
+    fontFamily: typography.mono,
+  },
 });

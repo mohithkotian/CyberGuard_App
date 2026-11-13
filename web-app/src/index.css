@@ -1,35 +1,36 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@import './responsive.css';
 
 :root {
   --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'IBM Plex Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  --bg: #0A0A0A;
-  --bg-card: #0E0E0E;
-  --bg-popover: #141414;
-  --surface-3: #1C1C1A;
-  --text: #EFEDE8;
-  --text-muted: #8E8B85;
-  --text-subtle: #7A7873;
-  --primary: #EFEDE8;
-  --primary-strong: #FFFFFF;
-  --accent: #EFEDE8;
+  --bg: #0B0F17;
+  --bg-card: #121824;
+  --bg-popover: #1A2233;
+  --surface-3: #1A2233;
+  --text: #F1F5F9;
+  --text-muted: #94A3B8;
+  --text-subtle: #64748B;
+  --primary: #3DF5C0;
+  --primary-strong: #54FFCA;
+  --accent: #3DF5C0;
   --status-mint: #3DF5C0;
-  --warning: #d8a43a;
-  --danger: #d96464;
-  --border: #242422;
-  --border-strong: #2C2B28;
-  --glass-bg: #141414;
-  --shadow: none;
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --border: #232D3F;
+  --border-strong: #2F3B52;
+  --glass-bg: #121824;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
   --focus-ring: 0 0 0 2px #3DF5C0;
 
-  --auth-bg: #070707;
-  --auth-card: #0d0d0d;
+  --auth-bg: #0B0F17;
+  --auth-card: #121824;
   --auth-card-border: var(--border);
-  --auth-input-bg: #141414;
+  --auth-input-bg: #1A2233;
   --auth-input-border: var(--border-strong);
   --auth-input-border-focus: var(--primary);
   --auth-input-text: var(--text);

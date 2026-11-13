@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { complaintsAPI, chatsAPI } from '../services/api';
-import { colors, globalStyles, statusColors, severityColors } from '../utils/theme';
+import { colors, globalStyles, statusColors, severityColors, typography } from '../utils/theme';
 import { format } from 'date-fns';
 import CyberBackground from '../components/CyberBackground';
-import useAuthStore from '../hooks/useAuthStore';
-
-const { width } = Dimensions.get('window');
+import ScreenHeader from '../components/ScreenHeader';
+import IconGlyph from '../components/IconGlyph';
 
 export default function ComplaintDetailScreen({ route, navigation }) {
   const complaintId = route?.params?.complaintId;
-  const { user } = useAuthStore();
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [caseChats, setCaseChats] = useState([]);
@@ -24,12 +22,16 @@ export default function ComplaintDetailScreen({ route, navigation }) {
       return;
     }
     try {
-      const request = /^[0-9a-fA-F]{24}$/.test(complaintId) 
-        ? complaintsAPI.getOne(complaintId)
-        : complaintsAPI.track(complaintId);
-
-      const { data } = await request;
-      const comp = data.data?.complaint || data.data;
+      let comp = null;
+      try {
+        const { data } = await (/^[0-9a-fA-F]{24}$/.test(complaintId)
+          ? complaintsAPI.getOne(complaintId)
+          : complaintsAPI.track(complaintId));
+        comp = data.data?.complaint || data.data;
+      } catch (firstErr) {
+        const { data } = await complaintsAPI.track(complaintId);
+        comp = data.data?.complaint || data.data;
+      }
       setComplaint(comp);
 
       // Load case chat if available
@@ -71,61 +73,63 @@ export default function ComplaintDetailScreen({ route, navigation }) {
 
   if (loading) {
     return (
-      <SafeAreaView style={[globalStyles.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+      <SafeAreaView style={[globalStyles.screen, styles.centerWrap]}>
         <ActivityIndicator color={colors.accent} size="large" />
-        <Text style={{ color: colors.muted, marginTop: 12, fontSize: 12 }}>DECRYPTING DOSSIER...</Text>
+        <Text style={styles.loadingText}>Loading Case File...</Text>
       </SafeAreaView>
     );
   }
 
   if (!complaint) {
     return (
-      <SafeAreaView style={[globalStyles.screen, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
-        <Text style={{ color: colors.danger, fontSize: 16, fontWeight: '900' }}>CASE NOT FOUND</Text>
-        <Text style={{ color: colors.muted, fontSize: 12, marginTop: 6, textAlign: 'center' }}>
-          The requested complaint identifier could not be verified in the cloud database.
+      <SafeAreaView style={[globalStyles.screen, styles.centerWrap]}>
+        <View style={styles.errorIconWrap}>
+          <IconGlyph name="alertTriangle" size={28} color={colors.danger} />
+        </View>
+        <Text style={styles.errorTitle}>Case Not Found</Text>
+        <Text style={styles.errorDesc}>
+          The requested complaint identifier could not be verified in the database.
         </Text>
-        <TouchableOpacity style={[globalStyles.btnOutline, { marginTop: 20 }]} onPress={() => navigation.goBack()}>
-          <Text style={globalStyles.btnOutlineText}>← Return to Feed</Text>
+        <TouchableOpacity
+          style={[globalStyles.btnOutline, { marginTop: 20 }]}
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.75}
+        >
+          <IconGlyph name="arrowLeft" size={16} color={colors.text} />
+          <Text style={globalStyles.btnOutlineText}>Return to Previous Screen</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
   }
 
-  const statusColor = statusColors[complaint.status] || colors.cyber;
+  const statusColor = statusColors[complaint.status] || colors.accent;
   const severityColor = severityColors[complaint.severity] || colors.warn;
 
   return (
-    <SafeAreaView style={globalStyles.screen}>
+    <SafeAreaView style={globalStyles.screen} edges={['top']}>
       <CyberBackground />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={{ color: colors.accent, fontSize: 18, fontWeight: '900' }}>←</Text>
-        </TouchableOpacity>
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.headerTitle}>INCIDENT DOSSIER</Text>
-          <Text style={styles.headerSub}>{complaint.complaintId || complaint._id}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        title="Incident Dossier"
+        subtitle={complaint.complaintId || complaint._id}
+        navigation={navigation}
+      />
 
-      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         {/* Core Case Card */}
-        <View style={globalStyles.glassCard}>
+        <View style={globalStyles.card}>
           <View style={globalStyles.spaceBetween}>
-            <Text style={[globalStyles.mono, { color: colors.cyber, fontSize: 12, fontWeight: '800' }]}>
+            <Text style={[globalStyles.mono, styles.caseDocketId]}>
               {complaint.complaintId}
             </Text>
             <View style={{ flexDirection: 'row', gap: 6 }}>
-              <View style={[globalStyles.badge, { backgroundColor: `${statusColor}20`, borderColor: statusColor, borderWidth: 1 }]}>
-                <Text style={{ color: statusColor, fontSize: 10, fontWeight: '900' }}>
+              <View style={[globalStyles.badge, { backgroundColor: `${statusColor}18`, borderColor: `${statusColor}45`, borderWidth: 1 }]}>
+                <Text style={[styles.badgeText, { color: statusColor }]}>
                   {(complaint.status || 'pending').replace(/_/g, ' ').toUpperCase()}
                 </Text>
               </View>
               {complaint.severity && (
-                <View style={[globalStyles.badge, { backgroundColor: `${severityColor}20`, borderColor: severityColor, borderWidth: 1 }]}>
-                  <Text style={{ color: severityColor, fontSize: 10, fontWeight: '900' }}>
+                <View style={[globalStyles.badge, { backgroundColor: `${severityColor}18`, borderColor: `${severityColor}45`, borderWidth: 1 }]}>
+                  <Text style={[styles.badgeText, { color: severityColor }]}>
                     {complaint.severity.toUpperCase()}
                   </Text>
                 </View>
@@ -167,17 +171,17 @@ export default function ComplaintDetailScreen({ route, navigation }) {
 
         {/* AI Neural Classification */}
         {complaint.mlPrediction && (
-          <View style={[globalStyles.glassCard, { borderColor: 'rgba(0, 255, 209, 0.3)' }]}>
-            <Text style={globalStyles.sectionTitle}>◈ AI NEURAL CLASSIFICATION</Text>
+          <View style={globalStyles.card}>
+            <Text style={globalStyles.sectionTitle}>AI Classification</Text>
             <View style={globalStyles.spaceBetween}>
-              <Text style={{ color: colors.text, fontSize: 13 }}>Predicted Category:</Text>
-              <Text style={{ color: colors.accent, fontSize: 13, fontWeight: '800' }}>
+              <Text style={styles.metaRowLabel}>Predicted Category:</Text>
+              <Text style={styles.metaRowValue}>
                 {(complaint.mlPrediction.category || complaint.category)?.replace(/_/g, ' ')}
               </Text>
             </View>
-            <View style={[globalStyles.spaceBetween, { marginTop: 8 }]}>
-              <Text style={{ color: colors.text, fontSize: 13 }}>Model Confidence:</Text>
-              <Text style={{ color: colors.accent, fontSize: 13, fontWeight: '800' }}>
+            <View style={[globalStyles.spaceBetween, { marginTop: 10 }]}>
+              <Text style={styles.metaRowLabel}>Model Confidence:</Text>
+              <Text style={styles.metaRowValue}>
                 {Math.round((complaint.mlPrediction.confidence || 0.95) * 100)}%
               </Text>
             </View>
@@ -186,8 +190,8 @@ export default function ComplaintDetailScreen({ route, navigation }) {
 
         {/* Suspect Identifiers */}
         {complaint.suspectInfo && (complaint.suspectInfo.phone || complaint.suspectInfo.email || complaint.suspectInfo.bankDetails) && (
-          <View style={globalStyles.glassCard}>
-            <Text style={globalStyles.sectionTitle}>! SUSPECT IDENTIFIERS</Text>
+          <View style={globalStyles.card}>
+            <Text style={globalStyles.sectionTitle}>Suspect Identifiers</Text>
             {complaint.suspectInfo.phone && (
               <View style={styles.suspectRow}>
                 <Text style={styles.suspectLabel}>Phone:</Text>
@@ -211,36 +215,39 @@ export default function ComplaintDetailScreen({ route, navigation }) {
 
         {/* Evidence Dossier */}
         {complaint.evidence && complaint.evidence.length > 0 && (
-          <View style={globalStyles.glassCard}>
-            <Text style={globalStyles.sectionTitle}>▤ ATTACHED EVIDENCE ({complaint.evidence.length})</Text>
+          <View style={globalStyles.card}>
+            <Text style={globalStyles.sectionTitle}>Attached Evidence ({complaint.evidence.length})</Text>
             {complaint.evidence.map((ev, i) => (
               <View key={i} style={styles.evidenceItem}>
-                <Text style={{ fontSize: 14 }}>▤</Text>
+                <IconGlyph name="file" size={18} color={colors.accent} />
                 <Text style={styles.evidenceName} numberOfLines={1}>
                   {ev.filename || ev.url?.split('/').pop() || `Evidence_File_${i+1}`}
                 </Text>
-                <Text style={{ color: colors.accent, fontSize: 11 }}>ATTACHED</Text>
+                <View style={[globalStyles.badge, { backgroundColor: 'rgba(61, 245, 192, 0.1)' }]}>
+                  <Text style={{ color: colors.accent, fontSize: 11, fontWeight: '700' }}>ATTACHED</Text>
+                </View>
               </View>
             ))}
           </View>
         )}
 
         {/* Timeline Stepper */}
-        <View style={globalStyles.glassCard}>
-          <Text style={globalStyles.sectionTitle}>… INVESTIGATION TIMELINE</Text>
+        <View style={globalStyles.card}>
+          <Text style={globalStyles.sectionTitle}>Investigation Timeline</Text>
           {(complaint.timeline && complaint.timeline.length > 0 ? complaint.timeline : [
-            { status: 'pending', message: 'Complaint registered and queued for neural categorization.', timestamp: complaint.createdAt },
+            { status: 'pending', message: 'Complaint registered and queued for investigation.', timestamp: complaint.createdAt },
             { status: 'under_review', message: 'Initial triage complete. Case dossier verified.', timestamp: complaint.createdAt }
           ]).map((t, i) => {
-            const stepColor = statusColors[t.status] || colors.cyber;
+            const stepColor = statusColors[t.status] || colors.accent;
+            const isResolved = t.status === 'resolved';
             return (
-              <View key={i} style={{ flexDirection: 'row', gap: 12, marginBottom: 14 }}>
-                <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: `${stepColor}25`, borderWidth: 2, borderColor: stepColor, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Text style={{ fontSize: 10 }}>{t.status === 'resolved' ? 'v' : '●'}</Text>
+              <View key={i} style={styles.timelineRow}>
+                <View style={[styles.timelineDot, { backgroundColor: `${stepColor}18`, borderColor: stepColor }]}>
+                  <IconGlyph name={isResolved ? 'check' : 'clock'} size={12} color={stepColor} strokeWidth={2.4} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '700' }}>{t.message}</Text>
-                  <Text style={{ color: colors.muted, fontSize: 10, marginTop: 2 }}>
+                  <Text style={styles.timelineMessage}>{t.message}</Text>
+                  <Text style={styles.timelineDate}>
                     {t.timestamp ? format(new Date(t.timestamp), 'dd MMM yyyy, hh:mm a') : 'Logged'}
                   </Text>
                 </View>
@@ -250,42 +257,43 @@ export default function ComplaintDetailScreen({ route, navigation }) {
         </View>
 
         {/* Officer Case Notes & Citizen Comms */}
-        <View style={globalStyles.glassCard}>
-          <Text style={globalStyles.sectionTitle}>@ CASE LOG & DIRECT OFFICER NOTES</Text>
+        <View style={globalStyles.card}>
+          <Text style={globalStyles.sectionTitle}>Case Notes & Officer Updates</Text>
           {caseChats.length === 0 ? (
-            <Text style={{ color: colors.muted, fontSize: 12, textAlign: 'center', paddingVertical: 10 }}>
-              No private officer notes on this case yet.
+            <Text style={styles.emptyChatText}>
+              No officer notes recorded on this case file yet.
             </Text>
           ) : (
             caseChats.map((c, i) => (
               <View key={i} style={styles.caseChatBubble}>
                 <View style={globalStyles.spaceBetween}>
-                  <Text style={{ color: colors.accent, fontSize: 11, fontWeight: '800' }}>
+                  <Text style={styles.officerName}>
                     {c.sender?.name || 'Investigating Officer'}
                   </Text>
-                  <Text style={{ color: colors.muted, fontSize: 9 }}>
+                  <Text style={styles.officerTimestamp}>
                     {c.createdAt ? format(new Date(c.createdAt), 'hh:mm a') : ''}
                   </Text>
                 </View>
-                <Text style={{ color: '#FFFFFF', fontSize: 12, marginTop: 4 }}>{c.message}</Text>
+                <Text style={styles.officerMessage}>{c.message}</Text>
               </View>
             ))
           )}
 
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+          <View style={styles.chatInputRow}>
             <TextInput
-              style={[styles.chatInput, { flex: 1 }]}
+              style={[globalStyles.input, styles.chatTextInput]}
               placeholder="Add remark or note to case file..."
               placeholderTextColor={colors.muted}
               value={chatText}
               onChangeText={setChatText}
             />
-            <TouchableOpacity 
-              style={[styles.sendBtn, (!chatText.trim() || sendingChat) && { opacity: 0.5 }]} 
+            <TouchableOpacity
+              style={[styles.sendNoteBtn, (!chatText.trim() || sendingChat) && styles.sendBtnDisabled]}
               onPress={handleSendCaseChat}
               disabled={!chatText.trim() || sendingChat}
+              activeOpacity={0.8}
             >
-              <Text style={{ color: '#030A14', fontWeight: '900', fontSize: 13 }}>LOG</Text>
+              <IconGlyph name="send" size={18} color="#070B12" strokeWidth={2.4} />
             </TouchableOpacity>
           </View>
         </View>
@@ -295,121 +303,202 @@ export default function ComplaintDetailScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
+  centerWrap: {
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    padding: 24,
   },
-  backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(0, 255, 209, 0.1)',
+  loadingText: {
+    color: colors.textSecondary,
+    marginTop: 14,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  errorIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(248, 113, 113, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 255, 209, 0.3)',
+    marginBottom: 14,
   },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: 1.5,
+  errorTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: '700',
   },
-  headerSub: {
+  errorDesc: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    marginTop: 6,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 60,
+  },
+  caseDocketId: {
     color: colors.accent,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   titleText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '900',
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: '700',
     marginTop: 12,
-    lineHeight: 22,
+    lineHeight: 24,
   },
   descText: {
     color: colors.textSecondary,
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 14,
+    lineHeight: 21,
     marginTop: 8,
   },
   infoGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.06)',
-    paddingTop: 10,
-    marginTop: 12,
+    borderTopColor: colors.border,
+    paddingTop: 12,
+    marginTop: 14,
   },
   infoCol: {
     flex: 1,
   },
   infoLabel: {
-    color: colors.muted,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 1,
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   infoValue: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: '600',
     marginTop: 2,
+    textTransform: 'capitalize',
+  },
+  metaRowLabel: {
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  metaRowValue: {
+    color: colors.accent,
+    fontSize: 14,
+    fontWeight: '700',
   },
   suspectRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 4,
+    paddingVertical: 6,
   },
   suspectLabel: {
-    color: colors.muted,
-    fontSize: 12,
+    color: colors.textSecondary,
+    fontSize: 13,
   },
   suspectVal: {
     color: colors.warn,
-    fontSize: 12,
-    fontWeight: '700',
-    fontFamily: 'monospace',
+    fontSize: 13,
+    fontWeight: '600',
+    fontFamily: typography.mono,
   },
   evidenceItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingVertical: 6,
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+    gap: 10,
   },
   evidenceName: {
     color: colors.text,
-    fontSize: 12,
+    fontSize: 13,
     flex: 1,
   },
-  caseChatBubble: {
-    backgroundColor: 'rgba(15, 25, 50, 0.8)',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.15)',
+  timelineRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 14,
   },
-  chatInput: {
-    backgroundColor: 'rgba(15, 25, 50, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 180, 255, 0.3)',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    color: colors.text,
-    fontSize: 12,
-  },
-  sendBtn: {
-    backgroundColor: colors.accent,
-    borderRadius: 8,
-    paddingHorizontal: 16,
+  timelineDot: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-  }
+  },
+  timelineMessage: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  timelineDate: {
+    color: colors.muted,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  emptyChatText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    textAlign: 'center',
+    paddingVertical: 10,
+  },
+  caseChatBubble: {
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: colors.borderLight,
+  },
+  officerName: {
+    color: colors.accent,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  officerTimestamp: {
+    color: colors.muted,
+    fontSize: 11,
+  },
+  officerMessage: {
+    color: colors.text,
+    fontSize: 14,
+    marginTop: 4,
+    lineHeight: 20,
+  },
+  chatInputRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  chatTextInput: {
+    flex: 1,
+    marginBottom: 0,
+    fontSize: 14,
+    paddingVertical: 10,
+  },
+  sendNoteBtn: {
+    backgroundColor: colors.accent,
+    borderRadius: 10,
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendBtnDisabled: {
+    opacity: 0.4,
+  },
 });
