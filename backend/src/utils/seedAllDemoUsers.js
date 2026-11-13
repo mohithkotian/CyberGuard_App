@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
 
+const dns = require('dns');
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+} catch (dnsErr) {}
+
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 const User = require('../models/User');
 
@@ -37,7 +42,17 @@ const demoUsers = [
 
 async function seed() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    const uri = process.env.MONGODB_URI;
+    try {
+      await mongoose.connect(uri);
+    } catch (primaryErr) {
+      if (process.env.MONGODB_URI_FALLBACK) {
+        console.warn('Atlas primary failed, trying local fallback...');
+        await mongoose.connect(process.env.MONGODB_URI_FALLBACK);
+      } else {
+        throw primaryErr;
+      }
+    }
     console.log('Connected to MongoDB for seeding demo users...');
 
     for (const u of demoUsers) {
