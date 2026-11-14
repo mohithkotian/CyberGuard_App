@@ -12,16 +12,16 @@
 
 | Model & Hyperparameters | Group CV Accuracy | CV Std Dev | Macro-F1 | Weighted-F1 | Calibration Support |
 |---|---|---|---|---|---|
-| `LinearSVC (C=2.0)` | **81.79%** | &plusmn; 2.29% | **0.7869** | 0.8198 | Platt Sigmoid / Calibrated |
-| `LinearSVC (C=1.0)` | **81.54%** | &plusmn; 2.52% | **0.7842** | 0.8171 | Platt Sigmoid / Calibrated |
-| `LinearSVC (C=0.5)` | **81.36%** | &plusmn; 2.54% | **0.7714** | 0.8154 | Platt Sigmoid / Calibrated |
-| `LogisticRegression (C=4.0)` | **80.91%** | &plusmn; 2.86% | **0.7689** | 0.8135 | Native Softmax |
-| `LogisticRegression (C=2.0)` | **79.88%** | &plusmn; 3.15% | **0.7600** | 0.8034 | Native Softmax |
-| `LogisticRegression (C=1.0)` | **78.48%** | &plusmn; 3.42% | **0.7487** | 0.7894 | Native Softmax |
-| `MultinomialNB (alpha=0.1)` | **76.92%** | &plusmn; 2.18% | **0.7317** | 0.7711 | Native Naive |
-| `LogisticRegression (C=0.5)` | **75.48%** | &plusmn; 3.92% | **0.7232** | 0.7553 | Native Softmax |
-| `MultinomialNB (alpha=0.5)` | **73.93%** | &plusmn; 2.78% | **0.7047** | 0.7373 | Native Naive |
-| `MultinomialNB (alpha=1.0)` | **72.14%** | &plusmn; 3.98% | **0.6891** | 0.7188 | Native Naive |
+| `LinearSVC (C=2.0)` | **82.26%** | &plusmn; 7.16% | **0.8074** | 0.8151 | Platt Sigmoid / Calibrated |
+| `LinearSVC (C=1.0)` | **81.94%** | &plusmn; 7.30% | **0.8041** | 0.8112 | Platt Sigmoid / Calibrated |
+| `LogisticRegression (C=4.0)` | **81.97%** | &plusmn; 6.73% | **0.8040** | 0.8142 | Native Softmax |
+| `LogisticRegression (C=2.0)` | **81.83%** | &plusmn; 6.80% | **0.8038** | 0.8133 | Native Softmax |
+| `LinearSVC (C=0.5)` | **81.82%** | &plusmn; 6.94% | **0.8025** | 0.8100 | Platt Sigmoid / Calibrated |
+| `LogisticRegression (C=1.0)` | **81.01%** | &plusmn; 6.52% | **0.7954** | 0.8049 | Native Softmax |
+| `LogisticRegression (C=0.5)` | **79.36%** | &plusmn; 6.44% | **0.7770** | 0.7879 | Native Softmax |
+| `MultinomialNB (alpha=0.5)` | **78.01%** | &plusmn; 7.35% | **0.7631** | 0.7732 | Native Naive |
+| `MultinomialNB (alpha=0.1)` | **78.03%** | &plusmn; 8.45% | **0.7595** | 0.7706 | Native Naive |
+| `MultinomialNB (alpha=1.0)` | **76.86%** | &plusmn; 7.53% | **0.7531** | 0.7622 | Native Naive |
 
 ---
 
