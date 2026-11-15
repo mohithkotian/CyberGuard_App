@@ -44,7 +44,13 @@ const initListeners = () => {
   listenersInitialized = true;
 
   mongoose.connection.on('connected', async () => {
-    logger.info(`[OK] MongoDB Connected: ${mongoose.connection.host}`);
+    const isAtlas = mongoose.connection.host.includes('mongodb.net');
+    logger.info(`[OK] MongoDB Connected: ${mongoose.connection.host} (DB: ${mongoose.connection.name})${isAtlas ? ' [MongoDB Atlas Cluster Active]' : ' [Local MongoDB]'}`);
+    try {
+      const Complaint = require('../models/Complaint');
+      const count = await Complaint.countDocuments();
+      logger.info(`[Database Sync] Active complaints in cluster: ${count}`);
+    } catch (_) {}
     await seedAdmin();
   });
 
@@ -83,15 +89,21 @@ const connectDB = async () => {
   const primaryUri = process.env.MONGODB_URI || process.env.MONGODB_URI_PROD;
   const fallbackUri = process.env.MONGODB_URI_FALLBACK;
 
-  const connectionOptions = {
+  const primaryConnectionOptions = {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 20000,
+    socketTimeoutMS: 45000,
+  };
+
+  const fallbackConnectionOptions = {
     maxPoolSize: 10,
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
   };
 
-  const tryConnect = async (uri, label = 'primary') => {
+  const tryConnect = async (uri, options, label = 'primary') => {
     logger.info(`Attempting MongoDB connection (${label})...`);
-    return await mongoose.connect(uri, connectionOptions);
+    return await mongoose.connect(uri, options);
   };
 
   try {
@@ -102,22 +114,30 @@ const connectDB = async () => {
     let conn;
     try {
       if (primaryUri) {
-        conn = await tryConnect(primaryUri, 'primary');
+        conn = await tryConnect(primaryUri, primaryConnectionOptions, 'primary Atlas');
       }
     } catch (primaryErr) {
-      logger.warn(`Primary MongoDB connection failed: ${primaryErr.message}`);
+      logger.warn(`Primary MongoDB Atlas attempt failed: ${primaryErr.message}. Retrying primary Atlas connection...`);
 
-      if (fallbackUri && fallbackUri !== primaryUri) {
-        logger.info('Attempting fallback MongoDB connection...');
-        try {
-          conn = await tryConnect(fallbackUri, 'fallback');
-          logger.info('[OK] Connected via fallback MongoDB URI');
-        } catch (fallbackErr) {
-          logger.warn(`Fallback MongoDB connection failed: ${fallbackErr.message}`);
-          throw fallbackErr;
+      try {
+        if (primaryUri) {
+          conn = await tryConnect(primaryUri, primaryConnectionOptions, 'primary Atlas retry');
         }
-      } else {
-        throw primaryErr;
+      } catch (retryErr) {
+        logger.warn(`Primary MongoDB Atlas retry failed: ${retryErr.message}`);
+
+        if (fallbackUri && fallbackUri !== primaryUri) {
+          logger.info('Attempting fallback MongoDB connection...');
+          try {
+            conn = await tryConnect(fallbackUri, fallbackConnectionOptions, 'fallback local');
+            logger.info('[OK] Connected via fallback MongoDB URI');
+          } catch (fallbackErr) {
+            logger.warn(`Fallback MongoDB connection failed: ${fallbackErr.message}`);
+            throw fallbackErr;
+          }
+        } else {
+          throw retryErr;
+        }
       }
     }
 

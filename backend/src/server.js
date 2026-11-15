@@ -1,3 +1,8 @@
+const dns = require('dns');
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+} catch (_) {}
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');

@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import { analyticsAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { safeFormatDate } from '../utils/formatDate';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -98,7 +99,7 @@ export default function AdminMap() {
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '8px', marginTop: '5px' }}>
                         <span style={{ fontSize: '9px', color: '#5A6480' }}>
-                          {format(new Date(p.createdAt), 'dd MMM yyyy')}
+                          {safeFormatDate(p.createdAt, 'dd MMM yyyy')}
                         </span>
                         <a 
                           href={`/track/${p.complaintId}`} 

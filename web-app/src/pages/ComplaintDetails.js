@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { safeFormatDate } from '../utils/formatDate';
 import { 
   FileText, ShieldAlert, Download, X, Printer, CheckCircle, Landmark, 
   ShieldCheck, Copy, PhoneCall, AlertTriangle, FileCheck, Mail, Scale, ExternalLink, Building2, Search,
@@ -483,7 +484,7 @@ export default function ComplaintDetails() {
     const contact = victim.mobile || complaint.userId?.phone || 'On Record';
     const amount = victim.amountLost || 'As per transaction dispute';
     const txnRef = victim.transactionReference || 'Under investigation / Transaction Statement Attached';
-    const dateStr = victim.incidentDate ? format(new Date(victim.incidentDate), 'dd-MMM-yyyy HH:mm') : format(new Date(complaint.createdAt), 'dd-MMM-yyyy');
+    const dateStr = victim.incidentDate ? safeFormatDate(victim.incidentDate, 'dd-MMM-yyyy HH:mm') : safeFormatDate(complaint.createdAt, 'dd-MMM-yyyy');
 
     return [
       'To,',
@@ -879,7 +880,7 @@ export default function ComplaintDetails() {
                 {complaint.title}
               </h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '13px', color: '#8e8b84', fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 600 }}>
-                <span>DATE: {format(new Date(complaint.createdAt), 'dd MMM yyyy HH:mm')}</span>
+                <span>DATE: {safeFormatDate(complaint.createdAt, 'dd MMM yyyy HH:mm')}</span>
                 <span>• CATEGORY: {complaint.category}</span>
                 {complaint.source && <span>• SOURCE: {complaint.source.toUpperCase()}</span>}
               </div>
@@ -1261,7 +1262,7 @@ export default function ComplaintDetails() {
                         <div style={{ fontSize: '11px', color: '#8e8b84', marginTop: 4, fontFamily: "'IBM Plex Mono', monospace" }}>
                           {hop.utrOrRef ? 'UTR: ' + hop.utrOrRef + ' • ' : ''}
                           {hop.ifsc ? 'IFSC: ' + hop.ifsc + ' • ' : ''}
-                          Logged: {format(new Date(hop.timestamp), 'dd MMM yyyy HH:mm')}
+                          Logged: {safeFormatDate(hop.timestamp, 'dd MMM yyyy HH:mm')}
                         </div>
                       </div>
                     </div>
@@ -1475,7 +1476,7 @@ export default function ComplaintDetails() {
                       {t.message}
                     </div>
                     <div style={{ fontSize: '12px', color: '#8e8b84', fontWeight: 500, display: 'flex', gap: '8px', fontFamily: "'IBM Plex Mono', monospace" }}>
-                      <span>{format(new Date(t.timestamp), 'dd MMM yyyy • HH:mm')}</span>
+                      <span>{safeFormatDate(t.timestamp, 'dd MMM yyyy • HH:mm')}</span>
                       {t.updatedBy && <span>• {t.updatedBy.name} ({t.updatedBy.role})</span>}
                     </div>
                   </div>
@@ -1696,7 +1697,7 @@ export default function ComplaintDetails() {
                     CERTIFICATE OF EVIDENCE DEPOSIT
                   </div>
                   <div style={{ fontSize: '12px', color: '#3DF5C0', fontFamily: "'IBM Plex Mono', monospace" }}>
-                    CASE ID: {complaint.complaintId} • TIMESTAMP: {format(new Date(complaint.createdAt), 'dd-MMM-yyyy HH:mm:ss')}
+                    CASE ID: {complaint.complaintId} • TIMESTAMP: {safeFormatDate(complaint.createdAt, 'dd-MMM-yyyy HH:mm:ss')}
                   </div>
                 </div>
 
@@ -1850,7 +1851,7 @@ export default function ComplaintDetails() {
                     <div style={{ color: '#8e8b84', fontSize: '11px', fontWeight: 700, marginBottom: 4 }}>INCIDENT CLASSIFICATION</div>
                     <div><strong>Category:</strong> {complaint.category}</div>
                     <div><strong>Severity:</strong> {complaint.severity?.toUpperCase()}</div>
-                    <div><strong>Filed At:</strong> {format(new Date(complaint.createdAt), 'dd MMM yyyy, HH:mm')}</div>
+                    <div><strong>Filed At:</strong> {safeFormatDate(complaint.createdAt, 'dd MMM yyyy, HH:mm')}</div>
                   </div>
                   <div style={{ background: '#121212', padding: 14, borderRadius: 8, border: '1px solid #242422' }}>
                     <div style={{ color: '#8e8b84', fontSize: '11px', fontWeight: 700, marginBottom: 4 }}>INVESTIGATING JURISDICTION</div>
@@ -1926,7 +1927,7 @@ export default function ComplaintDetails() {
                         <div key={i} style={{ background: '#121212', border: '1px solid #242422', borderRadius: 6, padding: '10px 14px', fontSize: '12px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                             <span style={{ fontWeight: 700, color: '#3DF5C0', fontFamily: "'IBM Plex Mono', monospace" }}>{c.action}</span>
-                            <span style={{ color: '#8e8b84', fontFamily: "'IBM Plex Mono', monospace" }}>{format(new Date(c.timestamp), 'dd-MMM-yyyy HH:mm:ss')}</span>
+                            <span style={{ color: '#8e8b84', fontFamily: "'IBM Plex Mono', monospace" }}>{safeFormatDate(c.timestamp, 'dd-MMM-yyyy HH:mm:ss')}</span>
                           </div>
                           <div style={{ color: '#d8d5ce', marginBottom: 4 }}>{c.notes || `Action by ${c.role?.toUpperCase()}`}</div>
                           {c.sha256 && (

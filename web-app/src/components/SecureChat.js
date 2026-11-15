@@ -6,6 +6,7 @@ import { chatsAPI } from '../services/api';
 import useAuthStore from '../hooks/useAuthStore';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { safeFormatDate } from '../utils/formatDate';
 
 const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || (process.env.REACT_APP_API_URL ? process.env.REACT_APP_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5002');
 
@@ -201,7 +202,7 @@ export default function SecureChat({ complaintId }) {
                     textAlign: 'right', 
                     marginTop: '4px' 
                   }}>
-                    {format(new Date(m.createdAt), 'HH:mm')}
+                    {safeFormatDate(m.createdAt, 'HH:mm')}
                   </div>
                 </div>
               </motion.div>

@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import { adminAPI } from '../services/api';
 import { getAvatarUrl, getAvatarFallback, getAvatarGradient } from '../utils/avatar';
+import { safeFormatDate } from '../utils/formatDate';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -377,14 +378,14 @@ export default function AdminUsers() {
       u.isTwoFactorEnabled ? 'Yes' : 'No',
       `"${(u.address?.city || 'N/A').replace(/"/g, '""')}"`,
       `"${(u.address?.state || 'N/A').replace(/"/g, '""')}"`,
-      format(new Date(u.createdAt), 'yyyy-MM-dd HH:mm:ss'),
+      safeFormatDate(u.createdAt, 'yyyy-MM-dd HH:mm:ss', 'N/A'),
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `CyberGuard_Personnel_Registry_${format(new Date(), 'yyyyMMdd_HHmm')}.csv`);
+    link.setAttribute('download', `CyberGuard_Personnel_Registry_${safeFormatDate(new Date(), 'yyyyMMdd_HHmm')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -400,7 +401,7 @@ export default function AdminUsers() {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(users, null, 2));
     const link = document.createElement('a');
     link.setAttribute('href', dataStr);
-    link.setAttribute('download', `CyberGuard_Personnel_Registry_${format(new Date(), 'yyyyMMdd_HHmm')}.json`);
+    link.setAttribute('download', `CyberGuard_Personnel_Registry_${safeFormatDate(new Date(), 'yyyyMMdd_HHmm')}.json`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -934,7 +935,7 @@ export default function AdminUsers() {
                                 )}
                               </div>
                               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', marginTop: '3px' }}>
-                                ID: {u._id?.substring(0, 10)}... | Joined {format(new Date(u.createdAt), 'dd MMM yyyy')}
+                                ID: {u._id?.substring(0, 10)}... | Joined {safeFormatDate(u.createdAt, 'dd MMM yyyy', 'Recent')}
                               </div>
                             </div>
                           </div>
@@ -2149,7 +2150,7 @@ export default function AdminUsers() {
 
                     <div>
                       <span style={{ color: 'rgba(255,255,255,0.4)', display: 'block', fontSize: '11px', fontWeight: 700 }}>REGISTRATION DATE</span>
-                      <span style={{ fontWeight: 600 }}>{format(new Date(selectedUser.createdAt), 'dd MMMM yyyy, HH:mm')}</span>
+                      <span style={{ fontWeight: 600 }}>{safeFormatDate(selectedUser.createdAt, 'dd MMMM yyyy, HH:mm', 'Recent')}</span>
                     </div>
                   </div>
 
@@ -2181,7 +2182,7 @@ export default function AdminUsers() {
                                 {c.title || c.category}
                               </div>
                               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '3px' }}>
-                                ID: {c.complaintId || c._id} | {format(new Date(c.createdAt), 'dd MMM yyyy')} | Loss: ₹{c.estimatedLoss || 0}
+                                ID: {c.complaintId || c._id} | {safeFormatDate(c.createdAt, 'dd MMM yyyy', 'Recent')} | Loss: ₹{c.estimatedLoss || 0}
                               </div>
                             </div>
 

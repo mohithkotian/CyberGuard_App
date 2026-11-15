@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import { complaintsAPI } from '../services/api';
+import { safeFormatDate } from '../utils/formatDate';
 
 const STATUSES = ['pending','under_review','investigating','in-progress','resolved','closed','rejected'];
 
@@ -221,7 +222,7 @@ export default function AdminComplaints() {
                       {c.victimDetails?.pincode || 'N/A'}
                     </td>
                     <td style={{ padding: '18px 24px', fontSize: '12px', color: '#8e8b84', fontWeight: 500, fontFamily: "'IBM Plex Mono', monospace" }}>
-                      {format(new Date(c.createdAt), 'dd MMM yy')}
+                      {safeFormatDate(c.createdAt, 'dd MMM yy', 'Recent')}
                     </td>
                     <td style={{ padding: '18px 24px' }}>
                       <div style={{ display: 'flex', gap: 8 }}>

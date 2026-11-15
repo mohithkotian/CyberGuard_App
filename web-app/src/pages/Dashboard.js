@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 import { format } from 'date-fns';
+import { safeFormatDate } from '../utils/formatDate';
 
 import Navbar from '../components/Navbar';
 
@@ -727,7 +728,7 @@ export default function Dashboard() {
 
                       <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 500 }}>
 
-                        Filed on {format(new Date(c.createdAt), 'dd MMM yyyy, hh:mm a')}
+                        Filed on {safeFormatDate(c.createdAt, 'dd MMM yyyy, hh:mm a')}
 
                       </p>
 

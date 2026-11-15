@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { safeFormatDate } from '../utils/formatDate';
 import { complaintsAPI } from '../services/api';
 import useAuthStore from '../hooks/useAuthStore';
 import SecureChat from '../components/SecureChat';
@@ -284,7 +285,7 @@ export default function TrackComplaint() {
                       color: '#8e8b84'
                     }}>
                       <span>Category: <strong style={{ color: '#d8d5ce' }}>{complaint.category}</strong></span>
-                      <span>Filed: <strong style={{ color: '#d8d5ce' }}>{format(new Date(complaint.createdAt), 'dd MMM yyyy • HH:mm')}</strong></span>
+                      <span>Filed: <strong style={{ color: '#d8d5ce' }}>{safeFormatDate(complaint.createdAt, 'dd MMM yyyy • HH:mm')}</strong></span>
                       <span>Criticality: <strong style={{ color: complaint.severity === 'high' ? '#d96464' : '#d8a43a' }}>{complaint.severity?.toUpperCase() || 'STANDARD'}</strong></span>
                     </div>
                   </div>
@@ -461,7 +462,7 @@ export default function TrackComplaint() {
                               fontSize: '12px',
                               color: '#8E8B85'
                             }}>
-                              {format(new Date(t.timestamp), 'dd MMM yyyy • HH:mm:ss')}
+                              {safeFormatDate(t.timestamp, 'dd MMM yyyy • HH:mm:ss')}
                             </span>
                           </div>
                         </div>

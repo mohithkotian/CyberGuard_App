@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { safeFormatDate } from '../utils/formatDate';
 import Navbar from '../components/Navbar';
 import { complaintsAPI } from '../services/api';
 import { onStatusUpdate, offStatusUpdate } from '../services/socket';
@@ -507,7 +508,7 @@ export default function OfficerDashboard() {
                       </span>
                       <span style={{ fontSize: '10px', color: '#555' }}>•</span>
                       <span style={{ fontSize: '11px', color: '#8e8b84' }}>
-                        {format(new Date(c.createdAt), 'dd MMM yyyy')}
+                        {safeFormatDate(c.createdAt, 'dd MMM yyyy')}
                       </span>
                     </div>
                   </div>

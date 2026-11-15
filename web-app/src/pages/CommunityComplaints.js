@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { safeFormatDate } from '../utils/formatDate';
 import { UsersRound, ShieldCheck, ArrowRight, Lock, Search, Radio, AlertTriangle, ShieldAlert, Compass } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { complaintsAPI } from '../services/api';
@@ -425,7 +426,7 @@ export default function CommunityComplaints() {
                         {c.title}
                       </h3>
                       <p style={{ fontSize: '12px', color: '#8e8b84', margin: 0, fontFamily: "'IBM Plex Mono', monospace" }}>
-                        FILED: {format(new Date(c.createdAt), 'dd MMM yyyy, HH:mm')}
+                        FILED: {safeFormatDate(c.createdAt, 'dd MMM yyyy, HH:mm')}
                       </p>
                     </div>
 
