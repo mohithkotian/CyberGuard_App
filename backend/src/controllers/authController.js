@@ -33,12 +33,17 @@ const login = async (req, res, next) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      user.loginAttempts = (user.loginAttempts || 0) + 1;
-      if (user.loginAttempts >= 5) {
-        user.lockUntil = new Date(Date.now() + 30 * 60 * 1000);
-        user.loginAttempts = 0;
+      const updatedUser = await User.findByIdAndUpdate(
+        user._id,
+        { $inc: { loginAttempts: 1 } },
+        { new: true, select: '+loginAttempts' }
+      );
+      if (updatedUser && updatedUser.loginAttempts >= 5) {
+        await User.findByIdAndUpdate(user._id, {
+          lockUntil: new Date(Date.now() + 30 * 60 * 1000),
+          loginAttempts: 0
+        });
       }
-      await user.save({ validateBeforeSave: false });
       return next(new AppError('Invalid email or password.', 401));
     }
 
@@ -408,7 +413,7 @@ const enrollFace = async (req, res, next) => {
     
     // Only Pruthvi Shetty can enroll
     const user = await User.findById(req.user.id);
-    if (user.email !== 'pruthvishetty04@gmail.com') {
+    if (user.role !== 'admin' && user.email !== 'pruthvishetty04@gmail.com') {
       return next(new AppError('UNAUTHORIZED: Face ID enrollment restricted to System Admin.', 403));
     }
 

@@ -124,6 +124,8 @@ exports.getEvidence = async (req, res, next) => {
       logger.warn(`Evidence file [${evidence.filename}] retrieved with unverified_legacy status (no stored SHA-256 baseline).`);
     } else if (integrityStatus === 'integrity_mismatch') {
       logger.error(`CRITICAL: Evidence hash mismatch for ${evidence.filename}. Stored: ${evidence.sha256}, disk: ${currentHash}`);
+      evidence.isTampered = true;
+      evidence.integrityStatus = 'integrity_mismatch';
       try {
         if (!complaint.chainOfCustody) complaint.chainOfCustody = [];
         complaint.chainOfCustody.push({
@@ -133,6 +135,11 @@ exports.getEvidence = async (req, res, next) => {
           actorRole: req.user.role,
           details: `CRITICAL INTEGRITY VIOLATION: Evidence file [${evidence.originalName || evidence.filename}] tampered with or corrupted. Expected SHA-256: ${evidence.sha256}, Actual: ${currentHash}`,
           evidenceHash: currentHash,
+          performedBy: req.user._id,
+          role: req.user.role,
+          targetFile: evidence.filename,
+          sha256: currentHash,
+          notes: `CRITICAL INTEGRITY VIOLATION: Evidence file [${evidence.originalName || evidence.filename}] tampered with or corrupted.`,
           timestamp: new Date()
         });
         await complaint.save();
@@ -146,6 +153,8 @@ exports.getEvidence = async (req, res, next) => {
 
     // Log chain-of-custody access event
     try {
+      evidence.isTampered = false;
+      evidence.integrityStatus = integrityStatus || 'verified';
       if (!complaint.chainOfCustody) complaint.chainOfCustody = [];
       complaint.chainOfCustody.push({
         action: 'EVIDENCE_ACCESSED',
@@ -154,6 +163,11 @@ exports.getEvidence = async (req, res, next) => {
         actorRole: req.user.role,
         details: `Evidence file [${evidence.originalName || evidence.filename}] retrieved with status [${integrityStatus}] (SHA-256: ${(currentHash || evidence.sha256 || '').substring(0, 16)}...).`,
         evidenceHash: currentHash || evidence.sha256,
+        performedBy: req.user._id,
+        role: req.user.role,
+        targetFile: evidence.filename,
+        sha256: currentHash || evidence.sha256,
+        notes: `Evidence file [${evidence.originalName || evidence.filename}] retrieved with status [${integrityStatus}].`,
         timestamp: new Date()
       });
       await complaint.save();
@@ -318,6 +332,13 @@ exports.createComplaint = async (req, res, next) => {
       try { parsedLocation = JSON.parse(location); } catch (_) { parsedLocation = null; }
     } else if (location && typeof location === 'object') {
       parsedLocation = location;
+    }
+
+    if (parsedLocation && (parsedLocation.state || parsedLocation.district) && !parsedLocation.coordinates) {
+      if (!parsedVictimDetails.location) {
+        parsedVictimDetails.location = [parsedLocation.district, parsedLocation.state].filter(Boolean).join(', ');
+      }
+      parsedLocation = null;
     }
 
     // Determine category & priority rules
@@ -529,7 +550,8 @@ exports.getComplaints = async (req, res, next) => {
       } else if (category.includes(',')) {
         query.category = { $in: category.split(',').map(c => c.trim()) };
       } else {
-        query.category = category;
+        const cleanCat = category.replace(/_/g, ' ').trim();
+        query.category = { $regex: new RegExp(`^${cleanCat.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') };
       }
     }
     if (severity) query.severity = severity;
@@ -806,12 +828,16 @@ exports.trackComplaint = async (req, res, next) => {
     const timeline = complaint.timeline || [];
     const hasBankNotice = timeline.some(t => /bank|freeze|lien/i.test(t.message));
     const hasSec65B = (complaint.evidence || []).some(e => !!e.sha256);
-    const isAssigned = ['investigating', 'resolved'].includes(complaint.status);
+    const isAssigned = ['investigating', 'in-progress', 'resolved'].includes(complaint.status);
     const isResolved = ['resolved', 'closed'].includes(complaint.status);
+    const isRejected = complaint.status === 'rejected';
 
     let currentMilestone = 1;
     let milestoneName = 'Intake Sealed';
-    if (isResolved) {
+    if (isRejected) {
+      currentMilestone = 0;
+      milestoneName = 'Case Dismissed / Rejected';
+    } else if (isResolved) {
       currentMilestone = 5;
       milestoneName = 'Case Disposition';
     } else if (isAssigned) {
@@ -990,15 +1016,47 @@ exports.issueBankFreezeNotice = async (req, res, next) => {
 
     // Add to custody ledger
     complaint.chainOfCustody = complaint.chainOfCustody || [];
+    const custodyNote = `Lien notice dispatched to ${bankName} targeting ${accountNumber || upiId || transactionRef} (Ref: ${noticeNumber})`;
     complaint.chainOfCustody.push({
       action: 'BANK_FREEZE_NOTICE_ISSUED',
+      actor: req.user.name || req.user.role,
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      details: custodyNote,
+      evidenceHash: noticeSha256,
       performedBy: req.user._id,
       role: req.user.role,
       targetFile: noticeNumber,
       sha256: noticeSha256,
-      notes: `Lien notice dispatched to ${bankName} targeting ${accountNumber || upiId || transactionRef} (Ref: ${noticeNumber})`,
+      notes: custodyNote,
       timestamp
     });
+
+    // Synchronize money trail hop if present
+    if (complaint.moneyTrail && complaint.moneyTrail.length > 0) {
+      const targetHop = complaint.moneyTrail.find(h => 
+        (accountNumber && h.toAccountOrUpi === accountNumber) ||
+        (upiId && h.toAccountOrUpi === upiId) ||
+        (transactionRef && h.utrOrRef === transactionRef)
+      ) || complaint.moneyTrail[0];
+      if (targetHop) {
+        targetHop.status = 'FREEZE_NOTICE_ISSUED';
+        targetHop.freezeNoticeRef = noticeNumber;
+      }
+    }
+
+    // Synchronize restitution stage
+    if (!complaint.restitutionStatus || !complaint.restitutionStatus.currentStage) {
+      complaint.restitutionStatus = {
+        currentStage: 'FUNDS_DEBIT_FREEZED',
+        milestones: [{
+          stage: 'FUNDS_DEBIT_FREEZED',
+          notes: `Lien notice dispatched to ${bankName} (Ref: ${noticeNumber})`,
+          updatedBy: req.user._id,
+          timestamp
+        }]
+      };
+    }
 
     // Add to case audit timeline
     complaint.timeline = complaint.timeline || [];
@@ -2030,7 +2088,7 @@ exports.generateZeroFIRTransfer = async (req, res, next) => {
     const transferRef = 'TRANSFER/ZERO-FIR/' + now.getFullYear() + '/' + (complaint.complaintId || '').replace('CMP-', '');
 
     const exhibitsCount = (complaint.evidence || []).length;
-    const freezeCount = (complaint.chainOfCustody || []).filter(c => c.action === 'NOTICE_DISPATCHED').length;
+    const freezeCount = (complaint.chainOfCustody || []).filter(c => c.action === 'NOTICE_DISPATCHED' || c.action === 'BANK_FREEZE_NOTICE_ISSUED').length;
 
     const transferDocketText = [
       '================================================================================',
@@ -2421,7 +2479,11 @@ exports.updateRestitutionMilestone = async (req, res, next) => {
     if (settlementUtr) complaint.restitutionStatus.settlementUtr = settlementUtr;
     if (amountRestored !== undefined && amountRestored !== null) complaint.restitutionStatus.amountRestored = Number(amountRestored);
     if (remittanceBank) complaint.restitutionStatus.remittanceBank = remittanceBank;
-    if (stage === 'ESCROW_REMITTED_SUCCESSFULLY') complaint.restitutionStatus.remittedAt = now;
+    if (stage === 'ESCROW_REMITTED_SUCCESSFULLY') {
+      complaint.restitutionStatus.remittedAt = now;
+    } else if (complaint.restitutionStatus.remittedAt) {
+      complaint.restitutionStatus.remittedAt = undefined;
+    }
 
     complaint.restitutionStatus.milestones = complaint.restitutionStatus.milestones || [];
     complaint.restitutionStatus.milestones.push({
@@ -2433,13 +2495,20 @@ exports.updateRestitutionMilestone = async (req, res, next) => {
 
     // Record to chain of custody
     complaint.chainOfCustody = complaint.chainOfCustody || [];
+    const shaDigest = crypto.createHash('sha256').update(stage + '-' + (settlementUtr || '') + '-' + now.toISOString()).digest('hex');
+    const restitutionNote = 'Restitution pipeline updated to ' + stage + (amountRestored ? ' (Restored: INR ' + amountRestored + ')' : '');
     complaint.chainOfCustody.push({
       action: 'RESTITUTION_STAGE_UPDATED',
+      actor: req.user.name || req.user.role,
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      details: restitutionNote,
+      evidenceHash: shaDigest,
       performedBy: req.user._id,
       role: req.user.role,
       targetFile: stage,
-      sha256: crypto.createHash('sha256').update(stage + '-' + (settlementUtr || '') + '-' + now.toISOString()).digest('hex'),
-      notes: 'Restitution pipeline updated to ' + stage + (amountRestored ? ' (Restored: INR ' + amountRestored + ')' : ''),
+      sha256: shaDigest,
+      notes: restitutionNote,
       timestamp: now
     });
 

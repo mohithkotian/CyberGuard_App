@@ -66,6 +66,12 @@ exports.getMessages = async (req, res, next) => {
       .populate('sender', 'name role avatar')
       .sort('createdAt');
 
+    // Mark messages received from others as read
+    await Message.updateMany(
+      { complaintId: complaint._id, sender: { $ne: req.user._id }, isRead: false },
+      { $set: { isRead: true } }
+    );
+
     res.json({
       status: 'success',
       data: { messages }

@@ -14,6 +14,11 @@ const custodyEventSchema = new mongoose.Schema({
   actorRole: { type: String },
   details: { type: String },
   evidenceHash: { type: String },
+  performedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  role: { type: String },
+  targetFile: { type: String },
+  sha256: { type: String },
+  notes: { type: String },
   timestamp: { type: Date, default: Date.now }
 });
 
@@ -25,6 +30,8 @@ const evidenceSchema = new mongoose.Schema({
   size: { type: Number, required: true },
   sha256: { type: String },
   url: { type: String, required: true },
+  isTampered: { type: Boolean, default: false },
+  integrityStatus: { type: String, default: 'verified' },
   uploadedAt: { type: Date, default: Date.now }
 });
 
@@ -282,6 +289,12 @@ const complaintSchema = new mongoose.Schema({
       updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       timestamp: { type: Date, default: Date.now }
     }]
+  },
+  resolution: {
+    notes: { type: String },
+    resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    resolvedAt: { type: Date },
+    actionTaken: { type: String }
   }
 }, { timestamps: true });
 
@@ -304,7 +317,7 @@ complaintSchema.pre('save', function (next) {
 
   // Priority Zero Escalation for Women/Child Safety and Emergency Complaints
   const safetyCategories = ['Women/Child Safety', 'Domestic Violence', 'Child Exploitation', 'Emergency Safety', 'Harassment'];
-  if (safetyCategories.includes(this.category) || this.isImmediateAction) {
+  if ((this.isNew || this.isModified('category') || this.isModified('isImmediateAction')) && (safetyCategories.includes(this.category) || this.isImmediateAction)) {
     this.isImmediateAction = true;
     this.priority = 'top_priority';
     if (this.severity !== 'critical') {

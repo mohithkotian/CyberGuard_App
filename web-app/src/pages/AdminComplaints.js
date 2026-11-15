@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import { complaintsAPI } from '../services/api';
 
-const STATUSES = ['pending','under_review','investigating','resolved','closed','rejected'];
+const STATUSES = ['pending','under_review','investigating','in-progress','resolved','closed','rejected'];
 
 export default function AdminComplaints() {
   const navigate = useNavigate();
