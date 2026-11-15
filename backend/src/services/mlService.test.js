@@ -23,6 +23,7 @@ describe('ML Service - Client Security & Fallback', () => {
   });
 
   it('falls back to local NLP rules when ML service is offline or errors', async () => {
+    jest.spyOn(mlService.mlClient, 'post').mockRejectedValueOnce(new Error('Connection refused'));
     const result = await mlService.predict('50000 rupees was debited without OTP using UPI');
     expect(result.status).toBe('success');
     expect(result.category).toBe('Financial Fraud');
@@ -32,6 +33,7 @@ describe('ML Service - Client Security & Fallback', () => {
   });
 
   it('getModelInfo returns safe unavailable payload without fabricated accuracy when offline', async () => {
+    jest.spyOn(mlService.mlClient, 'get').mockRejectedValueOnce(new Error('Connection refused'));
     const info = await mlService.getModelInfo();
     expect(info.available).toBe(false);
     expect(info.status).toBe('unavailable');

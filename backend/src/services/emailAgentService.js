@@ -3,6 +3,7 @@ const axios = require('axios');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const logger = require('../utils/logger');
 const MailLog = require('../models/MailLog');
+const { formatPhoneE164 } = require('./smsService');
 
 const PLACEHOLDER_VALUES = [
   'your-email@gmail.com',
@@ -70,10 +71,25 @@ const getTransporter = () => {
   return cachedTransporter;
 };
 
+let geminiDisabledUntil = 0;
+
+/**
+ * Detect mock / seed demonstration email domains that lack public MX records.
+ */
+const isMockDomain = (email) => {
+  if (!email || typeof email !== 'string') return true;
+  const domain = (email.split('@')[1] || '').toLowerCase().trim();
+  return /cybercrime\.gov|cyberguard\.gov|\.local$|\.test$|example\.com|test\.com|localhost/i.test(domain);
+};
+
 /**
  * Generate email content using Gemini API if configured, otherwise return null to use templates.
  */
 async function generateEmailContent(prompt) {
+  if (Date.now() < geminiDisabledUntil) {
+    return null;
+  }
+
   try {
     const apiKey = cleanEnv(process.env.GEMINI_API_KEY);
     if (!apiKey) {
@@ -81,10 +97,21 @@ async function generateEmailContent(prompt) {
     }
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-2.5-flash' });
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+
+    // Strict 1.8s timeout to prevent blocking notifications on slow/hung connections
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Gemini API timeout')), 1800)
+    );
+
+    const generatePromise = model.generateContent(prompt).then((r) => r.response.text());
+    return await Promise.race([generatePromise, timeoutPromise]);
   } catch (error) {
-    logger.error(`Error generating email content: ${error.message}`);
+    if (/403|permission|unauthorized|401/i.test(error.message)) {
+      geminiDisabledUntil = Date.now() + 30 * 60 * 1000;
+      logger.warn(`Gemini API authorization error (${error.message}). Disabling AI email content generation for 30 minutes; using standard official templates.`);
+    } else {
+      logger.warn(`Email AI generation bypassed (${error.message}); using standard template.`);
+    }
     return null;
   }
 }
@@ -304,7 +331,14 @@ async function dispatchAndLog({
  * Send a confirmation email to a citizen when their complaint is registered.
  */
 exports.sendComplaintConfirmationEmail = async (user, complaint) => {
-  if (!user || !user.email) return null;
+  const recipientEmail = (user?.email || complaint?.victimDetails?.email || '').trim();
+  if (!recipientEmail) {
+    logger.info(`Cannot send confirmation email: No email address for user or complaint ${complaint?.complaintId || 'unknown'}`);
+    return null;
+  }
+  const recipientName = user?.name || complaint?.victimDetails?.name || complaint?.victimDetails?.fullName || 'Citizen';
+  const rawPhone = user?.phone || complaint?.victimDetails?.mobile || complaint?.victimDetails?.phone || '';
+  const recipientPhone = (rawPhone && formatPhoneE164(rawPhone)) || rawPhone;
 
   try {
     const emailSubject = `CyberGuard Acknowledgment: Complaint ${complaint.complaintId} Registered`;
@@ -312,18 +346,18 @@ exports.sendComplaintConfirmationEmail = async (user, complaint) => {
 
     const prompt = `
       You are an official Cybercrime Department AI Assistant.
-      Write a concise, reassuring confirmation email to a citizen named "${user.name}".
+      Write a concise, reassuring confirmation email to a citizen named "${recipientName}".
       Confirm that their cybercrime complaint (ID: ${complaint.complaintId}, Category: ${complaint.category}, Severity: ${complaint.severity}) has been officially registered on CyberGuard.
-      Start with "Dear ${user.name}," and end with a formal sign-off from "Cybercrime Department".
+      Start with "Dear ${recipientName}," and end with a formal sign-off from "Cybercrime Department".
       Provide raw email body text only.
     `;
 
     const generatedBody = await generateEmailContent(prompt);
-    const emailBody = generatedBody || `Dear ${user.name},\n\nYour cybercrime complaint has been officially registered on the CyberGuard portal.\n\nComplaint ID: ${complaint.complaintId}\nCategory: ${complaint.category}\nSeverity: ${(complaint.severity || 'medium').toUpperCase()}\nCurrent Status: ${(complaint.status || 'pending').toUpperCase()}\n\nYou can track real-time investigation updates anytime using your Complaint ID on the Track page.\n\nSincerely,\nCybercrime Department`;
+    const emailBody = generatedBody || `Dear ${recipientName},\n\nYour cybercrime complaint has been officially registered on the CyberGuard portal.\n\nComplaint ID: ${complaint.complaintId}\nCategory: ${complaint.category}\nSeverity: ${(complaint.severity || 'medium').toUpperCase()}\nCurrent Status: ${(complaint.status || 'pending').toUpperCase()}\n\nYou can track real-time investigation updates anytime using your Complaint ID on the Track page.\n\nSincerely,\nCybercrime Department`;
 
     return await dispatchAndLog({
-      to: user.email,
-      recipientPhone: user.phone || '',
+      to: recipientEmail,
+      recipientPhone,
       subject: emailSubject,
       body: emailBody,
       textMessage,
@@ -332,7 +366,7 @@ exports.sendComplaintConfirmationEmail = async (user, complaint) => {
       contextLabel: 'Complaint confirmation email',
     });
   } catch (error) {
-    logger.error(`Failed to process confirmation email for ${user.email}: ${error.message}`);
+    logger.error(`Failed to process confirmation email for ${recipientEmail}: ${error.message}`);
     return null;
   }
 };
@@ -341,29 +375,37 @@ exports.sendComplaintConfirmationEmail = async (user, complaint) => {
  * Send an email to a user when their complaint status is updated
  */
 exports.sendStateChangeEmail = async (user, complaint, oldStatus, newStatus, message) => {
-  if (!user || !user.email) return null;
+  const recipientEmail = (user?.email || complaint?.victimDetails?.email || '').trim();
+  if (!recipientEmail) {
+    logger.info(`Cannot send state change email: No email address for user or complaint ${complaint?.complaintId || 'unknown'}`);
+    return null;
+  }
+  const recipientName = user?.name || complaint?.victimDetails?.name || complaint?.victimDetails?.fullName || 'Citizen';
+  const rawPhone = user?.phone || complaint?.victimDetails?.mobile || complaint?.victimDetails?.phone || '';
+  const recipientPhone = (rawPhone && formatPhoneE164(rawPhone)) || rawPhone;
 
   try {
-    const emailSubject = `Update on your Cybercrime Complaint: ${complaint.complaintId} - Status: ${newStatus.toUpperCase()}`;
-    const textMessage = `Cybercrime Dept: Your complaint (ID: ${complaint.complaintId}) status has been updated to "${newStatus.toUpperCase()}".${message ? ` Notes: ${message}` : ''}`;
+    const formattedStatus = String(newStatus || 'updated').toUpperCase();
+    const emailSubject = `Update on your Cybercrime Complaint: ${complaint.complaintId} - Status: ${formattedStatus}`;
+    const textMessage = `Cybercrime Dept: Your complaint (ID: ${complaint.complaintId}) status has been updated to "${formattedStatus}".${message ? ` Notes: ${message}` : ''}`;
 
     const prompt = `
       You are an official Cybercrime Department AI Assistant.
-      Write a professional, empathetic email to a citizen named "${user.name}".
+      Write a professional, empathetic email to a citizen named "${recipientName}".
       Their complaint (ID: ${complaint.complaintId}, Category: ${complaint.category}) status has just changed from "${oldStatus}" to "${newStatus}".
       Please ensure you explicitly and prominently state the new status ("${newStatus}") early in the email.
       Additional official notes: "${message || 'No additional notes'}".
       
-      Keep the email concise, reassuring, and professional. The email should start with "Dear ${user.name}," and end with a formal sign-off from "Cybercrime Department".
+      Keep the email concise, reassuring, and professional. The email should start with "Dear ${recipientName}," and end with a formal sign-off from "Cybercrime Department".
       Do not include placeholders like [Your Name]. Just provide the raw text of the email body.
     `;
 
     const generatedBody = await generateEmailContent(prompt);
-    const emailBody = generatedBody || `Dear ${user.name},\n\nWe wanted to inform you that the status of your complaint (ID: ${complaint.complaintId}) has been updated from "${oldStatus}" to "${newStatus}".\n\nNotes from our team: ${message || 'No additional notes'}\n\nThank you for your cooperation.\n\nSincerely,\nCybercrime Department`;
+    const emailBody = generatedBody || `Dear ${recipientName},\n\nWe wanted to inform you that the status of your complaint (ID: ${complaint.complaintId}) has been updated from "${oldStatus}" to "${newStatus}".\n\nNotes from our team: ${message || 'No additional notes'}\n\nThank you for your cooperation.\n\nSincerely,\nCybercrime Department`;
 
     return await dispatchAndLog({
-      to: user.email,
-      recipientPhone: user.phone || '',
+      to: recipientEmail,
+      recipientPhone,
       subject: emailSubject,
       body: emailBody,
       textMessage,
@@ -372,7 +414,7 @@ exports.sendStateChangeEmail = async (user, complaint, oldStatus, newStatus, mes
       contextLabel: 'Status update email',
     });
   } catch (error) {
-    logger.error(`Failed to process status update email for ${user.email}: ${error.message}`);
+    logger.error(`Failed to process status update email for ${recipientEmail}: ${error.message}`);
     return null;
   }
 };
@@ -381,27 +423,35 @@ exports.sendStateChangeEmail = async (user, complaint, oldStatus, newStatus, mes
  * Send an email to a user when their complaint is viewed by an admin/officer
  */
 exports.sendViewedEmail = async (user, complaint, viewerRole) => {
-  if (!user || !user.email) return null;
+  const recipientEmail = (user?.email || complaint?.victimDetails?.email || '').trim();
+  if (!recipientEmail) {
+    logger.info(`Cannot send viewed notification email: No email address for user or complaint ${complaint?.complaintId || 'unknown'}`);
+    return null;
+  }
+  const recipientName = user?.name || complaint?.victimDetails?.name || complaint?.victimDetails?.fullName || 'Citizen';
+  const rawPhone = user?.phone || complaint?.victimDetails?.mobile || complaint?.victimDetails?.phone || '';
+  const recipientPhone = (rawPhone && formatPhoneE164(rawPhone)) || rawPhone;
 
   try {
+    const roleLabel = viewerRole || 'Officer';
     const emailSubject = `Your Cybercrime Complaint (${complaint.complaintId}) is being reviewed`;
-    const textMessage = `Cybercrime Dept: Your complaint #${complaint.complaintId} (${complaint.category}) is now under active review by an assigned ${viewerRole}.`;
+    const textMessage = `Cybercrime Dept: Your complaint #${complaint.complaintId} (${complaint.category}) is now under active review by an assigned ${roleLabel}.`;
 
     const prompt = `
       You are an official Cybercrime Department AI Assistant.
-      Write a short, professional, and reassuring email to a citizen named "${user.name}".
-      Inform them that their cybercrime complaint (ID: ${complaint.complaintId}, Category: ${complaint.category}) has just been viewed by an assigned ${viewerRole} and is currently under active attention.
+      Write a short, professional, and reassuring email to a citizen named "${recipientName}".
+      Inform them that their cybercrime complaint (ID: ${complaint.complaintId}, Category: ${complaint.category}) has just been viewed by an assigned ${roleLabel} and is currently under active attention.
       
-      Keep the email concise, reassuring, and professional. The email should start with "Dear ${user.name}," and end with a formal sign-off from "Cybercrime Department".
+      Keep the email concise, reassuring, and professional. The email should start with "Dear ${recipientName}," and end with a formal sign-off from "Cybercrime Department".
       Do not include placeholders like [Your Name]. Just provide the raw text of the email body.
     `;
 
     const generatedBody = await generateEmailContent(prompt);
-    const emailBody = generatedBody || `Dear ${user.name},\n\nWe wanted to let you know that your complaint (ID: ${complaint.complaintId}) has been viewed by our ${viewerRole} and is currently under attention.\n\nWe will notify you if there are any further updates.\n\nSincerely,\nCybercrime Department`;
+    const emailBody = generatedBody || `Dear ${recipientName},\n\nWe wanted to let you know that your complaint (ID: ${complaint.complaintId}) has been viewed by our ${roleLabel} and is currently under attention.\n\nWe will notify you if there are any further updates.\n\nSincerely,\nCybercrime Department`;
 
     return await dispatchAndLog({
-      to: user.email,
-      recipientPhone: user.phone || '',
+      to: recipientEmail,
+      recipientPhone,
       subject: emailSubject,
       body: emailBody,
       textMessage,
@@ -410,7 +460,7 @@ exports.sendViewedEmail = async (user, complaint, viewerRole) => {
       contextLabel: 'Viewed notification email',
     });
   } catch (error) {
-    logger.error(`Failed to process viewed notification email for ${user.email}: ${error.message}`);
+    logger.error(`Failed to process viewed notification email for ${recipientEmail}: ${error.message}`);
     return null;
   }
 };
@@ -422,12 +472,15 @@ exports.sendNewComplaintAlert = async (adminsAndOfficers, complaint, user) => {
   if (!adminsAndOfficers || adminsAndOfficers.length === 0) return;
 
   try {
-    const emailSubject = `[URGENT] New ${complaint.severity.toUpperCase()} Severity Cybercrime Complaint Filed`;
-    const textMessage = `[URGENT] New ${complaint.severity.toUpperCase()} complaint #${complaint.complaintId} (${complaint.category}) filed by ${user.name}. Review immediately on CyberGuard.`;
+    const complainantName = user?.name || complaint?.victimDetails?.name || 'Complainant';
+    const complainantEmail = user?.email || complaint?.victimDetails?.email || 'unspecified';
+    const severityLabel = (complaint?.severity || 'HIGH').toUpperCase();
+    const emailSubject = `[URGENT] New ${severityLabel} Severity Cybercrime Complaint Filed`;
+    const textMessage = `[URGENT] New ${severityLabel} complaint #${complaint?.complaintId} (${complaint?.category}) filed by ${complainantName}. Review immediately on CyberGuard.`;
 
     const prompt = `
       You are the Cybercrime System Dispatcher.
-      A new cybercrime complaint has just been filed by "${user.name}" (${user.email}).
+      A new cybercrime complaint has just been filed by "${complainantName}" (${complainantEmail}).
       Complaint ID: ${complaint.complaintId}
       Category: ${complaint.category}
       Severity: ${complaint.severity}
@@ -437,22 +490,63 @@ exports.sendNewComplaintAlert = async (adminsAndOfficers, complaint, user) => {
     `;
 
     const generatedBody = await generateEmailContent(prompt);
-    const emailBody = generatedBody || `Attention Admins and Officers,\n\nA new cybercrime complaint has been filed by ${user.name} (${user.email}).\n\nComplaint ID: ${complaint.complaintId}\nCategory: ${complaint.category}\nSeverity: ${complaint.severity}\n\nPlease log in to the CyberGuard dashboard to review and assign this case immediately.\n\nCyberGuard Automated Dispatch System`;
+    const emailBody = generatedBody || `Attention Admins and Officers,\n\nA new cybercrime complaint has been filed by ${complainantName} (${complainantEmail}).\n\nComplaint ID: ${complaint.complaintId}\nCategory: ${complaint.category}\nSeverity: ${complaint.severity}\n\nPlease log in to the CyberGuard dashboard to review and assign this case immediately.\n\nCyberGuard Automated Dispatch System`;
 
-    const emailPromises = adminsAndOfficers
-      .filter((admin) => Boolean(admin && admin.email))
-      .map((admin) =>
+    const validAdmins = adminsAndOfficers.filter((admin) => Boolean(admin && admin.email));
+    let realEmailSent = false;
+
+    const emailPromises = validAdmins.map(async (admin) => {
+      const email = admin.email.trim();
+      const phone = admin.phone || '';
+
+      if (isMockDomain(email)) {
+        try {
+          return await MailLog.create({
+            recipient: email,
+            recipientPhone: phone,
+            subject: emailSubject,
+            body: emailBody,
+            textMessage,
+            complaintId: complaint.complaintId,
+            status: 'delivered',
+            provider: 'internal-dispatch',
+            errorMessage: '',
+          });
+        } catch (mErr) {
+          logger.warn(`Could not log mock dispatch for ${email}: ${mErr.message}`);
+          return null;
+        }
+      }
+
+      realEmailSent = true;
+      return dispatchAndLog({
+        to: email,
+        recipientPhone: phone,
+        subject: emailSubject,
+        body: emailBody,
+        textMessage,
+        complaintId: complaint.complaintId,
+        fromName: 'Cybercrime Dispatch',
+        contextLabel: 'New complaint alert',
+      });
+    });
+
+    const cfg = getEmailConfig();
+    const adminAlertFallback = cleanEnv(process.env.ADMIN_ALERT_EMAIL);
+    if (!realEmailSent && adminAlertFallback && !isMockDomain(adminAlertFallback)) {
+      emailPromises.push(
         dispatchAndLog({
-          to: admin.email,
-          recipientPhone: admin.phone || '',
+          to: adminAlertFallback,
+          recipientPhone: '',
           subject: emailSubject,
           body: emailBody,
           textMessage,
           complaintId: complaint.complaintId,
           fromName: 'Cybercrime Dispatch',
-          contextLabel: 'New complaint alert',
+          contextLabel: 'Admin alert mirror',
         })
       );
+    }
 
     await Promise.allSettled(emailPromises);
   } catch (error) {

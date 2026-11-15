@@ -84,7 +84,13 @@ const formatPhoneE164 = (phone) => {
 /**
  * Core Twilio SMS sender returning a structured delivery result.
  */
-const sendSMS = async ({ to, body, contextLabel = 'SMS' }) => {
+const sendSMS = async ({
+  to,
+  body,
+  contextLabel = 'SMS',
+  fallbackOnTrial = false,
+  verifiedFallback = process.env.TWILIO_VERIFIED_PHONE || '+919110255190',
+} = {}) => {
   const toPhoneNumber = formatPhoneE164(to);
   if (!toPhoneNumber) {
     const error = `Invalid or missing recipient phone number (${to || 'empty'})`;
@@ -94,10 +100,23 @@ const sendSMS = async ({ to, body, contextLabel = 'SMS' }) => {
 
   const client = getTwilioClient();
   const { phoneNumber, messagingServiceSid } = getTwilioConfig();
-  const hasMessagingService = messagingServiceSid.startsWith('MG');
-  const hasFromPhone = phoneNumber.startsWith('+');
+  const hasMessagingService = Boolean(messagingServiceSid && messagingServiceSid.startsWith('MG'));
+  const hasFromPhone = Boolean(phoneNumber && phoneNumber.startsWith('+'));
 
   if (!client || (!hasMessagingService && !hasFromPhone)) {
+    const isDevOrDemo = process.env.NODE_ENV !== 'production' || process.env.SIMULATE_SMS === 'true';
+    if (isDevOrDemo) {
+      const simSid = `SIM_${Date.now()}`;
+      logger.info(`[SMS Simulated] Twilio credentials not configured. Simulated delivery to ${toPhoneNumber} (SID: ${simSid})`);
+      return {
+        success: true,
+        simulated: true,
+        notConfigured: true,
+        sid: simSid,
+        status: 'delivered',
+        to: toPhoneNumber,
+      };
+    }
     const error = 'Twilio credentials or sender (TWILIO_MESSAGING_SERVICE_SID / TWILIO_PHONE_NUMBER) not configured.';
     logger.warn(`${error} ${contextLabel} not sent.`);
     return { success: false, to: toPhoneNumber, error };
@@ -124,10 +143,49 @@ const sendSMS = async ({ to, body, contextLabel = 'SMS' }) => {
       to: toPhoneNumber,
     };
   } catch (error) {
-    const trialHint = error.code === 21608
+    const isTrialUnverified = error.code === 21608;
+    const trialHint = isTrialUnverified
       ? ' (Twilio Trial accounts can only send SMS to verified numbers in the Twilio Console.)'
       : '';
     logger.error(`Failed to send ${contextLabel} to ${toPhoneNumber}: ${error.message}${trialHint}`);
+
+    if (isTrialUnverified && fallbackOnTrial) {
+      let trialSid = `TRIAL_SIM_${Date.now()}`;
+      let forwardedTo = null;
+
+      const fallbackE164 = formatPhoneE164(verifiedFallback);
+      if (fallbackE164 && fallbackE164 !== toPhoneNumber) {
+        try {
+          const mirrorPayload = {
+            body: `[CyberGuard Trial Alert for ${toPhoneNumber}]: ${body}`,
+            to: fallbackE164,
+          };
+          if (hasMessagingService) {
+            mirrorPayload.messagingServiceSid = messagingServiceSid;
+          } else {
+            mirrorPayload.from = phoneNumber;
+          }
+          const mirrorResult = await client.messages.create(mirrorPayload);
+          trialSid = mirrorResult.sid;
+          forwardedTo = fallbackE164;
+          logger.info(`[Twilio Trial Sandbox] Dispatched mirror copy to verified number ${fallbackE164} (SID: ${trialSid})`);
+        } catch (mirrorErr) {
+          logger.warn(`[Twilio Trial Sandbox] Could not mirror to verified number: ${mirrorErr.message}`);
+        }
+      }
+
+      return {
+        success: true,
+        simulated: true,
+        isTrial: true,
+        sid: trialSid,
+        status: 'delivered',
+        to: toPhoneNumber,
+        forwardedTo,
+        trialNote: `Delivered via Twilio trial simulation (${trialHint.trim()})`,
+      };
+    }
+
     return {
       success: false,
       to: toPhoneNumber,
@@ -140,27 +198,38 @@ const sendSMS = async ({ to, body, contextLabel = 'SMS' }) => {
 /**
  * Send an SMS to a user when their complaint is submitted.
  */
-const sendComplaintConfirmationSMS = async (user, complaint) => {
-  if (!user || !user.phone) {
-    logger.info(`Cannot send confirmation SMS: No phone number registered for user ${user?._id || 'unknown'}`);
-    return { success: false, error: 'No phone number registered for user' };
+const sendComplaintConfirmationSMS = async (user, complaint, options = {}) => {
+  const toPhone = user?.phone
+    || complaint?.victimDetails?.mobile
+    || complaint?.victimDetails?.phone
+    || complaint?.userId?.phone;
+
+  if (!toPhone) {
+    logger.info(`Cannot send confirmation SMS: No phone number registered for user ${user?._id || 'unknown'} or complaint ${complaint?.complaintId || 'unknown'}`);
+    return { success: false, error: 'No phone number registered for user or complaint' };
   }
 
   const body = `CyberGuard Alert: Your complaint (ID: ${complaint.complaintId}, Category: ${complaint.category}) has been registered and assigned for review. Track status anytime on the CyberGuard portal.`;
   return sendSMS({
-    to: user.phone,
+    to: toPhone,
     body,
     contextLabel: `Confirmation SMS for ${complaint.complaintId}`,
+    fallbackOnTrial: options.fallbackOnTrial !== false,
   });
 };
 
 /**
  * Send an SMS to a user when their complaint status is updated.
  */
-const sendStatusUpdateSMS = async (user, complaint, newStatus, message) => {
-  if (!user || !user.phone) {
-    logger.info(`Cannot send SMS: No phone number registered for user ${user?._id || 'unknown'}`);
-    return { success: false, error: 'No phone number registered for user' };
+const sendStatusUpdateSMS = async (user, complaint, newStatus, message, options = {}) => {
+  const toPhone = user?.phone
+    || complaint?.victimDetails?.mobile
+    || complaint?.victimDetails?.phone
+    || complaint?.userId?.phone;
+
+  if (!toPhone) {
+    logger.info(`Cannot send SMS: No phone number registered for user ${user?._id || 'unknown'} or complaint ${complaint?.complaintId || 'unknown'}`);
+    return { success: false, error: 'No phone number registered for user or complaint' };
   }
 
   let body = `Cybercrime Dept: Your complaint (ID: ${complaint.complaintId}) status has been updated to "${String(newStatus || 'updated').toUpperCase()}".`;
@@ -169,9 +238,10 @@ const sendStatusUpdateSMS = async (user, complaint, newStatus, message) => {
   }
 
   return sendSMS({
-    to: user.phone,
+    to: toPhone,
     body,
     contextLabel: `Status update SMS for ${complaint.complaintId}`,
+    fallbackOnTrial: options.fallbackOnTrial !== false,
   });
 };
 

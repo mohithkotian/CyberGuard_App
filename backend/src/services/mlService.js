@@ -260,4 +260,4 @@ const healthCheck = async () => {
   }
 };
 
-module.exports = { predict, getModelInfo, healthCheck, localRuleClassification, CATEGORY_DISPLAY_MAP, SUBCATEGORY_DEFAULT_MAP };
+module.exports = { predict, getModelInfo, healthCheck, localRuleClassification, CATEGORY_DISPLAY_MAP, SUBCATEGORY_DEFAULT_MAP, mlClient };

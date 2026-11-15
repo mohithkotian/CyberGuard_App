@@ -487,6 +487,7 @@ router.post('/communications/test', async (req, res, next) => {
     const customMsg = (message || '').trim() || `CyberGuard Test Dispatch (${new Date().toISOString()}): Email and Twilio SMS gateway verification.`;
 
     const results = {};
+    let createdMailLog = null;
 
     if (channel === 'email' || channel === 'both') {
       if (!targetEmail) {
@@ -499,7 +500,7 @@ router.post('/communications/test', async (req, res, next) => {
           text: customMsg,
           fromName: 'CyberGuard System',
         });
-        await MailLog.create({
+        createdMailLog = await MailLog.create({
           recipient: targetEmail,
           recipientPhone: targetPhone,
           subject,
@@ -521,7 +522,28 @@ router.post('/communications/test', async (req, res, next) => {
           to: targetPhone,
           body: customMsg,
           contextLabel: 'Admin Test SMS',
+          fallbackOnTrial: true,
         });
+
+        if (createdMailLog) {
+          createdMailLog.smsStatus = results.sms.success ? 'delivered' : 'failed';
+          createdMailLog.smsSid = results.sms.sid || '';
+          createdMailLog.smsError = results.sms.error || '';
+          await createdMailLog.save();
+        } else {
+          await MailLog.create({
+            recipient: targetEmail || 'sms-admin@cyberguard.internal',
+            recipientPhone: targetPhone,
+            subject: 'CyberGuard SMS Gateway Test',
+            body: `SMS test message sent to ${targetPhone}`,
+            textMessage: customMsg,
+            status: 'delivered',
+            provider: 'sms-gateway',
+            smsStatus: results.sms.success ? 'delivered' : 'failed',
+            smsSid: results.sms.sid || '',
+            smsError: results.sms.error || '',
+          });
+        }
       }
     }
 

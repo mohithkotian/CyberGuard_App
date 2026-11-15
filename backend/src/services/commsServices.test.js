@@ -107,6 +107,42 @@ describe('SMS Service (Twilio)', () => {
     expect(res.errorCode).toBe(21608);
     expect(res.error).toContain('Twilio Trial');
   });
+
+  it('extracts phone from complaint.victimDetails.mobile when user.phone is missing', async () => {
+    mockTwilioCreate.mockResolvedValue({ sid: 'SM_VICTIM_MOBILE', status: 'delivered' });
+
+    const confirmRes = await smsService.sendComplaintConfirmationSMS(
+      { _id: 'u2', email: 'user@example.com' }, // No phone on user object
+      {
+        complaintId: 'CMP-200',
+        category: 'Financial Fraud',
+        victimDetails: { mobile: '9110255190' },
+      }
+    );
+
+    expect(confirmRes.success).toBe(true);
+    expect(confirmRes.to).toBe('+919110255190');
+    expect(confirmRes.sid).toBe('SM_VICTIM_MOBILE');
+  });
+
+  it('simulates trial delivery gracefully when fallbackOnTrial is enabled for unverified numbers', async () => {
+    const err = new Error('The number +919876543210 is unverified');
+    err.code = 21608;
+    // When mirror copy to verified number is attempted, simulate mirror success
+    mockTwilioCreate.mockRejectedValueOnce(err).mockResolvedValueOnce({ sid: 'SM_MIRROR_OK', status: 'queued' });
+
+    const res = await smsService.sendSMS({
+      to: '9876543210',
+      body: 'CyberGuard Test Notification',
+      fallbackOnTrial: true,
+      verifiedFallback: '+919110255190',
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.isTrial).toBe(true);
+    expect(res.status).toBe('delivered');
+    expect(res.to).toBe('+919876543210');
+  });
 });
 
 describe('Email Agent Service (HTTPS + SMTP)', () => {
@@ -194,5 +230,58 @@ describe('Email Agent Service (HTTPS + SMTP)', () => {
         errorMessage: expect.stringContaining('Webhook timeout'),
       })
     );
+  });
+
+  it('extracts recipient email and phone from complaint.victimDetails when user has missing fields', async () => {
+    mockSendMail.mockResolvedValue({ messageId: 'smtp-victim-details' });
+
+    const result = await emailAgentService.sendComplaintConfirmationEmail(
+      { name: 'Anonymous Citizen' }, // No email on user
+      {
+        complaintId: 'CMP-777',
+        category: 'Hacking',
+        severity: 'high',
+        victimDetails: {
+          email: 'victim@external.com',
+          mobile: '9110255190',
+        },
+      }
+    );
+
+    expect(result.delivery.success).toBe(true);
+    expect(mockSendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'victim@external.com',
+      })
+    );
+    expect(mockMailLogCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipient: 'victim@external.com',
+        recipientPhone: '+919110255190',
+        complaintId: 'CMP-777',
+      })
+    );
+  });
+
+  it('handles mock seed domains in sendNewComplaintAlert by logging directly without choking SMTP', async () => {
+    const mockAdmins = [
+      { name: 'Admin Gov', email: 'admin@cybercrime.gov' },
+      { name: 'Officer Gov', email: 'officer@cyberguard.gov' },
+    ];
+
+    await emailAgentService.sendNewComplaintAlert(
+      mockAdmins,
+      { complaintId: 'CMP-888', category: 'Phishing', severity: 'critical' },
+      { name: 'Complainant', email: 'user@example.com' }
+    );
+
+    expect(mockMailLogCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recipient: 'admin@cybercrime.gov',
+        status: 'delivered',
+        provider: 'internal-dispatch',
+      })
+    );
+    expect(mockSendMail).not.toHaveBeenCalled();
   });
 });

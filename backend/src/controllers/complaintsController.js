@@ -388,6 +388,17 @@ exports.createComplaint = async (req, res, next) => {
 
     await complaint.populate('userId', 'name email phone');
 
+    // Auto-sync user phone number if user profile lacks one
+    if (req.user && (!req.user.phone || !req.user.phone.trim()) && parsedVictimDetails.mobile) {
+      try {
+        const User = require('../models/User');
+        await User.findByIdAndUpdate(req.user._id, { phone: parsedVictimDetails.mobile });
+        req.user.phone = parsedVictimDetails.mobile;
+      } catch (uErr) {
+        logger.warn(`Could not update user phone: ${uErr.message}`);
+      }
+    }
+
     // Emit real-time update
     const io = req.app.get('io');
     io.to('admin-room').emit('new-complaint', {
@@ -407,13 +418,51 @@ exports.createComplaint = async (req, res, next) => {
 
     // Dispatch email alert to admins/officers and acknowledgment email/SMS to complainant
     try {
-      const User = require('../models/User'); // Import User model dynamically if not at top
+      const User = require('../models/User');
+      const MailLog = require('../models/MailLog');
       const adminsAndOfficers = await User.find({ role: { $in: ['admin', 'officer', 'owner'] } }).select('email name phone');
-      Promise.allSettled([
-        emailAgentService.sendNewComplaintAlert(adminsAndOfficers, complaint, req.user),
-        emailAgentService.sendComplaintConfirmationEmail(req.user, complaint),
-        smsService.sendComplaintConfirmationSMS(req.user, complaint),
-      ]).catch((err) => logger.error(`Error dispatching complaint notifications: ${err.message}`));
+
+      (async () => {
+        try {
+          const [alertRes, emailRes, smsRes] = await Promise.allSettled([
+            emailAgentService.sendNewComplaintAlert(adminsAndOfficers, complaint, req.user),
+            emailAgentService.sendComplaintConfirmationEmail(req.user, complaint),
+            smsService.sendComplaintConfirmationSMS(req.user, complaint),
+          ]);
+
+          const mailLog = emailRes.status === 'fulfilled' ? emailRes.value?.mailLog : null;
+          const smsResult = smsRes.status === 'fulfilled' ? smsRes.value : null;
+          const targetPhone = req.user.phone || complaint.victimDetails?.mobile || complaint.victimDetails?.phone || '';
+
+          if (mailLog) {
+            if (targetPhone && !mailLog.recipientPhone) {
+              mailLog.recipientPhone = targetPhone;
+            }
+            if (smsResult) {
+              mailLog.smsStatus = smsResult.success ? 'delivered' : 'failed';
+              mailLog.smsSid = smsResult.sid || '';
+              mailLog.smsError = smsResult.error || '';
+            }
+            await mailLog.save();
+          } else if (smsResult && smsResult.success) {
+            await MailLog.create({
+              recipient: req.user.email || complaint.victimDetails?.email || 'citizen@cyberguard.internal',
+              recipientPhone: targetPhone,
+              subject: `CyberGuard Acknowledgment: Complaint ${complaint.complaintId} Registered`,
+              body: `Complaint ${complaint.complaintId} registered successfully.`,
+              textMessage: `CyberGuard Alert: Your complaint (ID: ${complaint.complaintId}, Category: ${complaint.category}) has been registered and assigned for review.`,
+              complaintId: complaint.complaintId,
+              status: 'delivered',
+              provider: 'sms-gateway',
+              smsStatus: 'delivered',
+              smsSid: smsResult.sid || '',
+              smsError: '',
+            });
+          }
+        } catch (dispatchErr) {
+          logger.error(`Error in background complaint notifications: ${dispatchErr.message}`);
+        }
+      })();
     } catch (err) {
       logger.error(`Error dispatching new complaint notifications: ${err.message}`);
     }
@@ -723,11 +772,33 @@ exports.updateStatus = async (req, res, next) => {
         ]);
         const mailLog = emailRes.status === 'fulfilled' ? emailRes.value?.mailLog : null;
         const smsResult = smsRes.status === 'fulfilled' ? smsRes.value : null;
-        if (mailLog && smsResult) {
-          mailLog.smsStatus = smsResult.success ? 'delivered' : 'failed';
-          mailLog.smsSid = smsResult.sid || '';
-          mailLog.smsError = smsResult.error || '';
+        const targetPhone = complaint.userId?.phone || complaint.victimDetails?.mobile || complaint.victimDetails?.phone || '';
+
+        if (mailLog) {
+          if (targetPhone && !mailLog.recipientPhone) {
+            mailLog.recipientPhone = targetPhone;
+          }
+          if (smsResult) {
+            mailLog.smsStatus = smsResult.success ? 'delivered' : 'failed';
+            mailLog.smsSid = smsResult.sid || '';
+            mailLog.smsError = smsResult.error || '';
+          }
           await mailLog.save();
+        } else if (smsResult && smsResult.success) {
+          const MailLog = require('../models/MailLog');
+          await MailLog.create({
+            recipient: complaint.userId?.email || complaint.victimDetails?.email || 'citizen@cyberguard.internal',
+            recipientPhone: targetPhone,
+            subject: `Update on your Cybercrime Complaint: ${complaint.complaintId} - Status: ${String(status || 'updated').toUpperCase()}`,
+            body: `Status updated to ${status}. Notes: ${message || 'No additional notes'}`,
+            textMessage: `Cybercrime Dept: Your complaint (ID: ${complaint.complaintId}) status has been updated to "${String(status || 'updated').toUpperCase()}".${message ? ` Notes: ${message}` : ''}`,
+            complaintId: complaint.complaintId,
+            status: 'delivered',
+            provider: 'sms-gateway',
+            smsStatus: 'delivered',
+            smsSid: smsResult.sid || '',
+            smsError: '',
+          });
         }
       } catch (notifyErr) {
         logger.error(`Error recording status update notification outcome: ${notifyErr.message}`);
