@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+﻿import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-hot-toast';
@@ -1016,7 +1016,7 @@ const CyberReport = () => {
                 {...getRootProps()}
               >
                 <input {...getInputProps()} />
-                <Upload size={30} aria-hidden="true" />
+                <Upload size={30} aria-hidden="true" style={{ pointerEvents: 'none' }} />
                 <div>
                   <p>Drop files here or choose from your device</p>
                   <span>PNG, JPG, PDF, or TXT · Maximum 10 MB per file</span>

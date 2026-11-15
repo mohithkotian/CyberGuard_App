@@ -31,6 +31,13 @@ const isDBError = (err) =>
   err.name === 'MongoTimeoutError' ||
   err.message?.includes('buffering timed out');
 
+const handleMulterError = (err) => {
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return new AppError('File size exceeds the allowed limit (maximum 10 MB per file).', 413);
+  }
+  return new AppError(err.message || 'File upload error.', 400);
+};
+
 const sendErrorDev = (err, res) => {
   if (isDBError(err)) {
     return res.status(503).json({
@@ -70,6 +77,7 @@ const errorHandler = (err, req, res, next) => {
     if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
     if (error.name === 'JsonWebTokenError') error = handleJWTError();
     if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+    if (error.name === 'MulterError' || err.name === 'MulterError') error = handleMulterError(err);
     sendErrorProd(error, res);
   }
 };
